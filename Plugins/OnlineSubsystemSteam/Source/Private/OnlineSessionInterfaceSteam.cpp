@@ -239,6 +239,9 @@ bool FOnlineSessionSteam::CreateSession(int32 HostingPlayerNum, FName SessionNam
 		// Unique identifier of this build for compatibility
 		Session->SessionSettings.BuildUniqueId = GetBuildUniqueId();
 
+		//로비 기능 활성화
+		Session->SessionSettings.bUseLobbiesIfAvailable = true;
+		
 		// Create Internet or LAN match
 		if (!NewSessionSettings.bIsLANMatch)
 		{

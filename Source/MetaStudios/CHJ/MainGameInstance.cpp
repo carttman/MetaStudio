@@ -79,9 +79,9 @@ void UMainGameInstance::OnMyCreateSessionComplete(FName SessionName , bool bWasS
 	if ( bWasSuccessful )
 	{
 		PRINTLOG(TEXT("OnMyCreateSessionComplete is Success~~~~~"));
-
+		
 		// 서버가 여행을 떠나고싶다.
-		GetWorld()->ServerTravel(TEXT("/Game/NetTPS/Maps/BattleMap?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/Maps/StudioMap?listen"));
 	}
 	else
 	{
@@ -199,7 +199,7 @@ void UMainGameInstance::OnMyDestroySessionComplete(FName SessionName , bool bWas
 	{
 		// 클라이언트가 로비로 여행을 가고싶다.
 		auto* pc = GetWorld()->GetFirstPlayerController();
-		pc->ClientTravel(TEXT("/Game/NetTPS/Maps/LobbyMap"), ETravelType::TRAVEL_Absolute);
+		pc->ClientTravel(TEXT("/Game/Maps/MainMenu"), ETravelType::TRAVEL_Absolute);
 	}
 }
 
