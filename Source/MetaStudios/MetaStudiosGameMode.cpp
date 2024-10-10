@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MetaStudiosGameMode.h"
-#include "MetaStudiosCharacter.h"
+#include "JYS/MetaStudiosCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 AMetaStudiosGameMode::AMetaStudiosGameMode()
