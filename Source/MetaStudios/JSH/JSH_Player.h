@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "IWebSocket.h"
 #include "JSH_Player.generated.h"
+
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -39,6 +41,13 @@ class AJSH_Player : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* StartRecord;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* StopRecord;
+
 public:
 	AJSH_Player();
 	
@@ -62,4 +71,20 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+
+// OBS WebSocket =======================================
+public:
+	
+	// WebSocket 객체
+	TSharedPtr<IWebSocket> OBSWebSocket;
+	
+	// 녹화 시작
+	void StartRecording();
+
+	// 녹화 종료
+	void StopRecording();
+
+	// WebSocket 연결 함수
+	void ConnectToOBS();
 };
