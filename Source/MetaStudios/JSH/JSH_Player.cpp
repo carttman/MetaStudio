@@ -12,6 +12,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "IWebSocket.h"
+#include "JSH_OBSWebSocket.h"
 #include "WebSocketsModule.h"
 
 
@@ -20,10 +21,7 @@
 
 AJSH_Player::AJSH_Player()
 {
-
 	PrimaryActorTick.bCanEverTick = true;
-
-	
 
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 		
@@ -55,9 +53,20 @@ void AJSH_Player::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
 
-	// WebSocket 연결
-	ConnectToOBS();
+	
+	// if (HasAuthority())
+	// {
+	// 	if (!FModuleManager::Get().IsModuleLoaded("WebSockets"))
+	// 	{
+	// 		FModuleManager::Get().LoadModuleChecked("WebSockets");
+	// 	}
+	//
+	// 	WebSocket = FWebSocketsModule::Get().CreateWebSocket("ws://192.168.0.4:4455");
+	// 	
+	// 	WebSocket->Connect();
+	// }
 }
 
 
@@ -86,8 +95,8 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AJSH_Player::Look);
 
-		EnhancedInputComponent->BindAction(StartRecord, ETriggerEvent::Triggered, this, &AJSH_Player::StartRecording);
-		EnhancedInputComponent->BindAction(StopRecord, ETriggerEvent::Triggered, this, &AJSH_Player::StopRecording);
+		EnhancedInputComponent->BindAction(StartRecord, ETriggerEvent::Started, this, &AJSH_Player::StartRecording);
+		EnhancedInputComponent->BindAction(StopRecord, ETriggerEvent::Started, this, &AJSH_Player::StopRecording);
 	}
 	else
 	{
@@ -129,58 +138,60 @@ void AJSH_Player::Look(const FInputActionValue& Value)
 
 void AJSH_Player::ConnectToOBS()
 {
-	if (!FModuleManager::Get().IsModuleLoaded("WebSockets"))
-	{
-		FModuleManager::Get().LoadModuleChecked("WebSockets");
-	}
+	// if (!FModuleManager::Get().IsModuleLoaded("WebSockets"))
+	// {
+	// 	FModuleManager::Get().LoadModuleChecked("WebSockets");
+	// }
+	//
+	// WebSocket = FWebSocketsModule::Get().CreateWebSocket("ws://192.168.0.4:4455");
+	//
+	// WebSocket->Connect();
+}
 
-	// WebSocket 서버 주소와 포트
-	FString ServerURL = "ws://192.168.0.4:4455"; // 서버 IP와 포트
-
-	// WebSocket 초기화
-	OBSWebSocket = FWebSocketsModule::Get().CreateWebSocket(ServerURL);
-
-	// 연결 성공 시 콜백
-	OBSWebSocket->OnConnected().AddLambda([this]()
-	{
-		UE_LOG(LogTemp, Log, TEXT("Connected to OBS WebSocket"));
-
-		// 비밀번호 인증 메시지 전송
-		FString AuthMessage = FString::Printf(TEXT("{\"op\": 1, \"d\": {\"rpcVersion\": 1, \"authentication\": \"%s\"}}"), *FString("AQQJFR9FhICdcJ6g"));
-		OBSWebSocket->Send(AuthMessage);
-	});
-
-	// 연결 실패 시 콜백
-	OBSWebSocket->OnConnectionError().AddLambda([](const FString& Error)
-	{
-		UE_LOG(LogTemp, Error, TEXT("WebSocket Connection Error: %s"), *Error);
-	});
-
-	// WebSocket 서버에 연결
-	OBSWebSocket->Connect();
+void AJSH_Player::DisConnectToOBS()
+{
+	// if (HasAuthority())
+	// {
+	// 	if (WebSocket->IsConnected())
+	// 	{
+	// 		WebSocket->Close();
+	// 	}
+	// }
 }
 
 
 // 녹화 시작 함수
 void AJSH_Player::StartRecording()
 {
-	if (OBSWebSocket.IsValid() && OBSWebSocket->IsConnected())
+	// if (IsLocallyControlled() && !HasAuthority())
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, TEXT("recording"));
+	// 	Jump();
+	// }
+
+	if (HasAuthority())
 	{
-		// 녹화 시작 명령 전송
-		FString StartRecordingMessage = TEXT("{\"op\": 6, \"d\": {\"requestType\": \"StartRecording\", \"requestId\": \"startRecording\"}}");
-		OBSWebSocket->Send(StartRecordingMessage);
-		UE_LOG(LogTemp, Log, TEXT("Sent StartRecording Command to OBS"));
+		ObsGamInstance->StartRecord();
+		Jump();
 	}
+	
+	// if (OBSWebSocket.IsValid() && OBSWebSocket->IsConnected())
+	// {
+	// 	// 녹화 시작 명령 전송
+	// 	FString StartRecordingMessage = TEXT("{\"op\": 6, \"d\": {\"requestType\": \"StartRecording\", \"requestId\": \"startRecording\"}}");
+	// 	OBSWebSocket->Send(StartRecordingMessage);
+	// 	UE_LOG(LogTemp, Log, TEXT("Sent StartRecording Command to OBS"));
+	// }
 }
 
 // 녹화 종료 함수
 void AJSH_Player::StopRecording()
 {
-	if (OBSWebSocket.IsValid() && OBSWebSocket->IsConnected())
-	{
-		// 녹화 종료 명령 전송
-		FString StopRecordingMessage = TEXT("{\"op\": 6, \"d\": {\"requestType\": \"StopRecording\", \"requestId\": \"stopRecording\"}}");
-		OBSWebSocket->Send(StopRecordingMessage);
-		UE_LOG(LogTemp, Log, TEXT("Sent StopRecording Command to OBS"));
-	}
+	// if (OBSWebSocket.IsValid() && OBSWebSocket->IsConnected())
+	// {
+	// 	// 녹화 종료 명령 전송
+	// 	FString StopRecordingMessage = TEXT("{\"op\": 6, \"d\": {\"requestType\": \"StopRecording\", \"requestId\": \"stopRecording\"}}");
+	// 	OBSWebSocket->Send(StopRecordingMessage);
+	// 	UE_LOG(LogTemp, Log, TEXT("Sent StopRecording Command to OBS"));
+	// }
 }

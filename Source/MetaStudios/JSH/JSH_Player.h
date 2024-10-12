@@ -76,8 +76,7 @@ public:
 // OBS WebSocket =======================================
 public:
 	
-	// WebSocket 객체
-	TSharedPtr<IWebSocket> OBSWebSocket;
+	TSharedPtr<IWebSocket> WebSocket;
 	
 	// 녹화 시작
 	void StartRecording();
@@ -87,4 +86,12 @@ public:
 
 	// WebSocket 연결 함수
 	void ConnectToOBS();
+
+
+	
+	// WebSocket 연결 함수
+	UFUNCTION()
+	void DisConnectToOBS();
+
+	class UJSH_OBSWebSocket* ObsGamInstance;
 };

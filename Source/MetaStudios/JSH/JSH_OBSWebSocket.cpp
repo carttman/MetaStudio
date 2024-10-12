@@ -2,12 +2,33 @@
 
 #include "JSH_OBSWebSocket.h"
 #include "WebSocketsModule.h"
+#include "Misc/SecureHash.h" 
+#include "JsonUtilities.h"
+
 
 
 void UJSH_OBSWebSocket::Init()
 {
     Super::Init();
 
+    OBSWebSocketConnect();
+
+
+
+    
+}
+
+void UJSH_OBSWebSocket::Shutdown()
+{
+    OBSWebSocketDisConnect();
+    
+    Super::Shutdown();
+}
+
+
+// WebSocket 연결
+void UJSH_OBSWebSocket::OBSWebSocketConnect()
+{
     if (!FModuleManager::Get().IsModuleLoaded("WebSockets"))
     {
         FModuleManager::Get().LoadModuleChecked("WebSockets");
@@ -15,76 +36,71 @@ void UJSH_OBSWebSocket::Init()
 
     WebSocket = FWebSocketsModule::Get().CreateWebSocket("ws://192.168.0.4:4455");
 
-    WebSocket->Connect();
+
     
-    // ConnectToOBS();  // 게임 시작 시 WebSocket 연결
+    WebSocket->OnConnected().AddLambda([]()
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, "Success");
+    });
+
+    WebSocket->OnConnectionError().AddLambda([](const FString& Error)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "Error");
+    });
+
+    WebSocket->OnClosed().AddLambda([](int32 StatusCode, const FString& Reason, bool bWasClean)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, bWasClean ? FColor::Green : FColor::Red, "Closed" + Reason);
+    });
+
+    
+    WebSocket->Connect();
 }
 
-void UJSH_OBSWebSocket::Shutdown()
+void UJSH_OBSWebSocket::OBSWebSocketDisConnect()
 {
     if (WebSocket->IsConnected())
     {
         WebSocket->Close();
     }
-    
-    Super::Shutdown();
-
-
 
     
-    // if (OBSWebSocket.IsValid())
+}
+
+void UJSH_OBSWebSocket::StartRecord()
+{
+    if (WebSocket.IsValid() && WebSocket->IsConnected())
+    {
+        // StartRecording 명령을 OBS에 전송
+        FString StartRecordMessage = TEXT("{\"request-type\": \"StartRecording\", \"message-id\": \"1\"}");
+        
+        WebSocket->Send(StartRecordMessage);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("WebSocket is not connected!"));
+    }
+    
+    // if (WebSocket.IsValid() && WebSocket->IsConnected())
     // {
-    //     OBSWebSocket->Close();  // 게임이 종료될 때 WebSocket 연결 해제
+    //     // JSON 객체 생성
+    //     TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+    //
+    //     // 필요한 명령어와 파라미터 추가
+    //     JsonObject->SetStringField("op", "6"); // Request Type
+    //     JsonObject->SetStringField("d", "StartRecord");
+    //
+    //     // JSON 형식으로 변환
+    //     FString OutputString;
+    //     TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+    //     FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+    //
+    //     // WebSocket을 통해 메시지 전송
+    //     WebSocket->Send(OutputString);
+    // }
+    // else
+    // {
+    //     UE_LOG(LogTemp, Warning, TEXT("WebSocket is not connected!"));
     // }
 }
 
-
-
-// void UJSH_OBSWebSocket::ConnectToOBS()
-// {
-//     if (!FModuleManager::Get().IsModuleLoaded("WebSockets"))
-//     {
-//         FModuleManager::Get().LoadModuleChecked("WebSockets");
-//     }
-//
-//     FString ServerURL = "ws://192.168.0.4:4455";  // 서버 IP와 포트
-//
-//     // WebSocket 초기화
-//     OBSWebSocket = FWebSocketsModule::Get().CreateWebSocket(ServerURL);
-//
-//     OBSWebSocket->OnConnected().AddLambda([this]()
-//     {
-//         UE_LOG(LogTemp, Log, TEXT("Connected to OBS WebSocket"));
-//
-//         // 비밀번호 인증 메시지 전송
-//         FString AuthMessage = FString::Printf(TEXT("{\"op\": 1, \"d\": {\"rpcVersion\": 1, \"authentication\": \"%s\"}}"), *FString("z8cJSfpNLoVzvacB"));
-//         OBSWebSocket->Send(AuthMessage);
-//     });
-//
-//     OBSWebSocket->OnConnectionError().AddLambda([](const FString& Error)
-//     {
-//         UE_LOG(LogTemp, Error, TEXT("WebSocket Connection Error: %s"), *Error);
-//     });
-//
-//     OBSWebSocket->Connect();
-// }
-
-// void UJSH_OBSWebSocket::StartRecording()
-// {
-//     if (OBSWebSocket.IsValid() && OBSWebSocket->IsConnected())
-//     {
-//         FString StartRecordingMessage = TEXT("{\"op\": 6, \"d\": {\"requestType\": \"StartRecording\", \"requestId\": \"startRecording\"}}");
-//         OBSWebSocket->Send(StartRecordingMessage);
-//         UE_LOG(LogTemp, Log, TEXT("Sent StartRecording Command to OBS"));
-//     }
-// }
-//
-// void UJSH_OBSWebSocket::StopRecording()
-// {
-//     if (OBSWebSocket.IsValid() && OBSWebSocket->IsConnected())
-//     {
-//         FString StopRecordingMessage = TEXT("{\"op\": 6, \"d\": {\"requestType\": \"StopRecording\", \"requestId\": \"stopRecording\"}}");
-//         OBSWebSocket->Send(StopRecordingMessage);
-//         UE_LOG(LogTemp, Log, TEXT("Sent StopRecording Command to OBS"));
-//     }
-// }

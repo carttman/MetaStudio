@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "JSH_Player.h"
 #include "IWebSocket.h"
 #include "JSH_OBSWebSocket.generated.h"
 
@@ -41,6 +42,19 @@ class METASTUDIOS_API UJSH_OBSWebSocket : public UGameInstance
 public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
+
+	void OBSWebSocketConnect();
+	void OBSWebSocketDisConnect();
 	
 	TSharedPtr<IWebSocket> WebSocket;
+
+	// class AJSH_PlayerController* PController;
+
+	
+	class AJSH_Player* pp;
+
+
+	void StartRecord();
+
+	FString CreatePasswordHash(const FString& Password, const FString& Salt, const FString& Challenge);
 };
