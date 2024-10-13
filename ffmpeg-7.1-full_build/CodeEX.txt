@@ -1,0 +1,10 @@
+
+
+[Only Screen]
+ffmpeg -y -rtbufsize 100M -f gdigrab -framerate 30 -probesize 10M -draw_mouse 1 -i desktop -c:v libx264 -r 30 -preset ultrafast -tune zerolatency -crf 25 -pix_fmt yuv420p "output.mp4"
+
+
+이상한 오디오도 같이 잡히는 문제 있씀 .. 해결 필요
+[Screen + Audio]
+ffmpeg -list_devices  true -f dshow -i dummy
+ffmpeg -f dshow -i audio="Line 1(Virtual Audio Cable)" -f gdigrab -offset_x 0 -offset_y 0 -video_size 1920x1080 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 C:\Users\jsh\Documents\GitHub\MetaStudio\ffmpeg-7.1-full_build\output_with_mic1.mkv

@@ -14,6 +14,11 @@
 #include "IWebSocket.h"
 #include "JSH_OBSWebSocket.h"
 #include "WebSocketsModule.h"
+#include <cstdlib>
+#include "Misc/Paths.h"
+#include "HAL/PlatformProcess.h"
+#include "Misc/CommandLine.h"
+#include "HAL/PlatformFilemanager.h"
 
 
 //DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -163,26 +168,64 @@ void AJSH_Player::DisConnectToOBS()
 // 녹화 시작 함수
 void AJSH_Player::StartRecording()
 {
-	// if (IsLocallyControlled() && !HasAuthority())
-	// {
-	// 	GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, TEXT("recording"));
-	// 	Jump();
-	// }
+	// Define the command as an FString
+	FString Command = TEXT("ffmpeg -f dshow -i audio=\"Line 1(Virtual Audio Cable)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 1920x1080 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 C:\\Users\\jsh\\Documents\\GitHub\\MetaStudio\\ffmpeg-7.1-full_build\\output_with_mic1.mkv");
+
+	// Break down the command into its executable and parameters
+	FString ExecutablePath = TEXT("C:/Users/jsh/Documents/GitHub/MetaStudio/ffmpeg-7.1-full_build/bin/ffmpeg.exe");  // Path to your ffmpeg.exe
+	FString Params = TEXT("-f dshow -i audio=\"Line 1(Virtual Audio Cable)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 1920x1080 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 C:\\Users\\jsh\\Documents\\GitHub\\MetaStudio\\ffmpeg-7.1-full_build\\output_with_mic1.mkv");
+
+	// Launch the process asynchronously
+	FProcHandle ProcessHandle = FPlatformProcess::CreateProc(
+		*ExecutablePath, // Executable path
+		*Params,         // Command parameters
+		true,            // bLaunchDetached (true to run in the background)
+		false,           // bLaunchHidden (false if you want to see the console window)
+		false,           // bLaunchReallyHidden (same as above)
+		nullptr,         // OutProcessID
+		0,               // Priority
+		nullptr,         // Optional working directory
+		nullptr          // Pipe write to nullptr (not needed)
+	);
+
+	// Check if the process started successfully
+	if (ProcessHandle.IsValid())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Recording started successfully in the background"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to start recording process."));
+	}
 
 	if (HasAuthority())
 	{
-		ObsGamInstance->StartRecord();
 		Jump();
 	}
-	
-	// if (OBSWebSocket.IsValid() && OBSWebSocket->IsConnected())
-	// {
-	// 	// 녹화 시작 명령 전송
-	// 	FString StartRecordingMessage = TEXT("{\"op\": 6, \"d\": {\"requestType\": \"StartRecording\", \"requestId\": \"startRecording\"}}");
-	// 	OBSWebSocket->Send(StartRecordingMessage);
-	// 	UE_LOG(LogTemp, Log, TEXT("Sent StartRecording Command to OBS"));
-	// }
 }
+
+	// // ffmpeg 명령어를 문자열로 작성
+	// const char* command = "ffmpeg -f dshow -i audio=\"Line 1(Virtual Audio Cable)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 1920x1080 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 C:\\Users\\jsh\\Documents\\GitHub\\MetaStudio\\ffmpeg-7.1-full_build\\output_with_mic1.mkv";
+ //    
+	// // system() 함수로 명령어 실행
+	// int result = system(command);
+	//
+	// if (result == 0)
+	// {
+	// 	UE_LOG(LogTemp, Log, TEXT("Recording started successfully"));
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogTemp, Error, TEXT("Failed to start recording. Error code: %d"), result);
+	// }
+	//
+	// if (HasAuthority())
+	// {
+	// 	Jump();
+	// }
+	
+
+	
 
 // 녹화 종료 함수
 void AJSH_Player::StopRecording()
