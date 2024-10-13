@@ -51,7 +51,7 @@ public:
 	// class AJSH_PlayerController* PController;
 
 	
-	class AJSH_Player* pp;
+	class AJSH_Player* DirectorPlayer;
 
 
 	void StartRecord();

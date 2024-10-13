@@ -95,7 +95,7 @@ public:
 
 	class UJSH_OBSWebSocket* ObsGamInstance;
 
-
+	// 녹화 종료 버튼을 누리지 않고, 게임을 껐을떄도 정상적으로 녹화가 종료 되도록 (1) =====
 	bool Recording = false;
 	
 	FProcHandle PH;
