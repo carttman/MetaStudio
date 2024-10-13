@@ -168,40 +168,68 @@ void AJSH_Player::DisConnectToOBS()
 // 녹화 시작 함수
 void AJSH_Player::StartRecording()
 {
-	// Define the command as an FString
-	FString Command = TEXT("ffmpeg -f dshow -i audio=\"Line 1(Virtual Audio Cable)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 1920x1080 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 C:\\Users\\jsh\\Documents\\GitHub\\MetaStudio\\ffmpeg-7.1-full_build\\output_with_mic1.mkv");
-
-	// Break down the command into its executable and parameters
-	FString ExecutablePath = TEXT("C:/Users/jsh/Documents/GitHub/MetaStudio/ffmpeg-7.1-full_build/bin/ffmpeg.exe");  // Path to your ffmpeg.exe
-	FString Params = TEXT("-f dshow -i audio=\"Line 1(Virtual Audio Cable)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 1920x1080 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 C:\\Users\\jsh\\Documents\\GitHub\\MetaStudio\\ffmpeg-7.1-full_build\\output_with_mic1.mkv");
-
-	// Launch the process asynchronously
-	FProcHandle ProcessHandle = FPlatformProcess::CreateProc(
-		*ExecutablePath, // Executable path
-		*Params,         // Command parameters
-		true,            // bLaunchDetached (true to run in the background)
-		false,           // bLaunchHidden (false if you want to see the console window)
-		false,           // bLaunchReallyHidden (same as above)
-		nullptr,         // OutProcessID
-		0,               // Priority
-		nullptr,         // Optional working directory
-		nullptr          // Pipe write to nullptr (not needed)
-	);
-
-	// Check if the process started successfully
-	if (ProcessHandle.IsValid())
+	if (!Recording)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Recording started successfully in the background"));
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, "Start Recording");
+		
+		// Define the command as an FString
+		FString Command = TEXT("ffmpeg -f dshow -i audio=\"Line 1(Virtual Audio Cable)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 1920x1080 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 C:\\Users\\jsh\\Documents\\GitHub\\MetaStudio\\ffmpeg-7.1-full_build\\UE_Recording_Screen_with_Audio.mkv");
+
+		// Break down the command into its executable and parameters
+		FString ExecutablePath = TEXT("C:/Users/jsh/Documents/GitHub/MetaStudio/ffmpeg-7.1-full_build/bin/ffmpeg.exe");  // Path to your ffmpeg.exe
+		FString Params = TEXT("-f dshow -i audio=\"Line 1(Virtual Audio Cable)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 1920x1080 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 C:\\Users\\jsh\\Documents\\GitHub\\MetaStudio\\ffmpeg-7.1-full_build\\UE_Recording_Screen_with_Audio.mkv");
+
+		// Launch the process asynchronously
+		FProcHandle ProcessHandle = FPlatformProcess::CreateProc(
+			*ExecutablePath, // Executable path
+			*Params,         // Command parameters
+			true,            // bLaunchDetached (true to run in the background)
+			false,           // bLaunchHidden (false if you want to see the console window)
+			false,           // bLaunchReallyHidden (same as above)
+			nullptr,         // OutProcessID
+			0,               // Priority
+			nullptr,         // Optional working directory
+			nullptr          // Pipe write to nullptr (not needed)
+		);
+
+		PH = ProcessHandle;
+		
+
+		// Check if the process started successfully
+		if (ProcessHandle.IsValid())
+		{
+			UE_LOG(LogTemp, Log, TEXT("Recording started successfully in the background"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to start recording process."));
+		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to start recording process."));
+		if (PH.IsValid())
+		{
+			// Terminates the FFmpeg process
+			FPlatformProcess::TerminateProc(PH);
+			FPlatformProcess::CloseProc(PH);  // Optional, to clean up the process handle
+        
+			UE_LOG(LogTemp, Log, TEXT("Recording stopped and FFmpeg process terminated"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to stop recording. No valid process handle found."));
+		}
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, "End Recording");
 	}
 
-	if (HasAuthority())
-	{
-		Jump();
-	}
+
+	Recording = !Recording;
+
+
+	// if (HasAuthority())
+	// {
+	// 	Jump();
+	// }
 }
 
 	// // ffmpeg 명령어를 문자열로 작성

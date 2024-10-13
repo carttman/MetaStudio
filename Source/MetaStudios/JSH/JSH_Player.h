@@ -94,4 +94,9 @@ public:
 	void DisConnectToOBS();
 
 	class UJSH_OBSWebSocket* ObsGamInstance;
+
+
+	bool Recording = false;
+	
+	FProcHandle PH;
 };

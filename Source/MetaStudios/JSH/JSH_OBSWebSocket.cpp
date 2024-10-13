@@ -21,6 +21,9 @@ void UJSH_OBSWebSocket::Init()
 void UJSH_OBSWebSocket::Shutdown()
 {
     OBSWebSocketDisConnect();
+
+
+    
     
     Super::Shutdown();
 }
