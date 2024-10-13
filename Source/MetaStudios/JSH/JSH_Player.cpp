@@ -15,10 +15,24 @@
 #include "JSH_OBSWebSocket.h"
 #include "WebSocketsModule.h"
 #include <cstdlib>
+
+#include "DelayAction.h"
+#include "K2Node_SpawnActorFromClass.h"
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/CommandLine.h"
 #include "HAL/PlatformFilemanager.h"
+#include "Kismet/GameplayStatics.h"
+#include "UniversalObjectLocators/UniversalObjectLocatorUtils.h"
+#include "Engine/World.h"
+#include "GameFramework/Actor.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/SceneComponent.h"
+#include "Engine/Engine.h"
+#include "GameFramework/Pawn.h"
+#include "UObject/ConstructorHelpers.h"
+#include "UObject/UObjectGlobals.h"
 
 
 //DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -58,9 +72,7 @@ void AJSH_Player::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
-
-	
+	// ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
 	// if (HasAuthority())
 	// {
 	// 	if (!FModuleManager::Get().IsModuleLoaded("WebSockets"))
@@ -101,7 +113,7 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AJSH_Player::Look);
 
 		EnhancedInputComponent->BindAction(StartRecord, ETriggerEvent::Started, this, &AJSH_Player::StartRecording);
-		EnhancedInputComponent->BindAction(StopRecord, ETriggerEvent::Started, this, &AJSH_Player::StopRecording);
+		EnhancedInputComponent->BindAction(SpectatorModeOnOff, ETriggerEvent::Started, this, &AJSH_Player::SpectatorMode);
 	}
 	else
 	{
@@ -141,8 +153,8 @@ void AJSH_Player::Look(const FInputActionValue& Value)
 }
 
 
-void AJSH_Player::ConnectToOBS()
-{
+// void AJSH_Player::ConnectToOBS()
+// {
 	// if (!FModuleManager::Get().IsModuleLoaded("WebSockets"))
 	// {
 	// 	FModuleManager::Get().LoadModuleChecked("WebSockets");
@@ -151,10 +163,10 @@ void AJSH_Player::ConnectToOBS()
 	// WebSocket = FWebSocketsModule::Get().CreateWebSocket("ws://192.168.0.4:4455");
 	//
 	// WebSocket->Connect();
-}
-
-void AJSH_Player::DisConnectToOBS()
-{
+// }
+//
+// void AJSH_Player::DisConnectToOBS()
+// {
 	// if (HasAuthority())
 	// {
 	// 	if (WebSocket->IsConnected())
@@ -162,7 +174,52 @@ void AJSH_Player::DisConnectToOBS()
 	// 		WebSocket->Close();
 	// 	}
 	// }
+// }
+
+void AJSH_Player::SpectatorMode()
+{
+	// Player 모드 변환 인풋 (F) -> Spectator Actor 스폰 후 Possess 바꿈
+	// Spectator Actor에서 다시 Possess 바꿔줘야 (F) -> Player로 다시 돌아올 수 있음
+	// @ 움직이다가 모드 바꿔주면, 클라이언트 쪽에서 모드 바꾸기 직전에 들어가던 인풋이 계속 들어가는 것처럼 보임, 멀티 쏴 줘야 할듯
+
+	// 1. Player 카메라 위치 가져오기
+	FTransform CameraTransform;
+	if (FollowCamera)
+	{
+		CameraTransform = FollowCamera->GetComponentTransform();
+	}
+
+	// 2. BP_Spectator를 FollowCamera 위치에 스폰하기
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	// 3. 블루프린트 클래스 로드 -> Possess 바꿔주기 + Visible 끄기
+	UClass* SpectatorClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/BP_Spectator.BP_Spectator_C"));
+    
+	if (SpectatorClass)
+	{
+		AActor* SpectatorActor = GetWorld()->SpawnActor<AActor>(SpectatorClass, CameraTransform, SpawnParams);
+		
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+        
+		if (PlayerController && SpectatorActor)
+		{
+			
+			APawn* SpectatorPawn = Cast<APawn>(SpectatorActor);
+			if (SpectatorPawn)
+			{
+				PlayerController->Possess(SpectatorPawn);
+				
+				GetMesh()->SetVisibility(false); 
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Spectator class could not be loaded!"));
+	}
 }
+
 
 
 // 녹화 시작 함수
