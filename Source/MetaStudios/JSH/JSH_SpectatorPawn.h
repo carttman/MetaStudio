@@ -9,9 +9,21 @@
 /**
  * 
  */
+class USpringArmComponent;
+class UCameraComponent;
+class UInputMappingContext;
+class UInputAction;
+struct FInputActionValue;
+
 UCLASS()
 class METASTUDIOS_API AJSH_SpectatorPawn : public ASpectatorPawn
 {
 	GENERATED_BODY()
+
+
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* StartRecord;
+	
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 };

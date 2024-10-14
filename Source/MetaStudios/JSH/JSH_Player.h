@@ -83,7 +83,7 @@ public:
 	// // WebSocket 연결 함수
 	// UFUNCTION()
 	// void DisConnectToOBS();
-	// class UJSH_OBSWebSocket* ObsGamInstance;
+	class UJSH_OBSWebSocket* ObsGamInstance;
 	// =========================================================
 
 

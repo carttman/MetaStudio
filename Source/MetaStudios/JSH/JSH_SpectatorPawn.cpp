@@ -3,3 +3,7 @@
 
 #include "JSH_SpectatorPawn.h"
 
+void AJSH_SpectatorPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}

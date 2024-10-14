@@ -57,4 +57,10 @@ public:
 	void StartRecord();
 
 	FString CreatePasswordHash(const FString& Password, const FString& Salt, const FString& Challenge);
+
+
+	FProcHandle PH;
+	
+	// 녹화 모드 On, Off 제어
+	bool Recording = false;
 };
