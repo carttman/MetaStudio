@@ -76,15 +76,8 @@ public:
 
 public:
 	
-	// OBS WebSocket =======================================	
-	// TSharedPtr<IWebSocket> WebSocket;
-	// // WebSocket 연결 함수
-	// void ConnectToOBS();
-	// // WebSocket 연결 함수
-	// UFUNCTION()
-	// void DisConnectToOBS();
 	class UJSH_OBSWebSocket* ObsGamInstance;
-	// =========================================================
+	
 
 
 	// 녹화 관련 =================================================================
