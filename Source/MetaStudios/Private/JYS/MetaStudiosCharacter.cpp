@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "EngineMinimal.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -60,11 +61,23 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 
 void AMetaStudiosCharacter::ManageBooster(float DeltaTime)
 {
+	Server_ManageBooster(DeltaTime);
+}
+
+void AMetaStudiosCharacter::Server_ManageBooster_Implementation(float DeltaTime)
+{
+	NetMulticast_ManageBooster(DeltaTime);
+}
+
+void AMetaStudiosCharacter::NetMulticast_ManageBooster_Implementation(float DeltaTime)
+{
 	// bIsBoosting 활성화 + 현재 남은 부스터가 0 이상일때
 	if (bIsBoosting && BoosterAmount > 0.0f)
 	{
 		// 현재 부스터 - 20 * DeltaTime
 		BoosterAmount -= BoosterDrainRate * DeltaTime;
+
+
 		// 만약 현재 부스터 남은 양이 0 이하거나 같을 때
 		if (BoosterAmount <= 0.0f)
 		{
@@ -74,12 +87,12 @@ void AMetaStudiosCharacter::ManageBooster(float DeltaTime)
 			GravityScaleOff();
 		}
 
-		FVector HoverForce = FVector(0.0f, 0.0f, BoostStrength * DeltaTime);
+		FVector HoverForce = FVector(GetVelocity().X, GetVelocity().Y, BoostStrength * DeltaTime);
 		LaunchCharacter(HoverForce, true, true);
 
 	}
-	// 만약 부스터가 비활 + 현재 부스터가 최대 부스터 양보다 적을 때
-	else if (!bIsBoosting && BoosterAmount < MaxBoosterAmount)
+	// 만약 부스터
+	if (!bIsBoosting && !GetCharacterMovement()->IsFalling())
 	{
 		// 현재 부스터 + 리필 부스터 양(10) * DeltaTime
 		BoosterAmount += BoosterRefillRate * DeltaTime;
@@ -93,9 +106,20 @@ void AMetaStudiosCharacter::ManageBooster(float DeltaTime)
 
 	// Optional debug message for testing
 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("Booster Amount: %.1f"), BoosterAmount));
+
 }
 
 void AMetaStudiosCharacter::ToggleBoosting()
+{
+	Server_ToggleBoosting();
+}
+
+void AMetaStudiosCharacter::Server_ToggleBoosting_Implementation()
+{
+	NetMulticast_ToggleBoosting();
+}
+
+void AMetaStudiosCharacter::NetMulticast_ToggleBoosting_Implementation()
 {
 	// Only toggle if booster amount is not zero
 	if (BoosterAmount > 0)
@@ -104,16 +128,28 @@ void AMetaStudiosCharacter::ToggleBoosting()
 
 		if (bIsBoosting)
 		{
-			GravityScaleOn();
-		}
-		else
-		{
 			GravityScaleOff();
 		}
 	}
 }
 
-void AMetaStudiosCharacter::GravityScaleOn()
+void AMetaStudiosCharacter::ToggleBoosting_Complete()
+{
+	Server_ToggleBoosting_Complete();
+}
+
+void AMetaStudiosCharacter::Server_ToggleBoosting_Complete_Implementation()
+{
+	NetMulticast_ToggleBoosting_Complete();
+}
+
+void AMetaStudiosCharacter::NetMulticast_ToggleBoosting_Complete_Implementation()
+{
+	bIsBoosting = false;
+	GravityScaleOn();
+}
+
+void AMetaStudiosCharacter::GravityScaleOff()
 {
 	// 중력 끄기
 	GetCharacterMovement()->GravityScale = GravityScaleZero;
@@ -122,11 +158,13 @@ void AMetaStudiosCharacter::GravityScaleOn()
 
 }
 
-void AMetaStudiosCharacter::GravityScaleOff()
+void AMetaStudiosCharacter::GravityScaleOn()
 {
+	//Server_GravityScaleOn();
 	// 중력 켜기
 	GetCharacterMovement()->GravityScale = GravityScaleNormal;
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Booster Deactivated"));
+
 
 }
 
@@ -167,12 +205,21 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::Look);
 
 		// Booster Toggle
-		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Started, this, &AMetaStudiosCharacter::ToggleBoosting);
+		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::ToggleBoosting);
+
+		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Completed, this, &AMetaStudiosCharacter::ToggleBoosting_Complete);
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component!"), *GetNameSafe(this));
 	}
+}
+
+void AMetaStudiosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME (AMetaStudiosCharacter, bIsBoosting);
 }
 
 void AMetaStudiosCharacter::Move(const FInputActionValue& Value)

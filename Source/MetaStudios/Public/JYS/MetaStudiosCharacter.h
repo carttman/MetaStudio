@@ -55,11 +55,36 @@ public:
 	
 	// Tick에서 부스터 관리 함수
 	void ManageBooster(float DeltaTime);
+
+	UFUNCTION(Server, Reliable)
+	void Server_ManageBooster(float DeltaTime);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_ManageBooster(float DeltaTime);
+ 
 	// Booster 사용
 	void ToggleBoosting();
+	
+	UFUNCTION(Server, Reliable)
+	void Server_ToggleBoosting();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_ToggleBoosting();
+
+	void ToggleBoosting_Complete();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ToggleBoosting_Complete();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_ToggleBoosting_Complete();
+
 	// 중력
-	void GravityScaleOn();
 	void GravityScaleOff();
+
+	void GravityScaleOn();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps);
 
 protected:
 
@@ -89,11 +114,11 @@ private:
 	// 부스터 힘
 	float BoostStrength = 2000.0f;
 
-	// 현재 부스터 양
-	float BoosterAmount = MaxBoosterAmount;
-
 	// 부스터의 최대 값
 	float MaxBoosterAmount = 100.0f;
+
+	// 현재 부스터 양
+	float BoosterAmount = 100.0f;
 
 	// 부스터 감소 속도
 	float BoosterDrainRate = 20.0f;
