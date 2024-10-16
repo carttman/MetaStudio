@@ -42,11 +42,24 @@ class AMetaStudiosCharacter : public ACharacter
 
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* LookAction;
+	UInputAction* LookAction;	
+	
+	// Booster Input Action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* BoosterAction;
 
 public:
 	AMetaStudiosCharacter();
+
+	virtual void Tick(float DeltaTime) override;
 	
+	// Tick에서 부스터 관리 함수
+	void ManageBooster(float DeltaTime);
+	// Booster 사용
+	void ToggleBoosting();
+	// 중력
+	void GravityScaleOn();
+	void GravityScaleOff();
 
 protected:
 
@@ -55,7 +68,6 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
 
 protected:
 	// APawn interface
@@ -69,5 +81,32 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+private:
+	// 부스터 사용 여부
+	bool bIsBoosting = false;
+
+	// 부스터 힘
+	float BoostStrength = 2000.0f;
+
+	// 현재 부스터 양
+	float BoosterAmount = MaxBoosterAmount;
+
+	// 부스터의 최대 값
+	float MaxBoosterAmount = 100.0f;
+
+	// 부스터 감소 속도
+	float BoosterDrainRate = 20.0f;
+
+	// 부스터 회복 속도
+	float BoosterRefillRate = 10.0f;
+
+	// 기본 중력 값
+	float GravityScaleNormal = 1.0f;  
+	
+	// 중력을 제거할 때 사용할 값
+	float GravityScaleZero = 0.0f;    
+
+
 };
 
