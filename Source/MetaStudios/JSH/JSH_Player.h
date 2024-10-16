@@ -63,7 +63,6 @@ protected:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-
 	virtual void BeginPlay();
 
 public:
@@ -75,6 +74,7 @@ public:
 
 
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	class UJSH_OBSWebSocket* ObsGamInstance;
 	
@@ -91,10 +91,25 @@ public:
 	void StopRecording();
 
 	// 녹화 모드 On, Off 제어
+	UPROPERTY(Replicated)
 	bool Recording = false;
 	
 	// 자유시점 모드
 	void SpectatorMode();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_SpectatorMode();
 
+
+	// 자유시점 모드
+	void Visible_On_OFF();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Visible_On_OFF();
+
+	UPROPERTY(Replicated)
+	bool PlayerVisibleOn = true;
+
+	
 	
 };
