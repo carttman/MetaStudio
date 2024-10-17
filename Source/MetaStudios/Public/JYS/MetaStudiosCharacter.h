@@ -46,7 +46,10 @@ class AMetaStudiosCharacter : public ACharacter
 	
 	// Booster Input Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* BoosterAction;
+	UInputAction* BoosterAction;	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* GetObjectAction;
 
 public:
 	AMetaStudiosCharacter();
@@ -84,7 +87,15 @@ public:
 
 	void GravityScaleOn();
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps);
+	// 가장 가까운 액터 찾기
+	void FindObject();
+
+	void DestroyObject();
+
+
+
+	// bool값 멀티
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 
@@ -101,6 +112,18 @@ protected:
 	// To add mapping context
 	virtual void BeginPlay();
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> object;
+
+	UPROPERTY(EditAnywhere)
+	TArray<AActor*> objects;
+
+	float nearsetObjectDist = 1000.0f;
+
+	AActor* targetObject;
+
+	// int32 itemCount = 0;
+
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -109,6 +132,7 @@ public:
 
 private:
 	// 부스터 사용 여부
+	UPROPERTY(Replicated)
 	bool bIsBoosting = false;
 
 	// 부스터 힘
@@ -132,6 +156,6 @@ private:
 	// 중력을 제거할 때 사용할 값
 	float GravityScaleZero = 0.0f;    
 
-
+	AActor* nearActor;
 };
 
