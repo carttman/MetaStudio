@@ -15,7 +15,7 @@
 #include "GameFramework/MovementComponent.h"
 #include "GameFramework/SpectatorPawnMovement.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "Tests/AutomationCommon.h"
 
 
 void AJSH_SpectatorPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -34,8 +34,9 @@ void AJSH_SpectatorPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		EnhancedInputComponent->BindAction(IA_BackMainPlayer, ETriggerEvent::Started, this, & AJSH_SpectatorPawn::BackPlayer);
-		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Ongoing, this, & AJSH_SpectatorPawn::EditModeON);
-		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Completed, this, & AJSH_SpectatorPawn::EditModeOFF);
+		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Triggered, this, & AJSH_SpectatorPawn::EditModeOFF);
+		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Ongoing, this, & AJSH_SpectatorPawn::EditModeOFF);
+		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Completed, this, & AJSH_SpectatorPawn::EditModeON);
 	}
 	else
 	{
@@ -51,31 +52,9 @@ void AJSH_SpectatorPawn::BeginPlay()
 	
 	
 	SpectatorPawnMovementComponent = Cast<USpectatorPawnMovement>(GetMovementComponent());
-	if (SpectatorPawnMovementComponent)
-	{
-		SpectatorPawnMovementComponent->SetComponentTickEnabled(false);
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("2222222"));
-
 	OriginController = Cast<APlayerController>(GetController());
-	OriginController->bShowMouseCursor = true;
-
-
-	if (OriginController)
-	{
-		OriginController->SetIgnoreLookInput(true);
-
-		// 마우스 커서를 보이게 설정
-		OriginController->bShowMouseCursor = true;
-
-		// 커서를 마우스로 제어할 수 있도록 설정
-		OriginController->bEnableClickEvents = true;
-		OriginController->bEnableMouseOverEvents = true;
-
-		// 필요하다면 마우스를 UI 전용으로 고정
-		// PlayerController->SetInputMode(FInputModeGameAndUI());
-	}
+	
+	EnableEdit();
 }
 
 
@@ -115,28 +94,7 @@ void AJSH_SpectatorPawn::NetMulti_BackPlayer_Implementation()
 
 void AJSH_SpectatorPawn::EditModeON()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "ing");
-
-	
-	// if (SpectatorPawnMovementComponent)
-	// {
-	// 	SpectatorPawnMovementComponent->
-	// }
-	//
-	// APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	// if (PlayerController)
-	// {
-	// 	PlayerController->SetIgnoreLookInput(false);
-	// }
-
-
-	// OriginController = Cast<APlayerController>(GetController());
-	// 마우스 커서를 보이게 설정
-	OriginController->bShowMouseCursor = true;
-	SpectatorPawnMovementComponent->SetComponentTickEnabled(true);
-	// 커서를 마우스로 제어할 수 있도록 설정
-	OriginController->bEnableClickEvents = true;
-	OriginController->bEnableMouseOverEvents = true;
+	EnableEdit();
 }
 
 
@@ -147,72 +105,61 @@ void AJSH_SpectatorPawn::EditModeON()
 
 void AJSH_SpectatorPawn::EditModeOFF()
 {
+	DisableEdit();
+}
+
+
+void AJSH_SpectatorPawn::EnableEdit()
+{
 	if (SpectatorPawnMovementComponent)
 	{
 		SpectatorPawnMovementComponent->SetComponentTickEnabled(false);
 	}
-	
+
 	if (OriginController)
 	{
-		OriginController->SetIgnoreLookInput(false);
-		OriginController->bShowMouseCursor = false;
+		// 마우스 커서 보이게 설정
+		OriginController->bShowMouseCursor = true;
 		OriginController->bEnableClickEvents = true;
 		OriginController->bEnableMouseOverEvents = true;
-		// PlayerController->SetInputMode(FInputModeGameAndUI());
+
+		// 마우스를 UI와 게임에서 사용할 수 있도록 설정
+		OriginController->SetInputMode(FInputModeGameAndUI());
+
+		// 마우스 잠금 해제
+		GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
 
+	GEngine->AddOnScreenDebugMessage(-3, 10.0f, FColor::Green, "Editor mode enabled");
 }
-	
 
 
 
 
+void AJSH_SpectatorPawn::DisableEdit()
+{
+	if (SpectatorPawnMovementComponent)
+	{
+		SpectatorPawnMovementComponent->SetComponentTickEnabled(true);
+	}
 
+	if (OriginController)
+	{
+		// 카메라 자유 이동을 허용하도록 설정
+		OriginController->SetIgnoreLookInput(false);
+        
+		// 마우스 커서 숨기기
+		OriginController->bShowMouseCursor = false;
+		OriginController->bEnableClickEvents = false;
+		OriginController->bEnableMouseOverEvents = false;
 
+		// 입력 모드를 게임 전용 모드로 설정하여 우클릭으로 자유시점 가능하게
+		OriginController->SetInputMode(FInputModeGameOnly());
+	}
 
+	GEngine->AddOnScreenDebugMessage(-4, 10.0f, FColor::Green, "Camera free mode enabled");
+}
 
-
-
-
-
-
-// void AJSH_SpectatorPawn::NetMulti_BackPlayer_Implementation()
-// {
-// 	// 1. Get Player Controller (인덱스가 0인 플레이어)
-// 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-//     
-// 	if (PlayerController)
-// 	{
-// 		// 2. Get All Actors of Class (BP_JSH_Player 클래스를 검색)
-// 		TArray<AActor*> FoundPlayers;
-// 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJSH_Player::StaticClass(), FoundPlayers);
-// 		
-// 		if (FoundPlayers.Num() > 0)
-// 		{
-// 			// 첫 번째 액터를 사용 ([0]으로 설정)
-// 			AJSH_Player* TargetPlayer = Cast<AJSH_Player>(FoundPlayers[0]);
-//
-// 			if (TargetPlayer)
-// 			{
-// 				// 3. 플레이어 컨트롤러가 Main Player Possess 하도록
-// 				PlayerController->Possess(TargetPlayer);
-//
-// 				// 4. 자기 자신(SpectatorPawn) Destory
-// 				this->Destroy();
-//
-// 				// 5. Player Mesh visible 꺼줬던거 다시 켜주기
-// 				// UMeshComponent* FoundMeshComponent = Cast<UMeshComponent>(TargetPlayer->GetComponentByClass(UMeshComponent::StaticClass()));
-// 				// if (FoundMeshComponent)
-// 				// {
-// 				// 	TargetPlayer->SetVisibility(true);
-// 				// }
-// 				// 이렇게 하니깐 , Client에서는 visible 켜진게 보여지지 않음 , 그냥 player쪽에서 visible 키는 함수 만들어 두고 , 그걸 가져와야할듯?
-// 				
-// 				// TargetPlayer->Visible_On_OFF();
-// 			}
-// 		}
-// 	}
-// }
 
 
 

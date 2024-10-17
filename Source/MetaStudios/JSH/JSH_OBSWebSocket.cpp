@@ -129,7 +129,7 @@ void UJSH_OBSWebSocket::ConvertMKVToMP4()
 			*WorkingDirectory,
 			nullptr             // Pipe (필요 없으므로 nullptr)
 		);
-		VideoFileName = nullptr;
+		
 		
 		if (ProcessHandle.IsValid())
 		{
@@ -148,14 +148,6 @@ void UJSH_OBSWebSocket::ConvertMKVToMP4()
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "No MKV file found to convert.");
 	}
 }
-
-
-
-
-
-
-
-
 
 
 

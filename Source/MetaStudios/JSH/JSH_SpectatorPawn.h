@@ -57,5 +57,9 @@ public:
 	
 	APlayerController* OriginController;
 
+	void EnableEdit();
+	
+	void DisableEdit();
+
 	
 };
