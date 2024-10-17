@@ -62,6 +62,7 @@ void AJSH_SpectatorPawn::BeginPlay()
 // (F) 에디터 모드에서 다시 플레이어 모드로 돌아가는 함수 
 void AJSH_SpectatorPawn::BackPlayer()
 {
+	DisableEdit();
 	NetMulti_BackPlayer();
 }
 
@@ -125,8 +126,6 @@ void AJSH_SpectatorPawn::EnableEdit()
 
 		// 마우스를 UI와 게임에서 사용할 수 있도록 설정
 		OriginController->SetInputMode(FInputModeGameAndUI());
-
-		// 마우스 잠금 해제
 		GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
 
