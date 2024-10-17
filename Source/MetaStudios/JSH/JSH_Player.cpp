@@ -75,8 +75,7 @@ AJSH_Player::AJSH_Player()
 void AJSH_Player::BeginPlay()
 {
 	Super::BeginPlay();
-
-
+	
 	
 	
 	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
@@ -215,9 +214,9 @@ void AJSH_Player::NetMulti_SpectatorMode_Implementation()
     
 	if (SpectatorClass)
 	{
-		AActor* SpectatorActor = GetWorld()->SpawnActor<AActor>(SpectatorClass, CameraTransform, SpawnParams);
+		//AActor* SpectatorActor = GetWorld()->SpawnActor<AActor>(SpectatorClass, CameraTransform, SpawnParams);
 		//ASpectatorPawn* SpectatorActor = GetWorld()->SpawnActor<ASpectatorPawn>(tt->SpectatorClass, CameraTransform, SpawnParams);
-		
+		AActor* SpectatorActor = GetWorld()->SpawnActorDeferred<AActor>(SpectatorClass, CameraTransform);
 		AJSH_PlayerController* PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 		
         
@@ -229,9 +228,12 @@ void AJSH_Player::NetMulti_SpectatorMode_Implementation()
 				if(HasAuthority())
 				{
 					PlayerController->SaveOriginCharacter();
+					UE_LOG(LogTemp, Warning, TEXT("11111"));
 					// UnPossessed();
 					// PlayerController->SetPawn(SpectatorPawn);
 					PlayerController->Possess(SpectatorPawn);
+					UGameplayStatics::FinishSpawningActor(SpectatorActor, CameraTransform);
+					//FinishSpawning(CameraTransform,true);
 					// SpectatorPawn->BeginPlay();
 				}
 				

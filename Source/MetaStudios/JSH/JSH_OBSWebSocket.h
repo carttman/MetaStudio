@@ -63,4 +63,9 @@ public:
 	
 	// 녹화 모드 On, Off 제어
 	bool Recording = false;
+	
+	FString VideoFileName;
+
+	
+	void ConvertMKVToMP4();
 };

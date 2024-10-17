@@ -109,7 +109,5 @@ public:
 
 	UPROPERTY(Replicated)
 	bool PlayerVisibleOn = true;
-
-	
 	
 };

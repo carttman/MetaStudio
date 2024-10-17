@@ -36,9 +36,7 @@ class METASTUDIOS_API AJSH_SpectatorPawn : public ASpectatorPawn
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_FlyMode;
 
-	void BeginSpectator();
-
-
+	
 	virtual void BeginPlay() override;
 	
 public:
@@ -57,5 +55,7 @@ public:
 
 	USpectatorPawnMovement* SpectatorPawnMovementComponent;
 	
-	APlayerController* SpectatorController;
+	APlayerController* OriginController;
+
+	
 };

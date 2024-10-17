@@ -43,10 +43,12 @@ void AJSH_SpectatorPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	}
 }
 
-
-void AJSH_SpectatorPawn::BeginSpectator()
+void AJSH_SpectatorPawn::BeginPlay()
 {
-	GEngine->AddOnScreenDebugMessage(-2, 10.0f, FColor::Red, "sdsd");
+	Super::BeginPlay();
+
+	GEngine->AddOnScreenDebugMessage(-3, 10.0f, FColor::Green, "dsd");
+	
 	
 	SpectatorPawnMovementComponent = Cast<USpectatorPawnMovement>(GetMovementComponent());
 	if (SpectatorPawnMovementComponent)
@@ -54,30 +56,29 @@ void AJSH_SpectatorPawn::BeginSpectator()
 		SpectatorPawnMovementComponent->SetComponentTickEnabled(false);
 	}
 
-	
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController)
+	UE_LOG(LogTemp, Warning, TEXT("2222222"));
+
+	OriginController = Cast<APlayerController>(GetController());
+	OriginController->bShowMouseCursor = true;
+
+
+	if (OriginController)
 	{
-		PlayerController->SetIgnoreLookInput(true);
+		OriginController->SetIgnoreLookInput(true);
 
 		// 마우스 커서를 보이게 설정
-		PlayerController->bShowMouseCursor = true;
+		OriginController->bShowMouseCursor = true;
 
 		// 커서를 마우스로 제어할 수 있도록 설정
-		PlayerController->bEnableClickEvents = true;
-		PlayerController->bEnableMouseOverEvents = true;
+		OriginController->bEnableClickEvents = true;
+		OriginController->bEnableMouseOverEvents = true;
 
 		// 필요하다면 마우스를 UI 전용으로 고정
-		PlayerController->SetInputMode(FInputModeGameAndUI());
+		// PlayerController->SetInputMode(FInputModeGameAndUI());
 	}
 }
 
-void AJSH_SpectatorPawn::BeginPlay()
-{
-	Super::BeginPlay();
 
-	GEngine->AddOnScreenDebugMessage(-3, 10.0f, FColor::Green, "dsd");
-}
 
 // (F) 에디터 모드에서 다시 플레이어 모드로 돌아가는 함수 
 void AJSH_SpectatorPawn::BackPlayer()
@@ -85,6 +86,8 @@ void AJSH_SpectatorPawn::BackPlayer()
 	NetMulti_BackPlayer();
 }
 
+
+//
 void AJSH_SpectatorPawn::NetMulti_BackPlayer_Implementation()
 {
 	// 1. Get Player Controller (인덱스가 0인 플레이어)
@@ -99,10 +102,15 @@ void AJSH_SpectatorPawn::NetMulti_BackPlayer_Implementation()
 		PlayerController->Possess(PlayerController->OriginPlayer);
 
 		// 4. 자기 자신(SpectatorPawn) Destory
-		// this->Destroy();
+		this->Destroy();
 	}
 }
 
+// =====================
+#pragma region dlfjdklfj
+
+/////
+#pragma endregion
 
 
 void AJSH_SpectatorPawn::EditModeON()
@@ -110,17 +118,32 @@ void AJSH_SpectatorPawn::EditModeON()
 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "ing");
 
 	
-	if (SpectatorPawnMovementComponent)
-	{
-		SpectatorPawnMovementComponent->SetComponentTickEnabled(true);
-	}
+	// if (SpectatorPawnMovementComponent)
+	// {
+	// 	SpectatorPawnMovementComponent->
+	// }
+	//
+	// APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	// if (PlayerController)
+	// {
+	// 	PlayerController->SetIgnoreLookInput(false);
+	// }
 
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController)
-	{
-		PlayerController->SetIgnoreLookInput(false);
-	}
+
+	// OriginController = Cast<APlayerController>(GetController());
+	// 마우스 커서를 보이게 설정
+	OriginController->bShowMouseCursor = true;
+	SpectatorPawnMovementComponent->SetComponentTickEnabled(true);
+	// 커서를 마우스로 제어할 수 있도록 설정
+	OriginController->bEnableClickEvents = true;
+	OriginController->bEnableMouseOverEvents = true;
 }
+
+
+// =====================================================
+
+
+
 
 void AJSH_SpectatorPawn::EditModeOFF()
 {
@@ -129,25 +152,12 @@ void AJSH_SpectatorPawn::EditModeOFF()
 		SpectatorPawnMovementComponent->SetComponentTickEnabled(false);
 	}
 	
-	if (SpectatorController)
+	if (OriginController)
 	{
-		SpectatorController->SetIgnoreLookInput(false);
-	}
-
-
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController)
-	{
-		PlayerController->SetIgnoreLookInput(true);
-
-		// 마우스 커서를 보이게 설정
-		PlayerController->bShowMouseCursor = true;
-
-		// 커서를 마우스로 제어할 수 있도록 설정
-		PlayerController->bEnableClickEvents = true;
-		PlayerController->bEnableMouseOverEvents = true;
-
-		// // 필요하다면 마우스를 UI 전용으로 고정
+		OriginController->SetIgnoreLookInput(false);
+		OriginController->bShowMouseCursor = false;
+		OriginController->bEnableClickEvents = true;
+		OriginController->bEnableMouseOverEvents = true;
 		// PlayerController->SetInputMode(FInputModeGameAndUI());
 	}
 
