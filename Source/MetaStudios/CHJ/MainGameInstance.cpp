@@ -79,9 +79,8 @@ void UMainGameInstance::OnMyCreateSessionComplete(FName SessionName , bool bWasS
 	if ( bWasSuccessful )
 	{
 		PRINTLOG(TEXT("OnMyCreateSessionComplete is Success~~~~~"));
-		
 		// 서버가 여행을 떠나고싶다.
-		GetWorld()->ServerTravel(TEXT("/Game/Maps/StudioMap?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/Maps/CinemaMap?listen"));
 	}
 	else
 	{

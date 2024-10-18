@@ -7,7 +7,6 @@
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
 #include "MetaStudios/CHJ/CHJ_TestCharacter.h"
-#include "MetaStudios/CHJ/Media/CHJStreamMediaSource.h"
 #include "MetaStudios/JSH/JSH_Player.h"
 
 // Sets default values for this component's properties
