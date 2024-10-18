@@ -12,6 +12,9 @@
 #include "Net/UnrealNetwork.h"
 #include "kismet/GameplayStatics.h"
 #include "Engine/Engine.h"
+#include "GameFramework/PlayerController.h"
+// #include "SetViewTargetBlend.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -39,16 +42,33 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
+	/////////////카메라 전환 (TPS, FPS)////////////////
 	// Create a camera boom
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f;
-	CameraBoom->bUsePawnControlRotation = true;
+	TPSCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPSCameraSpringArm"));
+	TPSCameraSpringArm->SetupAttachment(RootComponent);
+	TPSCameraSpringArm->TargetArmLength = 400.0f;
+	TPSCameraSpringArm->bUsePawnControlRotation = true;
+	TPSCameraSpringArm->TargetArmLength = 200;
 
 	// Create a follow camera
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
+	TPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TPSCamera"));
+	TPSCamera->SetupAttachment(TPSCameraSpringArm);
+	TPSCamera->bUsePawnControlRotation = false;
+	
+	// Create a camera boom
+	FPSCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("FPSCameraSpringArm"));
+	FPSCameraSpringArm->SetupAttachment(RootComponent);
+	FPSCameraSpringArm->TargetArmLength = 0.0f;
+	FPSCameraSpringArm->bUsePawnControlRotation = true;
+	FPSCameraSpringArm->TargetArmLength = 0;
+
+	// Create a follow camera
+	FPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FPSCamera"));
+	FPSCamera->SetupAttachment(FPSCameraSpringArm);
+	FPSCamera->bUsePawnControlRotation = false;
+
+
+
 }
 
 void AMetaStudiosCharacter::Tick(float DeltaTime)
@@ -62,6 +82,20 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 void AMetaStudiosCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	APlayerController* playerController = Cast<APlayerController>(GetController());
+	//playerController->SetViewTargetWithBlend(TPSCamera->GetChildActor(), 2.f)
+	
+	if (FPSCamera == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("111111111111"))
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("2222222222222222"));
+
+	}
+
 }
 
 /////////////////////Booster/////////////////////////////////////////////////////
@@ -111,7 +145,6 @@ void AMetaStudiosCharacter::NetMulticast_ManageBooster_Implementation(float Delt
 		}
 	}
 
-	// Optional debug message for testing
 	// GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("Booster Amount: %.1f"), BoosterAmount));
 
 }
@@ -160,24 +193,18 @@ void AMetaStudiosCharacter::GravityScaleOff()
 {
 	// 중력 끄기
 	GetCharacterMovement()->GravityScale = GravityScaleZero;
-	// LaunchCharacter(FVector(0, 0, 1000), true, true);
-	// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, TEXT("Booster Activated"));
 
 }
 
 void AMetaStudiosCharacter::GravityScaleOn()
 {
-	//Server_GravityScaleOn();
 	// 중력 켜기
 	GetCharacterMovement()->GravityScale = GravityScaleNormal;
-	// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Booster Deactivated"));
-
-
 }
 
 /////////////////////Booster/////////////////////////////////////////////////////
 
-// Input
+//////////////////////Input////////////////////////////////
 void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -210,11 +237,35 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Completed, this, &AMetaStudiosCharacter::ToggleBoosting_Complete);
 
 		EnhancedInputComponent->BindAction(GetObjectAction, ETriggerEvent::Started, this, &AMetaStudiosCharacter::FindObject);
+
+		EnhancedInputComponent->BindAction(CameraMode, ETriggerEvent::Started, this, &AMetaStudiosCharacter::ChangeCameraMode);
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component!"), *GetNameSafe(this));
 	}
+}
+
+/////////////카메라 전환 (TPS, FPS)////////////////
+void AMetaStudiosCharacter::ChangeCameraMode()
+{
+		if (IsTPSMode)
+		{
+			TPSCamera->SetActive(true);
+			FPSCamera->SetActive(false);
+			bUseControllerRotationYaw = true;
+		}
+		else
+		{
+			if (FPSCamera)
+			{
+				FPSCamera->SetActive(true);
+				TPSCamera->SetActive(false);
+				bUseControllerRotationYaw = false;
+			}
+		}
+
+		IsTPSMode = !IsTPSMode;
 }
 
 void AMetaStudiosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -272,7 +323,10 @@ void AMetaStudiosCharacter::FindObject()
 
 void AMetaStudiosCharacter::DestroyObject()
 {
-	nearActor->Destroy();
-	// itemCount++;
+	if (nearActor != nullptr)
+	{
+		nearActor->Destroy();
+		// itemCount++;
+	}
 	
 }

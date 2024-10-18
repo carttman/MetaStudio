@@ -22,11 +22,19 @@ class AMetaStudiosCharacter : public ACharacter
 
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* CameraBoom;
+	USpringArmComponent* TPSCameraSpringArm;
 
 	/** Follow camera */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* TPSCamera;
+
+	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FollowCamera;
+	USpringArmComponent* FPSCameraSpringArm;
+
+	/** Follow camera */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* FPSCamera;
 	
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -50,6 +58,9 @@ class AMetaStudiosCharacter : public ACharacter
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* GetObjectAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* CameraMode;
 
 public:
 	AMetaStudiosCharacter();
@@ -92,6 +103,20 @@ public:
 
 	void DestroyObject();
 
+	// 카메라 전환 (TPS, FPS)
+	//UPROPERTY(EditDefaultsOnly)
+	//class USpringArmComponent* TPSSpringArm;	
+	//
+	//UPROPERTY(EditDefaultsOnly)
+	//class USpringArmComponent* FPSSpringArm;
+
+	//UPROPERTY(EditDefaultsOnly)
+	//class UChildActorComponent* TPSCamera;
+
+	//UPROPERTY(EditDefaultsOnly)
+	//class UChildActorComponent* FPSCamera;
+
+	void ChangeCameraMode();
 
 
 	// bool값 멀티
@@ -126,9 +151,9 @@ protected:
 
 public:
 	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	// FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	// FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 private:
 	// 부스터 사용 여부
@@ -157,5 +182,14 @@ private:
 	float GravityScaleZero = 0.0f;    
 
 	AActor* nearActor;
+
+	UPROPERTY(Replicated)
+	bool IsTPSMode = false;
+
+	FTimerHandle CameraModeTimerHandle;
+	
+	float CameraModeTime;
+
+	float CameraBlendTime = 0;
 };
 
