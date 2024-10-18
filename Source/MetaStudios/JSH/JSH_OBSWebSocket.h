@@ -43,24 +43,25 @@ public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
 
-	void OBSWebSocketConnect();
-	void OBSWebSocketDisConnect();
 	
-	TSharedPtr<IWebSocket> WebSocket;
 
-	// class AJSH_PlayerController* PController;
-
-	
+	//// Record System /// ====================================================
 	class AJSH_Player* DirectorPlayer;
-
-
+	
 	void StartRecord();
-
-	FString CreatePasswordHash(const FString& Password, const FString& Salt, const FString& Challenge);
-
-
+	
 	FProcHandle PH;
 	
 	// 녹화 모드 On, Off 제어
 	bool Recording = false;
+	
+	FString VideoFileName;
+
+	
+	void ConvertMKVToMP4();
+	//// ==================================================== Record System ///
+
+
+
+	
 };

@@ -63,7 +63,6 @@ protected:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-
 	virtual void BeginPlay();
 
 public:
@@ -75,12 +74,12 @@ public:
 
 
 public:
-	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+
+	//// 녹화 관련 ////================================
+
 	class UJSH_OBSWebSocket* ObsGamInstance;
-	
-
-
-	// 녹화 관련 =================================================================
 	
 	FProcHandle PH;
 	
@@ -91,10 +90,27 @@ public:
 	void StopRecording();
 
 	// 녹화 모드 On, Off 제어
+	UPROPERTY(Replicated)
 	bool Recording = false;
 	
-	// 자유시점 모드
-	void SpectatorMode();
+	//// =================================== 녹화 관련 ////
 
+
+
+	
+	//// Editor //// ================================
+	UFUNCTION()
+	void SpectatorMode();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_SpectatorMode();
+	
+
+	UFUNCTION()
+	void Visible_On_OFF();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Visible_On_OFF();
+	UPROPERTY(Replicated)
+	bool PlayerVisibleOn = true;
+	//// ================================== Editor ////
 	
 };
