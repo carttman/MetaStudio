@@ -75,9 +75,9 @@ AJSH_Player::AJSH_Player()
 void AJSH_Player::BeginPlay()
 {
 	Super::BeginPlay();
+
 	
-	
-	
+	// Record 함수를 끌고 오기 위한 GameInstance 
 	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
 }
 
@@ -156,31 +156,7 @@ void AJSH_Player::Look(const FInputActionValue& Value)
 }
 
 
-// void AJSH_Player::ConnectToOBS()
-// {
-	// if (!FModuleManager::Get().IsModuleLoaded("WebSockets"))
-	// {
-	// 	FModuleManager::Get().LoadModuleChecked("WebSockets");
-	// }
-	//
-	// WebSocket = FWebSocketsModule::Get().CreateWebSocket("ws://192.168.0.4:4455");
-	//
-	// WebSocket->Connect();
-// }
-//
-// void AJSH_Player::DisConnectToOBS()
-// {
-	// if (HasAuthority())
-	// {
-	// 	if (WebSocket->IsConnected())
-	// 	{
-	// 		WebSocket->Close();
-	// 	}
-	// }
-// }
-
-
-
+#pragma region Player <-> SpectatorPawn
 
 // (F) 에디터 모드로 변환하는 함수
 void AJSH_Player::SpectatorMode()
@@ -236,10 +212,7 @@ void AJSH_Player::NetMulti_SpectatorMode_Implementation()
 					//FinishSpawning(CameraTransform,true);
 					// SpectatorPawn->BeginPlay();
 				}
-				
-				// GetMesh()->SetVisibility(false);
-				// Visible_On_OFF();
-				
+				Visible_On_OFF();
 			}
 		}
 	}
@@ -250,6 +223,11 @@ void AJSH_Player::NetMulti_SpectatorMode_Implementation()
 // SpecatatorPawn쪽에서 Player Visible 건들려고 하니깐 client쪽에서 안 보여서
 // 함수로 따로 뺴뒀음
 void AJSH_Player::Visible_On_OFF()
+{
+	NetMulti_Visible_On_OFF_Implementation();
+}
+
+void AJSH_Player::NetMulti_Visible_On_OFF_Implementation()
 {
 	//NetMulti_Visible_On_OFF();
 	if (PlayerVisibleOn)
@@ -263,54 +241,23 @@ void AJSH_Player::Visible_On_OFF()
 	PlayerVisibleOn = !PlayerVisibleOn;
 }
 
-void AJSH_Player::NetMulti_Visible_On_OFF_Implementation()
-{
-	// if (PlayerVisibleOn)
-	// {
-	// 	GetMesh()->SetVisibility(false, true);
-	// }
-	// else
-	// {
-	// 	GetMesh()->SetVisibility(true, true);
-	// }
-	// PlayerVisibleOn = !PlayerVisibleOn;
-}
+#pragma endregion
 
 
 
-// 녹화 시작 함수
+
+#pragma region  Record
+
+// 녹화 시작, 종료 함수
 void AJSH_Player::StartRecording()
 {
-
 	if (HasAuthority())
 	{
 		ObsGamInstance->StartRecord();
 	}
 }
 
-	
+#pragma endregion
 
-	
 
-// 녹화 종료 함수
-void AJSH_Player::StopRecording()
-{
-	// 테스트 할때 문제 없게, 일단 서버만 허용
-	if (HasAuthority())
-	{
-		if (PH.IsValid())
-		{
-			FPlatformProcess::TerminateProc(PH);
-			FPlatformProcess::CloseProc(PH);  
-        
-			UE_LOG(LogTemp, Log, TEXT("Recording stopped and FFmpeg process terminated"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to stop recording. No valid process handle found."));
-		}
-	}
 
-	
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, "End Recording");
-}

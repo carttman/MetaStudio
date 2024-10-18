@@ -5,6 +5,7 @@
 
 
 
+
 void UJSH_OBSWebSocket::Init()
 {
     Super::Init();
@@ -24,11 +25,7 @@ void UJSH_OBSWebSocket::Shutdown()
 
 
 
-
-
-
-
-
+#pragma region RecordSystem
 
 void UJSH_OBSWebSocket::StartRecord()
 {
@@ -101,9 +98,6 @@ void UJSH_OBSWebSocket::StartRecord()
 
 
 
-
-
-
 void UJSH_OBSWebSocket::ConvertMKVToMP4()
 {
 	if (!VideoFileName.IsEmpty())
@@ -149,8 +143,10 @@ void UJSH_OBSWebSocket::ConvertMKVToMP4()
 	}
 }
 
+#pragma endregion
 
 
+#pragma region Temp 
 
 // void UJSH_OBSWebSocket::StartRecord()
 // {
@@ -233,3 +229,5 @@ void UJSH_OBSWebSocket::ConvertMKVToMP4()
 // 		}
 // 		Recording = !Recording;
 // }
+
+#pragma endregion

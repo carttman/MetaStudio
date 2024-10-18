@@ -48,8 +48,6 @@ void AJSH_SpectatorPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GEngine->AddOnScreenDebugMessage(-3, 10.0f, FColor::Green, "dsd");
-	
 	
 	SpectatorPawnMovementComponent = Cast<USpectatorPawnMovement>(GetMovementComponent());
 	OriginController = Cast<APlayerController>(GetController());
@@ -59,15 +57,15 @@ void AJSH_SpectatorPawn::BeginPlay()
 
 
 
+
+#pragma region MainPlayer <-> SpectatorPawn
+
 // (F) 에디터 모드에서 다시 플레이어 모드로 돌아가는 함수 
 void AJSH_SpectatorPawn::BackPlayer()
 {
-	DisableEdit();
 	NetMulti_BackPlayer();
 }
 
-
-//
 void AJSH_SpectatorPawn::NetMulti_BackPlayer_Implementation()
 {
 	// 1. Get Player Controller (인덱스가 0인 플레이어)
@@ -78,32 +76,26 @@ void AJSH_SpectatorPawn::NetMulti_BackPlayer_Implementation()
     
 	if (PlayerController)
 	{
-		
 		PlayerController->Possess(PlayerController->OriginPlayer);
 
 		// 4. 자기 자신(SpectatorPawn) Destory
 		this->Destroy();
 	}
+
+	DisableEdit();
 }
 
-// =====================
-#pragma region dlfjdklfj
 
-/////
 #pragma endregion
+
+
+#pragma region EditMode
 
 
 void AJSH_SpectatorPawn::EditModeON()
 {
 	EnableEdit();
 }
-
-
-// =====================================================
-
-
-
-
 void AJSH_SpectatorPawn::EditModeOFF()
 {
 	DisableEdit();
@@ -128,8 +120,6 @@ void AJSH_SpectatorPawn::EnableEdit()
 		OriginController->SetInputMode(FInputModeGameAndUI());
 		GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
-
-	GEngine->AddOnScreenDebugMessage(-3, 10.0f, FColor::Green, "Editor mode enabled");
 }
 
 
@@ -144,20 +134,18 @@ void AJSH_SpectatorPawn::DisableEdit()
 
 	if (OriginController)
 	{
-		// 카메라 자유 이동을 허용하도록 설정
 		OriginController->SetIgnoreLookInput(false);
-        
-		// 마우스 커서 숨기기
+		
 		OriginController->bShowMouseCursor = false;
 		OriginController->bEnableClickEvents = false;
 		OriginController->bEnableMouseOverEvents = false;
-
-		// 입력 모드를 게임 전용 모드로 설정하여 우클릭으로 자유시점 가능하게
 		OriginController->SetInputMode(FInputModeGameOnly());
 	}
-
-	GEngine->AddOnScreenDebugMessage(-4, 10.0f, FColor::Green, "Camera free mode enabled");
 }
+
+#pragma endregion
+
+
 
 
 

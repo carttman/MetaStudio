@@ -75,12 +75,11 @@ public:
 
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
+
+
+	//// 녹화 관련 ////================================
+
 	class UJSH_OBSWebSocket* ObsGamInstance;
-	
-
-
-	// 녹화 관련 =================================================================
 	
 	FProcHandle PH;
 	
@@ -94,20 +93,24 @@ public:
 	UPROPERTY(Replicated)
 	bool Recording = false;
 	
-	// 자유시점 모드
-	void SpectatorMode();
+	//// =================================== 녹화 관련 ////
+
+
+
 	
+	//// Editor //// ================================
+	UFUNCTION()
+	void SpectatorMode();
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_SpectatorMode();
-
-
-	// 자유시점 모드
-	void Visible_On_OFF();
 	
+
+	UFUNCTION()
+	void Visible_On_OFF();
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_Visible_On_OFF();
-
 	UPROPERTY(Replicated)
 	bool PlayerVisibleOn = true;
+	//// ================================== Editor ////
 	
 };

@@ -40,26 +40,33 @@ class METASTUDIOS_API AJSH_SpectatorPawn : public ASpectatorPawn
 	virtual void BeginPlay() override;
 	
 public:
+
+	
+	
+
+
+	//// MainPlayer <-> SpectatorPawn ////=========================
 	UFUNCTION()
 	void BackPlayer();
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_BackPlayer();
+	//// ================================= MainPlayer <-> SpectatorPawn ////
 
+
+
+	
+	//// Editor ////=================================================   
+	USpectatorPawnMovement* SpectatorPawnMovementComponent;
+	APlayerController* OriginController;
+	
 	UFUNCTION()
 	void EditModeON();
-	// UFUNCTION(NetMulticast, Reliable)
-	// void NetMulti_EditMode();
-
 	UFUNCTION()
 	void EditModeOFF();
-
-	USpectatorPawnMovement* SpectatorPawnMovementComponent;
-	
-	APlayerController* OriginController;
-
+	UFUNCTION()
 	void EnableEdit();
-	
+	UFUNCTION()
 	void DisableEdit();
+	////================================================= Editor ////
 
-	
 };
