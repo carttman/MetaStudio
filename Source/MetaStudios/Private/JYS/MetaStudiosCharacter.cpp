@@ -10,6 +10,8 @@
 #include "InputActionValue.h"
 #include "EngineMinimal.h"
 #include "Net/UnrealNetwork.h"
+#include "kismet/GameplayStatics.h"
+#include "Engine/Engine.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -55,6 +57,11 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 
 
 	ManageBooster(DeltaTime);
+}
+
+void AMetaStudiosCharacter::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 /////////////////////Booster/////////////////////////////////////////////////////
@@ -105,7 +112,7 @@ void AMetaStudiosCharacter::NetMulticast_ManageBooster_Implementation(float Delt
 	}
 
 	// Optional debug message for testing
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("Booster Amount: %.1f"), BoosterAmount));
+	// GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("Booster Amount: %.1f"), BoosterAmount));
 
 }
 
@@ -154,7 +161,7 @@ void AMetaStudiosCharacter::GravityScaleOff()
 	// 중력 끄기
 	GetCharacterMovement()->GravityScale = GravityScaleZero;
 	// LaunchCharacter(FVector(0, 0, 1000), true, true);
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, TEXT("Booster Activated"));
+	// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, TEXT("Booster Activated"));
 
 }
 
@@ -163,21 +170,14 @@ void AMetaStudiosCharacter::GravityScaleOn()
 	//Server_GravityScaleOn();
 	// 중력 켜기
 	GetCharacterMovement()->GravityScale = GravityScaleNormal;
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Booster Deactivated"));
+	// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Booster Deactivated"));
 
 
 }
 
 /////////////////////Booster/////////////////////////////////////////////////////
 
-void AMetaStudiosCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-////////////////////////////////////////////////////////////////////////////
 // Input
-
 void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -208,6 +208,8 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::ToggleBoosting);
 
 		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Completed, this, &AMetaStudiosCharacter::ToggleBoosting_Complete);
+
+		EnhancedInputComponent->BindAction(GetObjectAction, ETriggerEvent::Started, this, &AMetaStudiosCharacter::FindObject);
 	}
 	else
 	{
@@ -215,7 +217,7 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	}
 }
 
-void AMetaStudiosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)
+void AMetaStudiosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
@@ -248,4 +250,29 @@ void AMetaStudiosCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AMetaStudiosCharacter::FindObject()
+{
+	//AActor* findObject = UGameplayStatics::GetActorOfClass(GetWorld(), object);
+
+	auto playerLoc = GetWorld()->GetFirstPlayerController()->GetCharacter()->GetActorLocation();
+	
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), object, objects);
+
+	nearActor = UGameplayStatics::FindNearestActor(playerLoc, objects, nearsetObjectDist);
+
+	AActor* nearestObject = nullptr;
+
+	if (nearActor != nullptr)
+	{
+		DestroyObject();
+	}
+}
+
+void AMetaStudiosCharacter::DestroyObject()
+{
+	nearActor->Destroy();
+	// itemCount++;
+	
 }
