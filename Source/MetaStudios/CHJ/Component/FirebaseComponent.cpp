@@ -25,7 +25,7 @@ void UFirebaseComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+    AnonymousLogin();
 }
 
 
@@ -75,6 +75,7 @@ void UFirebaseComponent::OnAnonymousLoginComplete(FHttpRequestPtr Request, FHttp
         // 로그인 실패 처리
     }
 }
+
 
 void UFirebaseComponent::FileUploadToFirebase(const FString& FilePath, const FString& FileName)
 {
@@ -144,4 +145,16 @@ void UFirebaseComponent::FileDownloadFromFirebase(const FString& SavePath, const
 
     // 요청 전송
     HttpRequest->ProcessRequest();
+}
+
+FString UFirebaseComponent::GetLine(const FString& str)
+{
+    TArray<FString> paths;
+    str.ParseIntoArray(paths, TEXT("/"));
+
+    TArray<FString> receive;
+    
+    paths[paths.Num() - 1].ParseIntoArray(receive, TEXT("."));
+
+    return receive[0];
 }

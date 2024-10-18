@@ -25,20 +25,21 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="Firebase")
 	void AnonymousLogin();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="Firebase")
 	void FileUploadToFirebase(const FString& FilePath, const FString& FileName);
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="Firebase")
 	void FileDownloadFromFirebase(const FString& SavePath, const FString& FileName);
 	UPROPERTY()
 	class AJSH_Player* Me;
-
+	
 private:
-   
 	FString AnonymousID = "";
-
-	FString FirebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/wavupdownload.appspot.com/o/";
+	//FString FirebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/wavupdownload.appspot.com/o/";
+	FString FirebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/metastudio2.appspot.com/o/";
 	void OnAnonymousLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
+	UFUNCTION(BlueprintCallable, Category="Firebase")
+	FString GetLine(const FString& str);
 };
