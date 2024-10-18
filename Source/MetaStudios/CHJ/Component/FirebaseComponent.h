@@ -31,15 +31,24 @@ public:
 	void FileUploadToFirebase(const FString& FilePath, const FString& FileName);
 	UFUNCTION(BlueprintCallable, Category="Firebase")
 	void FileDownloadFromFirebase(const FString& SavePath, const FString& FileName);
+
+	UFUNCTION(BlueprintCallable, Category="Firebase")
+	FString GetUrlFromFirebase(const FString& FileUrl);
+
+	UFUNCTION(BlueprintCallable, Category="Firebase")
+	void GetUploadedFileUrl(const FString& FileName);
 	UPROPERTY()
 	class AJSH_Player* Me;
-	
+
+	UPROPERTY()
+	class ACHJ_TestCharacter* CHJCharacter;
 private:
 	FString AnonymousID = "";
-	//FString FirebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/wavupdownload.appspot.com/o/";
 	FString FirebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/metastudio2.appspot.com/o/";
 	void OnAnonymousLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	UFUNCTION(BlueprintCallable, Category="Firebase")
 	FString GetLine(const FString& str);
+
+
 };

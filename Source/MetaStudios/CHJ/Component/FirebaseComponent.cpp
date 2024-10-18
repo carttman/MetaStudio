@@ -6,6 +6,8 @@
 #include "HttpModule.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
+#include "MetaStudios/CHJ/CHJ_TestCharacter.h"
+#include "MetaStudios/CHJ/Media/CHJStreamMediaSource.h"
 #include "MetaStudios/JSH/JSH_Player.h"
 
 // Sets default values for this component's properties
@@ -25,7 +27,7 @@ void UFirebaseComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-    AnonymousLogin();
+    //AnonymousLogin();
 }
 
 
@@ -97,12 +99,12 @@ void UFirebaseComponent::FileUploadToFirebase(const FString& FilePath, const FSt
    HttpRequest->SetContent(FileData);
 
    // HTTP 응답 처리
-   HttpRequest->OnProcessRequestComplete().BindLambda([this](FHttpRequestPtr Request , FHttpResponsePtr Response , bool bWasSuccessful)
+   HttpRequest->OnProcessRequestComplete().BindLambda([this, FileName](FHttpRequestPtr Request , FHttpResponsePtr Response , bool bWasSuccessful)
       {
          if ( bWasSuccessful && Response->GetResponseCode() == 200 )
          {
                 UE_LOG(LogTemp, Log, TEXT("File uploaded successfully"));
-               // 이긴 쪽의 클라이언트에서 업로드가 완료되면 서버의 다운로드 함수를 부르기
+                GetUploadedFileUrl(FileName);
          }
          else
          {
@@ -130,7 +132,6 @@ void UFirebaseComponent::FileDownloadFromFirebase(const FString& SavePath, const
                 if (FFileHelper::SaveArrayToFile(Response->GetContent(), *SavePath))
                 {
                     UE_LOG(LogTemp, Log, TEXT("File downloaded successfully"));
-                    AJSH_Player* You = Cast<AJSH_Player>(Me->GetWorld()->GetFirstPlayerController()->GetCharacter());
                 }
                 else
                 {
@@ -147,6 +148,41 @@ void UFirebaseComponent::FileDownloadFromFirebase(const FString& SavePath, const
     HttpRequest->ProcessRequest();
 }
 
+FString UFirebaseComponent::GetUrlFromFirebase(const FString& FileUrl)
+{
+    return FileUrl;
+}
+
+void UFirebaseComponent::GetUploadedFileUrl(const FString& FileName)
+{
+    // HTTP 요청 생성 (메타데이터 요청)
+    TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+    HttpRequest->SetURL(FirebaseStorageUrl + FileName + "?alt=media&token=" + AnonymousID); // 필요한 경우 토큰 추가
+    HttpRequest->SetVerb("GET");
+    HttpRequest->SetHeader("Authorization", "Bearer " + AnonymousID); // 익명 접근의 경우 필요하지 않을 수 있음
+
+    // HTTP 응답 처리
+    HttpRequest->OnProcessRequestComplete().BindLambda([this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+    {
+        if (bWasSuccessful && Response->GetResponseCode() == 200)
+        {
+            FString FileUrl = Response->GetURL();
+            UE_LOG(LogTemp, Warning, TEXT("File URL: %s"), *FileUrl);
+            CHJCharacter = Cast<ACHJ_TestCharacter>(GetOwner());
+            CHJCharacter->SetStreamUrl(FileUrl);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Failed to get file URL"));
+        }
+    });
+
+    // 요청 전송
+    HttpRequest->ProcessRequest();
+}
+
+#pragma region 파일 이름만 가져온다.
+#pragma endregion
 FString UFirebaseComponent::GetLine(const FString& str)
 {
     TArray<FString> paths;
@@ -158,3 +194,5 @@ FString UFirebaseComponent::GetLine(const FString& str)
 
     return receive[0];
 }
+
+

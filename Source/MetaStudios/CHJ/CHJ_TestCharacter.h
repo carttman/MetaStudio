@@ -28,5 +28,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UFirebaseComponent* FirebaseComponent;
-	
+public:
+	UFUNCTION(BlueprintImplementableEvent, Category="Firebase")
+	void SetStreamUrl(const FString& url);
 };

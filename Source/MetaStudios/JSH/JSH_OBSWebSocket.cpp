@@ -65,7 +65,7 @@ void UJSH_OBSWebSocket::StartRecord()
 			FString ExecutablePath = FString::Printf(TEXT("%sffmpeg/bin/ffmpeg.exe"), *AutoPath);   // Path to ffmpeg.exe
 			FString Params = FString::Printf(TEXT("-f dshow -i audio=\"마이크 배열(Realtek(R) Audio)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 2560x1600 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 %s"), *FilePath);
 
-			//asus
+			//asusx
 			//FString FilePath = FString::Printf(TEXT("%sffmpeg/UE_%s.mkv"), *AutoPath, *DateTimeString);
 			//FString ExecutablePath = FString::Printf(TEXT("%sffmpeg/bin/ffmpeg.exe"), *AutoPath);   // Path to ffmpeg.exe
 			//FString Params = FString::Printf(TEXT("-f dshow -i audio=\"마이크 배열(Realtek(R) Audio)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 2560x1600 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 %s"), *FilePath);
