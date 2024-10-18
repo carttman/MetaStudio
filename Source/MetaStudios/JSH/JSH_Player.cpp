@@ -161,8 +161,10 @@ void AJSH_Player::Look(const FInputActionValue& Value)
 // (F) 에디터 모드로 변환하는 함수
 void AJSH_Player::SpectatorMode()
 {
-	NetMulti_SpectatorMode();
-	
+	if (HasAuthority())
+	{
+		NetMulti_SpectatorMode();
+	}
 }
 
 void AJSH_Player::NetMulti_SpectatorMode_Implementation()
@@ -170,7 +172,8 @@ void AJSH_Player::NetMulti_SpectatorMode_Implementation()
 	// Player 모드 변환 인풋 (F) -> Spectator Actor 스폰 후 Possess 바꿈
 	// Spectator Actor에서 다시 Possess 바꿔줘야 (F) -> Player로 다시 돌아올 수 있음
 	// @ 움직이다가 모드 바꿔주면, 클라이언트 쪽에서 모드 바꾸기 직전에 들어가던 인풋이 계속 들어가는 것처럼 보임, 멀티 쏴 줘야 할듯
-	
+
+
 	// 1. Player 카메라 위치 가져오기
 	FTransform CameraTransform;
 	if (FollowCamera)
@@ -201,44 +204,53 @@ void AJSH_Player::NetMulti_SpectatorMode_Implementation()
 			APawn* SpectatorPawn = Cast<APawn>(SpectatorActor);
 			if (SpectatorPawn)
 			{
-				if(HasAuthority())
-				{
-					PlayerController->SaveOriginCharacter();
-					UE_LOG(LogTemp, Warning, TEXT("11111"));
-					// UnPossessed();
-					// PlayerController->SetPawn(SpectatorPawn);
-					PlayerController->Possess(SpectatorPawn);
-					UGameplayStatics::FinishSpawningActor(SpectatorActor, CameraTransform);
-					//FinishSpawning(CameraTransform,true);
-					// SpectatorPawn->BeginPlay();
-				}
+				PlayerController->SaveOriginCharacter();
+				UE_LOG(LogTemp, Warning, TEXT("11111"));
+				// UnPossessed();
+				// PlayerController->SetPawn(SpectatorPawn);
+				PlayerController->Possess(SpectatorPawn);
+				UGameplayStatics::FinishSpawningActor(SpectatorActor, CameraTransform);
+				//FinishSpawning(CameraTransform,true);
+				// SpectatorPawn->BeginPlay();
 				Visible_On_OFF();
 			}
 		}
 	}
+
 }
 
 
 
 // SpecatatorPawn쪽에서 Player Visible 건들려고 하니깐 client쪽에서 안 보여서
 // 함수로 따로 뺴뒀음
+
 void AJSH_Player::Visible_On_OFF()
 {
-	NetMulti_Visible_On_OFF_Implementation();
+	if (HasAuthority())
+	{
+		NetMulti_Visible_On_OFF();
+	}
 }
 
 void AJSH_Player::NetMulti_Visible_On_OFF_Implementation()
 {
+	UE_LOG(LogTemp, Error, TEXT("111111 v on/off"));
+	
 	//NetMulti_Visible_On_OFF();
+
 	if (PlayerVisibleOn)
 	{
-		GetMesh()->SetVisibility(false, true);
+		GetMesh()->SetVisibility(false);
+		UE_LOG(LogTemp, Error, TEXT("false"));
 	}
 	else
 	{
-		GetMesh()->SetVisibility(true, true);
+		GetMesh()->SetVisibility(true);
+		UE_LOG(LogTemp, Error, TEXT("true"));
 	}
+	
 	PlayerVisibleOn = !PlayerVisibleOn;
+
 }
 
 #pragma endregion

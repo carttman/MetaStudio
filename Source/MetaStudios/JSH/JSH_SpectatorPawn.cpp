@@ -63,7 +63,10 @@ void AJSH_SpectatorPawn::BeginPlay()
 // (F) 에디터 모드에서 다시 플레이어 모드로 돌아가는 함수 
 void AJSH_SpectatorPawn::BackPlayer()
 {
-	NetMulti_BackPlayer();
+	if (HasAuthority())
+	{
+		NetMulti_BackPlayer();
+	}
 }
 
 void AJSH_SpectatorPawn::NetMulti_BackPlayer_Implementation()
@@ -78,8 +81,10 @@ void AJSH_SpectatorPawn::NetMulti_BackPlayer_Implementation()
 	{
 		PlayerController->Possess(PlayerController->OriginPlayer);
 
+		UE_LOG(LogTemp, Error, TEXT("22222222"));
+		PlayerController->OriginPlayer->Visible_On_OFF();
 		// 4. 자기 자신(SpectatorPawn) Destory
-		this->Destroy();
+		// this->Destroy();
 	}
 
 	DisableEdit();
@@ -94,11 +99,18 @@ void AJSH_SpectatorPawn::NetMulti_BackPlayer_Implementation()
 
 void AJSH_SpectatorPawn::EditModeON()
 {
-	EnableEdit();
+	if (HasAuthority())
+	{
+		EnableEdit();
+	}
 }
 void AJSH_SpectatorPawn::EditModeOFF()
 {
-	DisableEdit();
+	if (HasAuthority())
+	{
+		DisableEdit();
+
+	}
 }
 
 

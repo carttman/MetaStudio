@@ -7,12 +7,20 @@
 
 void AJSH_PlayerController::SaveOriginCharacter()
 {
-	// OriginPlayer->SetOwner(GetOwner());
-
-	// OriginPlayer = Cast<AJSH_Player>(GetOwner());
-	
-	// OriginPlayer = Cast<AJSH_Player>(GetOwner());
-
+	if (HasAuthority())
+	{
+		NetMulti_SaveOriginCharacter();
+	}
+}
+void AJSH_PlayerController::NetMulti_SaveOriginCharacter_Implementation()
+{
 	OriginPlayer = Cast<AJSH_Player>(GetPawn());
+}
 
+
+
+void AJSH_PlayerController::PlayerViewOnOff()
+{
+	// UE_LOG(LogTemp, Error, TEXT("ccccccc"));
+	// OriginPlayer->Visible_On_OFF();
 }

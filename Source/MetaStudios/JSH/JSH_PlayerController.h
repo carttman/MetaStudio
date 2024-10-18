@@ -22,5 +22,10 @@ public:
 
 	UFUNCTION()
 	void SaveOriginCharacter();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_SaveOriginCharacter();
+
+
+	void PlayerViewOnOff();
 	
 };

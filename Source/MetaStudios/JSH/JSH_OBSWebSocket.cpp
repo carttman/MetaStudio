@@ -109,8 +109,10 @@ void UJSH_OBSWebSocket::ConvertMKVToMP4()
 		FString WorkingDirectory = FString::Printf(TEXT("%sffmpeg"), *AutoPath);
 		UE_LOG(LogTemp, Error, TEXT("convert: %s"), *AutoPath);
 
-		FString Params2 = FString::Printf(TEXT("-i \"%s/%s.mkv\" -vcodec copy -acodec copy \"%s/%s.mp4\""), *WorkingDirectory, *VideoFileName, *WorkingDirectory, *VideoFileName);
-		
+		// FString Params2 = FString::Printf(TEXT("-i \"%s/%s.mkv\" -vcodec copy -acodec copy \"%s/%s.mp4\""), *WorkingDirectory, *VideoFileName, *WorkingDirectory, *VideoFileName);
+		// 위처럼 copy하면 mp4a 문제 생김
+		FString Params2 = FString::Printf(TEXT("-i \"%s/%s.mkv\" -vcodec h264 -acodec aac -strict experimental \"%s/%s.mp4\""), *WorkingDirectory, *VideoFileName, *WorkingDirectory, *VideoFileName);
+
 		// FFmpeg 프로세스 실행
 		FProcHandle ProcessHandle = FPlatformProcess::CreateProc(
 			*ExecutablePath,    // FFmpeg 실행 경로
