@@ -38,6 +38,7 @@ void UFirebaseComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	// ...
 }
 
+#pragma region firebase에 익명 로그인 한다.
 void UFirebaseComponent::AnonymousLogin()
 {
     FString FirebaseAPIKey = "AIzaSyCIixsAehUcAmotkhFkHWa8kXbeO3F8A-I";
@@ -76,11 +77,11 @@ void UFirebaseComponent::OnAnonymousLoginComplete(FHttpRequestPtr Request, FHttp
         // 로그인 실패 처리
     }
 }
+#pragma endregion
 
-
+#pragma region 파이어베이스에 업로드 한다.
 void UFirebaseComponent::FileUploadToFirebase(const FString& FilePath, const FString& FileName)
 {
-
    // 파일 읽기
    TArray<uint8> FileData;
    if ( !FFileHelper::LoadFileToArray(FileData , *FilePath) )
@@ -114,6 +115,7 @@ void UFirebaseComponent::FileUploadToFirebase(const FString& FilePath, const FSt
    // 요청 전송
    HttpRequest->ProcessRequest();
 }
+#pragma endregion
 
 void UFirebaseComponent::FileDownloadFromFirebase(const FString& SavePath, const FString& FileName)
 {
@@ -147,11 +149,8 @@ void UFirebaseComponent::FileDownloadFromFirebase(const FString& SavePath, const
     HttpRequest->ProcessRequest();
 }
 
-FString UFirebaseComponent::GetUrlFromFirebase(const FString& FileUrl)
-{
-    return FileUrl;
-}
 
+#pragma region 업로드 한 파일 이름의 url을 가져온다.
 void UFirebaseComponent::GetUploadedFileUrl(const FString& FileName)
 {
     // HTTP 요청 생성 (메타데이터 요청)
@@ -179,9 +178,9 @@ void UFirebaseComponent::GetUploadedFileUrl(const FString& FileName)
     // 요청 전송
     HttpRequest->ProcessRequest();
 }
+#pragma endregion
 
 #pragma region 파일 이름만 가져온다.
-#pragma endregion
 FString UFirebaseComponent::GetLine(const FString& str)
 {
     TArray<FString> paths;
@@ -193,5 +192,6 @@ FString UFirebaseComponent::GetLine(const FString& str)
 
     return receive[0];
 }
+#pragma endregion
 
 
