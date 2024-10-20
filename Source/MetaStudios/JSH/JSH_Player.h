@@ -29,6 +29,19 @@ class AJSH_Player : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* RecordCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* FallGuys;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* FallGuys_Camera;
+	
+	
+
+
+	// Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 	
@@ -40,13 +53,18 @@ class AJSH_Player : public ACharacter
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
-
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* StartRecord;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* SpectatorModeOnOff;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_FlyMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Up_Down;
 
 public:
 	AJSH_Player();
@@ -77,28 +95,34 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 
-	//// 녹화 관련 ////================================
+#pragma region Record
 
+	// 녹화 시작 / 종료
 	class UJSH_OBSWebSocket* ObsGamInstance;
-	
 	FProcHandle PH;
-	
-	// 녹화 시작
 	void StartRecording();
+	
 
-	// 녹화 종료
-	void StopRecording();
 
-	// 녹화 모드 On, Off 제어
+	// 3인칭 <-> 1인칭
 	UPROPERTY(Replicated)
-	bool Recording = false;
+	bool Camera_Third_First = false;
+	UFUNCTION()
+	void Camera_Third_First_Change();
+
+	// 카메라 Visible 껏다 키기
+	UPROPERTY(Replicated)
+	bool CameraSpawn_On_Off = false;
+	UFUNCTION()
+	void CameraSpawn();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_CameraSpawn();
 	
-	//// =================================== 녹화 관련 ////
-
-
+#pragma endregion
 
 	
-	//// Editor //// ================================
+#pragma region Editor (Player <-> SpectatorPawn)
+	
 	UFUNCTION()
 	void SpectatorMode();
 	UFUNCTION(NetMulticast, Reliable)
@@ -111,6 +135,26 @@ public:
 	void NetMulti_Visible_On_OFF();
 	UPROPERTY(Replicated)
 	bool PlayerVisibleOn = true;
-	//// ================================== Editor ////
+#pragma endregion
+
 	
+#pragma region FlyMode
+	
+	UFUNCTION()
+	void FlyMode();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_FlyMode();
+	UPROPERTY(Replicated)
+	bool FlyMode_On_Off = false;
+
+
+	UFUNCTION()
+	void Fly_Up_Down(const FInputActionValue& Value);
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Fly_Up_Down(const FInputActionValue& Value);
+
+	float Fly_Zvalue = 0;
+	float Fly_Off_Value = 0 ;
+	
+#pragma endregion
 };

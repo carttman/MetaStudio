@@ -31,6 +31,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/SceneComponent.h"
 #include "Engine/Engine.h"
+#include "EntitySystem/MovieSceneEntitySystemRunner.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpectatorPawn.h"
@@ -53,8 +54,9 @@ AJSH_Player::AJSH_Player()
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); 
-
+	
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
@@ -69,7 +71,17 @@ AJSH_Player::AJSH_Player()
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); 
-	FollowCamera->bUsePawnControlRotation = false; 
+	FollowCamera->bUsePawnControlRotation = false;
+	
+	RecordCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("RecordCamera"));
+	RecordCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	RecordCamera->SetRelativeLocation(FVector(440.0f, 0.0f, 0.0f));
+	// RecordCamera->SetRelativeRotation(FRotator(13.876860f, -0.433584f, -59.389724f));
+	RecordCamera->bUsePawnControlRotation = false;
+
+	FallGuys->CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Body"));
+	FallGuys->SetupAttachment(RootComponent);
+	
 }
 
 void AJSH_Player::BeginPlay()
@@ -88,6 +100,9 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AJSH_Player, PlayerVisibleOn);
+	DOREPLIFETIME(AJSH_Player, FlyMode_On_Off);
+	DOREPLIFETIME(AJSH_Player, Camera_Third_First);
+	
 }
 
 
@@ -117,12 +132,19 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 		EnhancedInputComponent->BindAction(StartRecord, ETriggerEvent::Started, this, &AJSH_Player::StartRecording);
 		EnhancedInputComponent->BindAction(SpectatorModeOnOff, ETriggerEvent::Started, this, &AJSH_Player::SpectatorMode);
+
+		
+		EnhancedInputComponent->BindAction(IA_FlyMode, ETriggerEvent::Started, this, &AJSH_Player::FlyMode);
+		
+		EnhancedInputComponent->BindAction(IA_Up_Down, ETriggerEvent::Triggered, this, &AJSH_Player::Fly_Up_Down);
 	}
 	else
 	{
 		//UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
+
+#pragma region Move / Look
 
 void AJSH_Player::Move(const FInputActionValue& Value)
 {
@@ -155,8 +177,13 @@ void AJSH_Player::Look(const FInputActionValue& Value)
 	}
 }
 
+#pragma endregion
 
-#pragma region Player <-> SpectatorPawn
+
+
+#pragma region Editor (Player <-> SpectatorPawn)
+
+
 
 // (F) 에디터 모드로 변환하는 함수
 void AJSH_Player::SpectatorMode()
@@ -257,7 +284,6 @@ void AJSH_Player::NetMulti_Visible_On_OFF_Implementation()
 
 
 
-
 #pragma region  Record
 
 // 녹화 시작, 종료 함수
@@ -265,11 +291,107 @@ void AJSH_Player::StartRecording()
 {
 	if (HasAuthority())
 	{
+		// 카메라 무조건 만들고 녹화 시작
+		CameraSpawn_On_Off = false;
+		CameraSpawn();
+
+		// 인스턴스에 넣어둔 녹화 기능 시작
 		ObsGamInstance->StartRecord();
 	}
 }
 
+
+// 1인칭 <-> 3인칭 ,
+void AJSH_Player::Camera_Third_First_Change()
+{
+	if (!Camera_Third_First)
+	{
+		// 3인칭 -> 1인칭 변환
+		FollowCamera->SetActive(false);
+		RecordCamera->SetActive(true);
+		bUseControllerRotationYaw = true;
+	}
+	else
+	{
+		// 1인칭 -> 3인칭 변환
+		RecordCamera->SetActive(false);
+		FollowCamera->SetActive(true);
+		bUseControllerRotationYaw = false;
+	}
+	Camera_Third_First = !Camera_Third_First;
+}
+
+
+
+void AJSH_Player::CameraSpawn()
+{
+	NetMulti_CameraSpawn();
+}
+
+void AJSH_Player::NetMulti_CameraSpawn_Implementation()
+{
+}
+
+
 #pragma endregion
+
+
+
+#pragma region FlyMode
+
+void AJSH_Player::FlyMode()
+{
+	NetMulti_FlyMode();
+}
+void AJSH_Player::NetMulti_FlyMode_Implementation()
+{
+	if(!FlyMode_On_Off)
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		bUseControllerRotationPitch = true;
+		bUseControllerRotationYaw = true;
+		bUseControllerRotationRoll = true;
+	}
+	else
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		bUseControllerRotationPitch = false;
+		bUseControllerRotationYaw = false;
+		bUseControllerRotationRoll = false;
+	}
+
+	FlyMode_On_Off = !FlyMode_On_Off;
+}
+
+
+
+void AJSH_Player::Fly_Up_Down(const FInputActionValue& Value)
+{
+	NetMulti_Fly_Up_Down(Value);
+}
+void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& Value)
+{
+	if (GetCharacterMovement()->IsFlying())
+	{
+		// 입력 값에서 Up/Down 액션 값 추출
+		Fly_Zvalue = Value.Get<float>();
+		UE_LOG(LogTemp, Warning, TEXT("처음: %f"), Fly_Zvalue)
+		AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
+
+		Fly_Off_Value = Fly_Off_Value + Fly_Zvalue;
+		if (Fly_Off_Value <= -10)
+		{
+			FlyMode();
+			Fly_Off_Value = 0;
+		}
+	}
+}
+
+
+#pragma endregion
+
+
+
 
 
 
