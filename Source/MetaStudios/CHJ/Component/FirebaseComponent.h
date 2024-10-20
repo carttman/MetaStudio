@@ -31,9 +31,7 @@ public:
 	void FileUploadToFirebase(const FString& FilePath, const FString& FileName);
 	UFUNCTION(BlueprintCallable, Category="Firebase")
 	void FileDownloadFromFirebase(const FString& SavePath, const FString& FileName);
-
-	UFUNCTION(BlueprintCallable, Category="Firebase")
-	FString GetUrlFromFirebase(const FString& FileUrl);
+	
 
 	UFUNCTION(BlueprintCallable, Category="Firebase")
 	void GetUploadedFileUrl(const FString& FileName);
