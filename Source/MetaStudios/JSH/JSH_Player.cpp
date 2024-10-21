@@ -470,7 +470,10 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 	// 		Fly_Off_Value = 0;
 	// 	}
 	// }
-
+	if (!FlyMode_On_Off)
+	{
+		FlyMode();	
+	}
 	if (GetCharacterMovement()->IsFlying())
 	{
 		// 입력 값에서 Up/Down 액션 값 추출
