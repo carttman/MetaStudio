@@ -4,10 +4,11 @@
 #include "../CHJ/Component/FirebaseComponent.h"
 
 #include "HttpModule.h"
+#include "MediaPlayer.h"
+#include "StreamMediaSource.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
-#include "MetaStudios/CHJ/CHJ_TestCharacter.h"
-#include "MetaStudios/JSH/JSH_Player.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UFirebaseComponent::UFirebaseComponent()
@@ -36,6 +37,14 @@ void UFirebaseComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UFirebaseComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(UFirebaseComponent, MyMediaPlayer);
+    DOREPLIFETIME(UFirebaseComponent, MyStreamMediaSource);
 }
 
 #pragma region firebase에 익명 로그인 한다.
@@ -117,6 +126,7 @@ void UFirebaseComponent::FileUploadToFirebase(const FString& FilePath, const FSt
 }
 #pragma endregion
 
+#pragma region 파이어베이스에서 영상 다운로드 한다
 void UFirebaseComponent::FileDownloadFromFirebase(const FString& SavePath, const FString& FileName)
 {
     // HTTP 요청 생성
@@ -148,7 +158,7 @@ void UFirebaseComponent::FileDownloadFromFirebase(const FString& SavePath, const
     // 요청 전송
     HttpRequest->ProcessRequest();
 }
-
+#pragma endregion 
 
 #pragma region 업로드 한 파일 이름의 url을 가져온다.
 void UFirebaseComponent::GetUploadedFileUrl(const FString& FileName)
@@ -166,8 +176,9 @@ void UFirebaseComponent::GetUploadedFileUrl(const FString& FileName)
         {
             FString FileUrl = Response->GetURL();
             UE_LOG(LogTemp, Warning, TEXT("File URL: %s"), *FileUrl);
-            CHJCharacter = Cast<ACHJ_TestCharacter>(GetOwner());
-            CHJCharacter->SetStreamUrl(FileUrl);
+            //MyStreamMediaSource->StreamUrl = FileUrl;
+            //MyMediaPlayer->OpenSource(MyStreamMediaSource);
+            MultiRPC_GetStreamUrl(FileUrl);
         }
         else
         {
@@ -179,6 +190,16 @@ void UFirebaseComponent::GetUploadedFileUrl(const FString& FileName)
     HttpRequest->ProcessRequest();
 }
 #pragma endregion
+
+#pragma region 영상 URL 받고 멀티로 뿌린다
+void UFirebaseComponent::MultiRPC_GetStreamUrl_Implementation(const FString& FileName)
+{
+    MyStreamMediaSource->StreamUrl = FileName;
+    MyMediaPlayer->OpenSource(MyStreamMediaSource);
+    
+}
+#pragma endregion
+
 
 #pragma region 파일 이름만 가져온다.
 FString UFirebaseComponent::GetLine(const FString& str)

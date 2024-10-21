@@ -24,7 +24,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	UFUNCTION(BlueprintCallable, Category="Firebase")
 	void AnonymousLogin();
 	UFUNCTION(BlueprintCallable, Category="Firebase")
@@ -35,6 +35,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Firebase")
 	void GetUploadedFileUrl(const FString& FileName);
+
+	UFUNCTION(NetMulticast, reliable)
+	void MultiRPC_GetStreamUrl(const FString& FileName);
+	
 	UPROPERTY()
 	class AJSH_Player* Me;
 
@@ -48,5 +52,9 @@ private:
 	UFUNCTION(BlueprintCallable, Category="Firebase")
 	FString GetLine(const FString& str);
 
+	UPROPERTY(EditAnywhere, Category="Firebase", Replicated)
+	class UMediaPlayer* MyMediaPlayer;
 
+	UPROPERTY(EditAnywhere, Category="Firebase", Replicated)
+	class UStreamMediaSource* MyStreamMediaSource;
 };
