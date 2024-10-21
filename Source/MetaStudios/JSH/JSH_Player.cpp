@@ -453,21 +453,58 @@ void AJSH_Player::Fly_Up_Down(const FInputActionValue& Value)
 }
 void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& Value)
 {
+	// if (GetCharacterMovement()->IsFlying())
+	// {
+	// 	// 입력 값에서 Up/Down 액션 값 추출
+	// 	Fly_Zvalue = Value.Get<float>();
+	// 	UE_LOG(LogTemp, Warning, TEXT("처음: %f"), Fly_Zvalue)
+	// 	AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
+	//
+	// 	Fly_Off_Value = Fly_Off_Value + Fly_Zvalue;
+	//
+	// 	if (Fly_Off_Value <= -10)
+	// 	{
+	// 		FlyMode();
+	// 		Fly_Off_Value = 0;
+	// 	}
+	// }
+
 	if (GetCharacterMovement()->IsFlying())
 	{
 		// 입력 값에서 Up/Down 액션 값 추출
 		Fly_Zvalue = Value.Get<float>();
-		UE_LOG(LogTemp, Warning, TEXT("처음: %f"), Fly_Zvalue)
 		AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
 
-		Fly_Off_Value = Fly_Off_Value + Fly_Zvalue;
+		// 아래에 있는 물체와의 거리 체크
+		FVector Start = GetActorLocation();
+		FVector End = Start - FVector(0.f, 0.f, 1000.f);
 
-		if (Fly_Off_Value <= -10)
+		FHitResult HitResult;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
+
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+
+		if (bHit)
 		{
-			FlyMode();
-			Fly_Off_Value = 0;
+			float DistanceToGround = HitResult.Distance;
+
+			// 원하는 거리 임계값 설정 (예: 200 유닛 미만일 때 플라이 모드 종료)
+			if (DistanceToGround < 100.0f)
+			{
+				FlyMode();  // 비행 모드 종료
+			}
+			
+			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+		}
+		else
+		{
+			
+			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
 	}
+
+	
 }
 
 
