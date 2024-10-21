@@ -158,6 +158,7 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_FlyMode, ETriggerEvent::Started, this, &AJSH_Player::FlyMode);
 		
 		EnhancedInputComponent->BindAction(IA_Up_Down, ETriggerEvent::Triggered, this, &AJSH_Player::Fly_Up_Down);
+		EnhancedInputComponent->BindAction(IA_Up_Down2, ETriggerEvent::Triggered, this, &AJSH_Player::Fly_Down_Ray);
 		
 		EnhancedInputComponent->BindAction(IA_Camera_Spawn_Destroy, ETriggerEvent::Started, this, &AJSH_Player::CameraSpawn);
 		EnhancedInputComponent->BindAction(IA_Camera_Third_First, ETriggerEvent::Started, this, &AJSH_Player::Camera_Third_First_Change);
@@ -446,11 +447,12 @@ void AJSH_Player::NetMulti_FlyMode_Implementation()
 }
 
 
-
+// (E) 위로 올라가는 - 레이 안 쏨
 void AJSH_Player::Fly_Up_Down(const FInputActionValue& Value)
 {
 	NetMulti_Fly_Up_Down(Value);
 }
+
 void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& Value)
 {
 	// if (GetCharacterMovement()->IsFlying())
@@ -473,6 +475,24 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 	{
 		// 입력 값에서 Up/Down 액션 값 추출
 		Fly_Zvalue = Value.Get<float>();
+		UE_LOG(LogTemp, Warning, TEXT("처음: %f"), Fly_Zvalue)
+		AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
+	}
+}
+
+
+// (Q) 아래로 내려가는 -> 내려갈때 레이쏴서 일정 거리 가까워지면 FlyMode 종료 
+void AJSH_Player::Fly_Down_Ray(const FInputActionValue& Value)
+{
+	NetMulti_Fly_Down_Ray(Value);
+}
+
+void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& Value)
+{
+	if (GetCharacterMovement()->IsFlying())
+	{
+		// 입력 값에서 Up/Down 액션 값 추출
+		Fly_Zvalue = Value.Get<float>();
 		AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
 
 		// 아래에 있는 물체와의 거리 체크
@@ -489,10 +509,10 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 		{
 			float DistanceToGround = HitResult.Distance;
 
-			// 원하는 거리 임계값 설정 (예: 200 유닛 미만일 때 플라이 모드 종료)
+			// 원하는 거리 임계값 설정
 			if (DistanceToGround < 100.0f)
 			{
-				FlyMode();  // 비행 모드 종료
+				FlyMode(); 
 			}
 			
 			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
@@ -503,10 +523,7 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
 	}
-
-	
 }
-
 
 #pragma endregion
 

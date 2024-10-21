@@ -67,6 +67,9 @@ class AJSH_Player : public ACharacter
 	UInputAction* IA_Up_Down;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Up_Down2;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Camera_Spawn_Destroy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -170,6 +173,13 @@ public:
 
 	float Fly_Zvalue = 0;
 	float Fly_Off_Value = 0 ;
+
+
+
+	UFUNCTION()
+	void Fly_Down_Ray(const FInputActionValue& Value);
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Fly_Down_Ray(const FInputActionValue& Value);
 	
 #pragma endregion
 };
