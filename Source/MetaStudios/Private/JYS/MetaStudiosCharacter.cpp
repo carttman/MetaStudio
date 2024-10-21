@@ -13,8 +13,10 @@
 #include "kismet/GameplayStatics.h"
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
-// #include "SetViewTargetBlend.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "GameFramework/Controller.h"
+#include "JYS/SpaceshipPawn.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -96,6 +98,94 @@ void AMetaStudiosCharacter::BeginPlay()
 
 	}
 
+}
+//////////////////////Input////////////////////////////////
+void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	// Add Input Mapping Context
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+
+	// Set up action bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		// Jumping
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		// Moving
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::Move);
+
+		// Looking
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::Look);
+
+		// Booster Toggle
+		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::ToggleBoosting);
+
+		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Completed, this, &AMetaStudiosCharacter::ToggleBoosting_Complete);
+
+		EnhancedInputComponent->BindAction(GetObjectAction, ETriggerEvent::Started, this, &AMetaStudiosCharacter::FindObject);
+
+		EnhancedInputComponent->BindAction(CameraMode, ETriggerEvent::Started, this, &AMetaStudiosCharacter::ChangeCameraMode);
+
+		//// 우주선에서 앉았다가 일어나기 -> 컨트롤러 바뀌게////////
+		PlayerInputComponent->BindAction("EnterSpaceship", IE_Pressed, this, &AMetaStudiosCharacter::TryEnterSpaceship);
+		PlayerInputComponent->BindAction("ExitSpaceship", IE_Pressed, this, &AMetaStudiosCharacter::ExitSpaceship);
+	}
+	else
+	{
+		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component!"), *GetNameSafe(this));
+	}
+}
+
+//////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
+void AMetaStudiosCharacter::EnterSpaceship()
+{
+	/*if (ControlledSpaceship)
+	{*/ 
+		// player controller 찾고 (o)
+
+		APlayerController* playerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+
+		// ControlledSpaceship 찾고
+
+		// Player Controller
+
+
+		if (playerController && ControlledSpaceship)
+		{
+			// playerController->UnPossess();
+			playerController->Possess(ControlledSpaceship);
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Possessed Spaceship"));
+
+		}
+	// }
+}
+
+void AMetaStudiosCharacter::ExitSpaceship()
+{
+	APlayerController* playerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+
+	if (ControlledSpaceship && playerController)
+	{
+		playerController->Possess(this); 
+	}
+}
+
+void AMetaStudiosCharacter::TryEnterSpaceship()
+{
+	if (ControlledSpaceship && ControlledSpaceship->CanPlayerEnter())
+	{
+		EnterSpaceship();
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("EnterSpaceship"));
+	}
 }
 
 /////////////////////Booster/////////////////////////////////////////////////////
@@ -204,47 +294,6 @@ void AMetaStudiosCharacter::GravityScaleOn()
 
 /////////////////////Booster/////////////////////////////////////////////////////
 
-//////////////////////Input////////////////////////////////
-void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	// Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
-
-	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::Move);
-
-		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::Look);
-
-		// Booster Toggle
-		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::ToggleBoosting);
-
-		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Completed, this, &AMetaStudiosCharacter::ToggleBoosting_Complete);
-
-		EnhancedInputComponent->BindAction(GetObjectAction, ETriggerEvent::Started, this, &AMetaStudiosCharacter::FindObject);
-
-		EnhancedInputComponent->BindAction(CameraMode, ETriggerEvent::Started, this, &AMetaStudiosCharacter::ChangeCameraMode);
-	}
-	else
-	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component!"), *GetNameSafe(this));
-	}
-}
 
 /////////////카메라 전환 (TPS, FPS)////////////////
 void AMetaStudiosCharacter::ChangeCameraMode()
