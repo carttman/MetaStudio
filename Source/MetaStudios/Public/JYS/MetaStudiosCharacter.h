@@ -118,6 +118,16 @@ public:
 
 	void ChangeCameraMode();
 
+	// 플레이어랑 우주선 컨트롤러 바꾸기
+	void EnterSpaceship();
+	void ExitSpaceship();
+	void TryEnterSpaceship();
+
+	// 플레이어랑 우주선이랑 컨트롤러 바꾸기
+	UPROPERTY(EditDefaultsOnly)
+	class ASpaceshipPawn* ControlledSpaceship;
+
+	// AController* CharacterController;
 
 	// bool값 멀티
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -183,6 +193,7 @@ private:
 
 	AActor* nearActor;
 
+	// TPS / FPS 카메라 전환
 	UPROPERTY(Replicated)
 	bool IsTPSMode = false;
 
@@ -191,5 +202,7 @@ private:
 	float CameraModeTime;
 
 	float CameraBlendTime = 0;
+
+
 };
 
