@@ -17,6 +17,7 @@
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
 #include "JYS/SpaceshipPawn.h"
+#include "JYS/CharacterController.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -56,7 +57,7 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	TPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TPSCamera"));
 	TPSCamera->SetupAttachment(TPSCameraSpringArm);
 	TPSCamera->bUsePawnControlRotation = false;
-	
+
 	// Create a camera boom
 	FPSCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("FPSCameraSpringArm"));
 	FPSCameraSpringArm->SetupAttachment(RootComponent);
@@ -84,10 +85,10 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 void AMetaStudiosCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	APlayerController* playerController = Cast<APlayerController>(GetController());
 	//playerController->SetViewTargetWithBlend(TPSCamera->GetChildActor(), 2.f)
-	
+
 	if (FPSCamera == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("111111111111"))
@@ -136,8 +137,7 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(CameraMode, ETriggerEvent::Started, this, &AMetaStudiosCharacter::ChangeCameraMode);
 
 		//// 우주선에서 앉았다가 일어나기 -> 컨트롤러 바뀌게////////
-		PlayerInputComponent->BindAction("EnterSpaceship", IE_Pressed, this, &AMetaStudiosCharacter::TryEnterSpaceship);
-		PlayerInputComponent->BindAction("ExitSpaceship", IE_Pressed, this, &AMetaStudiosCharacter::ExitSpaceship);
+		PlayerInputComponent->BindAction("EnterSpaceship", IE_Pressed, this, &AMetaStudiosCharacter::EnterSpaceship);
 	}
 	else
 	{
@@ -148,43 +148,25 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 //////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
 void AMetaStudiosCharacter::EnterSpaceship()
 {
-	/*if (ControlledSpaceship)
-	{*/ 
-		// player controller 찾고 (o)
+	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 
-		APlayerController* playerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	ASpaceshipPawn* SpaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
 
-		// ControlledSpaceship 찾고
-
-		// Player Controller
-
-
-		if (playerController && ControlledSpaceship)
+	if (SpaceshipActor)
+	{
+		if (characterController && SpaceshipActor)
 		{
-			// playerController->UnPossess();
-			playerController->Possess(ControlledSpaceship);
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Possessed Spaceship"));
-
+			SpaceshipActor->player = this;
+			if (SpaceshipActor->CanPlayerEnter())
+			{
+				characterController->Possess(SpaceshipActor);
+				GetMesh()->SetVisibility(false);
+			}
 		}
-	// }
-}
-
-void AMetaStudiosCharacter::ExitSpaceship()
-{
-	APlayerController* playerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-
-	if (ControlledSpaceship && playerController)
-	{
-		playerController->Possess(this); 
 	}
-}
-
-void AMetaStudiosCharacter::TryEnterSpaceship()
-{
-	if (ControlledSpaceship && ControlledSpaceship->CanPlayerEnter())
+	else
 	{
-		EnterSpaceship();
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("EnterSpaceship"));
+		UE_LOG(LogTemp, Error, TEXT("Spaceship class could not be loaded!"));
 	}
 }
 
@@ -298,30 +280,30 @@ void AMetaStudiosCharacter::GravityScaleOn()
 /////////////카메라 전환 (TPS, FPS)////////////////
 void AMetaStudiosCharacter::ChangeCameraMode()
 {
-		if (IsTPSMode)
+	if (IsTPSMode)
+	{
+		TPSCamera->SetActive(true);
+		FPSCamera->SetActive(false);
+		bUseControllerRotationYaw = true;
+	}
+	else
+	{
+		if (FPSCamera)
 		{
-			TPSCamera->SetActive(true);
-			FPSCamera->SetActive(false);
-			bUseControllerRotationYaw = true;
+			FPSCamera->SetActive(true);
+			TPSCamera->SetActive(false);
+			bUseControllerRotationYaw = false;
 		}
-		else
-		{
-			if (FPSCamera)
-			{
-				FPSCamera->SetActive(true);
-				TPSCamera->SetActive(false);
-				bUseControllerRotationYaw = false;
-			}
-		}
+	}
 
-		IsTPSMode = !IsTPSMode;
+	IsTPSMode = !IsTPSMode;
 }
 
 void AMetaStudiosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME (AMetaStudiosCharacter, bIsBoosting);
+	DOREPLIFETIME(AMetaStudiosCharacter, bIsBoosting);
 }
 
 void AMetaStudiosCharacter::Move(const FInputActionValue& Value)
@@ -357,7 +339,7 @@ void AMetaStudiosCharacter::FindObject()
 	//AActor* findObject = UGameplayStatics::GetActorOfClass(GetWorld(), object);
 
 	auto playerLoc = GetWorld()->GetFirstPlayerController()->GetCharacter()->GetActorLocation();
-	
+
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), object, objects);
 
 	nearActor = UGameplayStatics::FindNearestActor(playerLoc, objects, nearsetObjectDist);
@@ -377,5 +359,5 @@ void AMetaStudiosCharacter::DestroyObject()
 		nearActor->Destroy();
 		// itemCount++;
 	}
-	
+
 }
