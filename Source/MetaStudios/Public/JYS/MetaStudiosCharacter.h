@@ -120,14 +120,19 @@ public:
 
 	// 플레이어랑 우주선 컨트롤러 바꾸기
 	void EnterSpaceship();
-	void ExitSpaceship();
-	void TryEnterSpaceship();
 
-	// 플레이어랑 우주선이랑 컨트롤러 바꾸기
+
+	//// 플레이어랑 우주선이랑 컨트롤러 바꾸기
+	//UPROPERTY(EditDefaultsOnly)
+	//class ASpaceshipPawn* ControlledSpaceship;
+
 	UPROPERTY(EditDefaultsOnly)
-	class ASpaceshipPawn* ControlledSpaceship;
+	TSubclassOf<APawn> SpaceshipPawnFactory;	
 
-	// AController* CharacterController;
+	UPROPERTY(EditDefaultsOnly)
+	TArray<AActor*> Actors;
+
+	APlayerController* MetaController;
 
 	// bool값 멀티
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
