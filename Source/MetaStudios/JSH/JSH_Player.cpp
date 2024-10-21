@@ -346,6 +346,7 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 		// 1인칭 -> 3인칭 변환
 		RecordCamera->SetActive(false);
 		FollowCamera->SetActive(true);
+		// 비행 상태가 아닐때에만 Yaw를 꺼줌
 		if (!GetCharacterMovement()->IsFlying())
 		{
 			bUseControllerRotationYaw = false;
@@ -382,7 +383,11 @@ void AJSH_Player::NetMulti_Camera_Third_First_Change_Implementation()
 		// 1인칭 -> 3인칭 변환
 		RecordCamera->SetActive(false);
 		FollowCamera->SetActive(true);
-		bUseControllerRotationYaw = false;
+		// 비행 상태가 아닐때에만 Yaw를 꺼줌
+		if (!GetCharacterMovement()->IsFlying())
+		{
+			bUseControllerRotationYaw = false;
+		}
 		CameraSpawn_On_Off = false;
 	}
 	Camera_Third_First = !Camera_Third_First;
