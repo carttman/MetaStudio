@@ -79,9 +79,25 @@ AJSH_Player::AJSH_Player()
 	// RecordCamera->SetRelativeRotation(FRotator(13.876860f, -0.433584f, -59.389724f));
 	RecordCamera->bUsePawnControlRotation = false;
 
-	FallGuys->CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Body"));
+	FallGuys = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	FallGuys->SetupAttachment(RootComponent);
-	
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> TMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/JSH/Asset/FallGuys02/yoshi_-_fall_guys_fan_art.yoshi_-_fall_guys_fan_art'"));
+	if (TMesh.Succeeded())
+	{
+		FallGuys->SetSkeletalMesh(TMesh.Object);
+		FallGuys->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+		FallGuys->SetRelativeScale3D(FVector(0.005, 0.005, 0.005));
+	}
+
+	FallGuys_Camera = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Record Camera"));
+	FallGuys_Camera->SetupAttachment(FallGuys);
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> TMesh2(TEXT("/Script/Engine.SkeletalMesh'/Game/JSH/Asset/Camera03/source/video-cam.video-cam'"));
+	if (TMesh2.Succeeded())
+	{
+		FallGuys_Camera->SetSkeletalMesh(TMesh2.Object);
+		FallGuys_Camera->SetRelativeLocationAndRotation(FVector(-12477.217394, 3931.275206, 24551.795870), FRotator(1.727941, 0.148925, 9.851076));
+		FallGuys_Camera->SetRelativeScale3D(FVector(100, 100, 100));
+	}
 }
 
 void AJSH_Player::BeginPlay()
@@ -91,6 +107,10 @@ void AJSH_Player::BeginPlay()
 	
 	// Record 함수를 끌고 오기 위한 GameInstance 
 	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
+
+
+	// 카메라 처음에는 안 보이게
+	FallGuys_Camera->SetVisibility(false);
 }
 
 
@@ -102,6 +122,7 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AJSH_Player, PlayerVisibleOn);
 	DOREPLIFETIME(AJSH_Player, FlyMode_On_Off);
 	DOREPLIFETIME(AJSH_Player, Camera_Third_First);
+	DOREPLIFETIME(AJSH_Player, Start_On_Off);
 	
 }
 
@@ -137,6 +158,11 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_FlyMode, ETriggerEvent::Started, this, &AJSH_Player::FlyMode);
 		
 		EnhancedInputComponent->BindAction(IA_Up_Down, ETriggerEvent::Triggered, this, &AJSH_Player::Fly_Up_Down);
+		
+		EnhancedInputComponent->BindAction(IA_Camera_Spawn_Destroy, ETriggerEvent::Started, this, &AJSH_Player::CameraSpawn);
+		EnhancedInputComponent->BindAction(IA_Camera_Third_First, ETriggerEvent::Started, this, &AJSH_Player::Camera_Third_First_Change);
+
+		
 	}
 	else
 	{
@@ -291,12 +317,46 @@ void AJSH_Player::StartRecording()
 {
 	if (HasAuthority())
 	{
-		// 카메라 무조건 만들고 녹화 시작
-		CameraSpawn_On_Off = false;
-		CameraSpawn();
-
 		// 인스턴스에 넣어둔 녹화 기능 시작
 		ObsGamInstance->StartRecord();
+	}
+
+	NetMulti_StartRecording();
+}
+
+void AJSH_Player::NetMulti_StartRecording_Implementation()
+{
+	if (!Start_On_Off)
+	{
+		// 3인칭 -> 1인칭 변환
+		FollowCamera->SetActive(false);
+		RecordCamera->SetActive(true);
+		bUseControllerRotationYaw = true;
+		Camera_Third_First = true;
+
+		// 카메라 소환
+		FallGuys_Camera->SetVisibility(true);
+		CameraSpawn_On_Off = true;
+		UE_LOG(LogTemp, Warning, TEXT("visible true"));
+
+		Start_On_Off = true;
+	}
+	else
+	{
+		// 1인칭 -> 3인칭 변환
+		RecordCamera->SetActive(false);
+		FollowCamera->SetActive(true);
+		if (!GetCharacterMovement()->IsFlying())
+		{
+			bUseControllerRotationYaw = false;
+		}
+		Camera_Third_First = false;
+		
+		// 카메라 제거
+		FallGuys_Camera->SetVisibility(false);
+		CameraSpawn_On_Off = false;
+
+		Start_On_Off = false;
 	}
 }
 
@@ -304,12 +364,18 @@ void AJSH_Player::StartRecording()
 // 1인칭 <-> 3인칭 ,
 void AJSH_Player::Camera_Third_First_Change()
 {
-	if (!Camera_Third_First)
+	NetMulti_Camera_Third_First_Change();
+}
+
+void AJSH_Player::NetMulti_Camera_Third_First_Change_Implementation()
+{
+	if (!CameraSpawn_On_Off)
 	{
 		// 3인칭 -> 1인칭 변환
 		FollowCamera->SetActive(false);
 		RecordCamera->SetActive(true);
 		bUseControllerRotationYaw = true;
+		CameraSpawn_On_Off = true;
 	}
 	else
 	{
@@ -317,12 +383,13 @@ void AJSH_Player::Camera_Third_First_Change()
 		RecordCamera->SetActive(false);
 		FollowCamera->SetActive(true);
 		bUseControllerRotationYaw = false;
+		CameraSpawn_On_Off = false;
 	}
 	Camera_Third_First = !Camera_Third_First;
 }
 
 
-
+// 카메라 스폰
 void AJSH_Player::CameraSpawn()
 {
 	NetMulti_CameraSpawn();
@@ -330,6 +397,16 @@ void AJSH_Player::CameraSpawn()
 
 void AJSH_Player::NetMulti_CameraSpawn_Implementation()
 {
+	if (!CameraSpawn_On_Off)
+	{
+		FallGuys_Camera->SetVisibility(true);
+	}
+	else
+	{
+		FallGuys_Camera->SetVisibility(false);
+	}
+	
+	CameraSpawn_On_Off = !CameraSpawn_On_Off;
 }
 
 
@@ -379,6 +456,7 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 		AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
 
 		Fly_Off_Value = Fly_Off_Value + Fly_Zvalue;
+
 		if (Fly_Off_Value <= -10)
 		{
 			FlyMode();

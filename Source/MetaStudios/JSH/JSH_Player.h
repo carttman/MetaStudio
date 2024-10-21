@@ -66,6 +66,12 @@ class AJSH_Player : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Up_Down;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Spawn_Destroy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Third_First;
+
 public:
 	AJSH_Player();
 	
@@ -100,8 +106,15 @@ public:
 	// 녹화 시작 / 종료
 	class UJSH_OBSWebSocket* ObsGamInstance;
 	FProcHandle PH;
+
+	UFUNCTION()
 	void StartRecording();
-	
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_StartRecording();
+
+	UPROPERTY(Replicated)
+	bool Start_On_Off = false;
 
 
 	// 3인칭 <-> 1인칭
@@ -109,6 +122,8 @@ public:
 	bool Camera_Third_First = false;
 	UFUNCTION()
 	void Camera_Third_First_Change();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Camera_Third_First_Change();
 
 	// 카메라 Visible 껏다 키기
 	UPROPERTY(Replicated)
