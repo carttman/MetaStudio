@@ -50,6 +50,9 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ASpaceshipPawn::MoveForward);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ASpaceshipPawn::MoveRight);
 	PlayerInputComponent->BindAxis(TEXT("MoveUp"), this, &ASpaceshipPawn::MoveUp);
+
+	PlayerInputComponent->BindAction("ExitSpaceship", IE_Pressed, this, &ASpaceshipPawn::ExitSpaceship);
+
 }
 
 bool ASpaceshipPawn::CanPlayerEnter()
@@ -80,3 +83,13 @@ void ASpaceshipPawn::MoveUp(float value)
 	MovementDirection.Z = FMath::Clamp(value, -1.0f, 1.0f);
 }
 
+void ASpaceshipPawn::ExitSpaceship()
+{
+	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+
+	if (characterController)
+	{
+		characterController->Possess(player);
+		player->GetMesh()->SetVisibility(true);
+	}
+}

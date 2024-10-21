@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "MetaStudiosCharacter.h"
 #include "SpaceshipPawn.generated.h"
 
 UCLASS()
@@ -28,6 +29,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool CanPlayerEnter();
+
+	void ExitSpaceship();
+
+	AMetaStudiosCharacter* player;
 
 private:
 	void MoveForward(float value);
