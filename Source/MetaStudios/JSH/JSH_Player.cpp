@@ -35,6 +35,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpectatorPawn.h"
+#include "GameFramework/SpectatorPawnMovement.h"
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
 #include "UObject/UObjectGlobals.h"
@@ -111,6 +112,8 @@ void AJSH_Player::BeginPlay()
 
 	// 카메라 처음에는 안 보이게
 	FallGuys_Camera->SetVisibility(false);
+
+	// Editor Mode
 }
 
 
@@ -119,10 +122,11 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AJSH_Player, PlayerVisibleOn);
-	DOREPLIFETIME(AJSH_Player, FlyMode_On_Off);
-	DOREPLIFETIME(AJSH_Player, Camera_Third_First);
-	DOREPLIFETIME(AJSH_Player, Start_On_Off);
+	DOREPLIFETIME(AJSH_Player, PlayerVisible_b_On);
+	DOREPLIFETIME(AJSH_Player, FlyMode_b_On_Off);
+	DOREPLIFETIME(AJSH_Player, Camera_b_Third_First);
+	DOREPLIFETIME(AJSH_Player, Record_b_On_Off);
+	DOREPLIFETIME(AJSH_Player, EditorMode_B);
 	
 }
 
@@ -155,7 +159,7 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(SpectatorModeOnOff, ETriggerEvent::Started, this, &AJSH_Player::SpectatorMode);
 
 		
-		EnhancedInputComponent->BindAction(IA_FlyMode, ETriggerEvent::Started, this, &AJSH_Player::FlyMode);
+		EnhancedInputComponent->BindAction(IA_EditorMode, ETriggerEvent::Started, this, &AJSH_Player::EditorMode);
 		
 		EnhancedInputComponent->BindAction(IA_Up_Down, ETriggerEvent::Triggered, this, &AJSH_Player::Fly_Up_Down);
 		EnhancedInputComponent->BindAction(IA_Up_Down2, ETriggerEvent::Triggered, this, &AJSH_Player::Fly_Down_Ray);
@@ -292,7 +296,7 @@ void AJSH_Player::NetMulti_Visible_On_OFF_Implementation()
 	
 	//NetMulti_Visible_On_OFF();
 
-	if (PlayerVisibleOn)
+	if (PlayerVisible_b_On)
 	{
 		GetMesh()->SetVisibility(false);
 		UE_LOG(LogTemp, Error, TEXT("false"));
@@ -303,12 +307,11 @@ void AJSH_Player::NetMulti_Visible_On_OFF_Implementation()
 		UE_LOG(LogTemp, Error, TEXT("true"));
 	}
 	
-	PlayerVisibleOn = !PlayerVisibleOn;
+	PlayerVisible_b_On = !PlayerVisible_b_On;
 
 }
 
 #pragma endregion
-
 
 
 #pragma region  Record
@@ -316,31 +319,34 @@ void AJSH_Player::NetMulti_Visible_On_OFF_Implementation()
 // 녹화 시작, 종료 함수
 void AJSH_Player::StartRecording()
 {
+	if(EditorMode_B) return;
+	
 	if (HasAuthority())
 	{
 		// 인스턴스에 넣어둔 녹화 기능 시작
 		ObsGamInstance->StartRecord();
+		NetMulti_StartRecording();
 	}
 
-	NetMulti_StartRecording();
+	// NetMulti_StartRecording();
 }
 
 void AJSH_Player::NetMulti_StartRecording_Implementation()
 {
-	if (!Start_On_Off)
+	if (!Record_b_On_Off)
 	{
 		// 3인칭 -> 1인칭 변환
 		FollowCamera->SetActive(false);
 		RecordCamera->SetActive(true);
 		bUseControllerRotationYaw = true;
-		Camera_Third_First = true;
+		Camera_b_Third_First = true;
 
 		// 카메라 소환
 		FallGuys_Camera->SetVisibility(true);
-		CameraSpawn_On_Off = true;
+		CameraSpawn_b_On_Off = true;
 		UE_LOG(LogTemp, Warning, TEXT("visible true"));
 
-		Start_On_Off = true;
+		Record_b_On_Off = true;
 	}
 	else
 	{
@@ -352,13 +358,13 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 		{
 			bUseControllerRotationYaw = false;
 		}
-		Camera_Third_First = false;
+		Camera_b_Third_First = false;
 		
 		// 카메라 제거
 		FallGuys_Camera->SetVisibility(false);
-		CameraSpawn_On_Off = false;
+		CameraSpawn_b_On_Off = false;
 
-		Start_On_Off = false;
+		Record_b_On_Off = false;
 	}
 }
 
@@ -371,13 +377,13 @@ void AJSH_Player::Camera_Third_First_Change()
 
 void AJSH_Player::NetMulti_Camera_Third_First_Change_Implementation()
 {
-	if (!CameraSpawn_On_Off)
+	if (!CameraSpawn_b_On_Off)
 	{
 		// 3인칭 -> 1인칭 변환
 		FollowCamera->SetActive(false);
 		RecordCamera->SetActive(true);
 		bUseControllerRotationYaw = true;
-		CameraSpawn_On_Off = true;
+		CameraSpawn_b_On_Off = true;
 	}
 	else
 	{
@@ -389,9 +395,9 @@ void AJSH_Player::NetMulti_Camera_Third_First_Change_Implementation()
 		{
 			bUseControllerRotationYaw = false;
 		}
-		CameraSpawn_On_Off = false;
+		CameraSpawn_b_On_Off = false;
 	}
-	Camera_Third_First = !Camera_Third_First;
+	Camera_b_Third_First = !Camera_b_Third_First;
 }
 
 
@@ -403,7 +409,7 @@ void AJSH_Player::CameraSpawn()
 
 void AJSH_Player::NetMulti_CameraSpawn_Implementation()
 {
-	if (!CameraSpawn_On_Off)
+	if (!CameraSpawn_b_On_Off)
 	{
 		FallGuys_Camera->SetVisibility(true);
 	}
@@ -412,12 +418,11 @@ void AJSH_Player::NetMulti_CameraSpawn_Implementation()
 		FallGuys_Camera->SetVisibility(false);
 	}
 	
-	CameraSpawn_On_Off = !CameraSpawn_On_Off;
+	CameraSpawn_b_On_Off = !CameraSpawn_b_On_Off;
 }
 
 
 #pragma endregion
-
 
 
 #pragma region FlyMode
@@ -428,7 +433,7 @@ void AJSH_Player::FlyMode()
 }
 void AJSH_Player::NetMulti_FlyMode_Implementation()
 {
-	if(!FlyMode_On_Off)
+	if(!FlyMode_b_On_Off)
 	{
 		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 		bUseControllerRotationPitch = true;
@@ -443,7 +448,7 @@ void AJSH_Player::NetMulti_FlyMode_Implementation()
 		bUseControllerRotationRoll = false;
 	}
 
-	FlyMode_On_Off = !FlyMode_On_Off;
+	FlyMode_b_On_Off = !FlyMode_b_On_Off;
 }
 
 
@@ -470,7 +475,7 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 	// 		Fly_Off_Value = 0;
 	// 	}
 	// }
-	if (!FlyMode_On_Off)
+	if (!FlyMode_b_On_Off)
 	{
 		FlyMode();	
 	}
@@ -490,10 +495,14 @@ void AJSH_Player::Fly_Down_Ray(const FInputActionValue& Value)
 	NetMulti_Fly_Down_Ray(Value);
 }
 
+
+
 void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& Value)
 {
+	
 	if (GetCharacterMovement()->IsFlying())
 	{
+		
 		// 입력 값에서 Up/Down 액션 값 추출
 		Fly_Zvalue = Value.Get<float>();
 		AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
@@ -512,10 +521,97 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 		{
 			float DistanceToGround = HitResult.Distance;
 
-			// 원하는 거리 임계값 설정
-			if (DistanceToGround < 100.0f)
+			// Editor 모드가 아닐때에만 Fly Mode를 종료
+			if (!EditorMode_B)
 			{
-				FlyMode(); 
+				// 원하는 거리 임계값 설정
+				if (DistanceToGround < 100.0f)
+				{
+					FlyMode(); 
+				}
+			}
+			
+			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+		}
+		else
+		{
+			
+			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+		}
+	}
+
+}
+
+#pragma endregion
+
+
+#pragma region EditorMode
+
+// (key: 1) EditorMode On / Off
+void AJSH_Player::EditorMode()
+{
+	// 녹화 중이 아닐때에만 Editor 모드 가능
+	if (Record_b_On_Off) return;
+
+	NetMulti_EditorMode();
+}
+
+void AJSH_Player::NetMulti_EditorMode_Implementation()
+{
+	// Editor Mode On
+	if (!EditorMode_B)
+	{
+		UE_LOG(LogTemp, Error, TEXT("EditorModeOn"));
+		
+		// FlyMode를 제어하는 bool 값 (Editor Mode 일때 항상 날아다니 도록)
+		EditorMode_B = true;
+		
+		// 3인칭 -> 1인칭 변환
+		FollowCamera->SetActive(false);
+		RecordCamera->SetActive(true);
+		bUseControllerRotationYaw = true;
+		Camera_b_Third_First = true;
+	}
+	// Editor Mode Off
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("EditorMode Off"));
+		// FlyMode를 제어하는 bool 값 (Editor Mode 일때 항상 날아다니 도록)
+		EditorMode_B = false;
+		
+		// 1인칭 -> 3인칭 변환
+		RecordCamera->SetActive(false);
+		FollowCamera->SetActive(true);
+		// 비행 상태가 아닐때에만 Yaw를 꺼줌
+		if (!GetCharacterMovement()->IsFlying())
+		{
+			bUseControllerRotationYaw = false;
+		}
+		Camera_b_Third_First = false;
+
+
+		// 아래로 레이 한번 쏴서 , Fly 모드 종료
+		FVector Start = GetActorLocation();
+		FVector End = Start - FVector(0.f, 0.f, 1000.f);
+
+		FHitResult HitResult;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
+
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+
+		if (bHit)
+		{
+			float DistanceToGround = HitResult.Distance;
+
+			// Editor 모드가 아닐때에만 Fly Mode를 종료
+			if (!EditorMode_B)
+			{
+				// 원하는 거리 임계값 설정
+				if (DistanceToGround < 100.0f)
+				{
+					FlyMode(); 
+				}
 			}
 			
 			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
@@ -528,8 +624,24 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 	}
 }
 
-#pragma endregion
+void AJSH_Player::EditModeON()
+{
+}
 
+void AJSH_Player::EditModeOFF()
+{
+}
+
+void AJSH_Player::EnableEdit()
+{
+}
+
+void AJSH_Player::DisableEdit()
+{
+}
+
+#pragma endregion
+	
 
 
 

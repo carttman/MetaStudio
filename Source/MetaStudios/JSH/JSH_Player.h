@@ -61,7 +61,7 @@ class AJSH_Player : public ACharacter
 	UInputAction* SpectatorModeOnOff;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* IA_FlyMode;
+	UInputAction* IA_EditorMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Up_Down;
@@ -117,12 +117,12 @@ public:
 	void NetMulti_StartRecording();
 
 	UPROPERTY(Replicated)
-	bool Start_On_Off = false;
+	bool Record_b_On_Off = false;
 
 
 	// 3인칭 <-> 1인칭
 	UPROPERTY(Replicated)
-	bool Camera_Third_First = false;
+	bool Camera_b_Third_First = false;
 	UFUNCTION()
 	void Camera_Third_First_Change();
 	UFUNCTION(NetMulticast, Reliable)
@@ -130,7 +130,7 @@ public:
 
 	// 카메라 Visible 껏다 키기
 	UPROPERTY(Replicated)
-	bool CameraSpawn_On_Off = false;
+	bool CameraSpawn_b_On_Off = false;
 	UFUNCTION()
 	void CameraSpawn();
 	UFUNCTION(NetMulticast, Reliable)
@@ -152,7 +152,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_Visible_On_OFF();
 	UPROPERTY(Replicated)
-	bool PlayerVisibleOn = true;
+	bool PlayerVisible_b_On = true;
 #pragma endregion
 
 	
@@ -163,7 +163,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_FlyMode();
 	UPROPERTY(Replicated)
-	bool FlyMode_On_Off = false;
+	bool FlyMode_b_On_Off = false;
 
 
 	UFUNCTION()
@@ -182,4 +182,30 @@ public:
 	void NetMulti_Fly_Down_Ray(const FInputActionValue& Value);
 	
 #pragma endregion
+
+
+#pragma region EditorMode
+
+	UFUNCTION()
+	void EditorMode();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_EditorMode();
+
+	
+	APlayerController* OriginController;
+	
+	UFUNCTION()
+	void EditModeON();
+	UFUNCTION()
+	void EditModeOFF();
+	UFUNCTION()
+	void EnableEdit();
+	UFUNCTION()
+	void DisableEdit();
+
+	UPROPERTY(Replicated)
+	bool EditorMode_B = false;
+
+#pragma endregion
+	
 };
