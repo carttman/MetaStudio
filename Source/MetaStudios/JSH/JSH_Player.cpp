@@ -113,13 +113,9 @@ void AJSH_Player::BeginPlay()
 	// 카메라 처음에는 안 보이게
 	FallGuys_Camera->SetVisibility(false);
 
-	// Editor Mode
-	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 
-	if (true)
-	{
-		
-	}
+	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	
 }
 
 
@@ -333,7 +329,8 @@ void AJSH_Player::StartRecording()
 	if (HasAuthority())
 	{
 		// 인스턴스에 넣어둔 녹화 기능 시작
-		ObsGamInstance->StartRecord();
+		//ObsGamInstance->StartRecord();
+		JPlayerController->StartRecord();
 		NetMulti_StartRecording();
 	}
 
@@ -344,6 +341,8 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 {
 	if (!Record_b_On_Off)
 	{
+		if (!FlyMode_b_On_Off) FlyMode();
+		
 		// 3인칭 -> 1인칭 변환
 		FollowCamera->SetActive(false);
 		RecordCamera->SetActive(true);
@@ -374,6 +373,44 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 		CameraSpawn_b_On_Off = false;
 
 		Record_b_On_Off = false;
+
+
+		
+		// Record Mode를 끌때에 아래로 레이 한번 쏴서 , 바닥에 가까우면 Fly 모드 종료
+		FVector Start = GetActorLocation();
+		FVector End = Start - FVector(0.f, 0.f, 1000.f);
+
+		FHitResult HitResult;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
+
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+
+		if (bHit)
+		{
+			float DistanceToGround = HitResult.Distance;
+
+			
+			if (DistanceToGround < 100.0f)
+			{
+				// 거리가 바닥이랑 가까울때 나는 모드면 , FLYMODE()를 가져와서 꺼주고
+				if (FlyMode_b_On_Off)
+				{
+					FlyMode();
+				}
+				else
+				{
+					GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+				}
+			}
+			
+			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+		}
+		else
+		{
+			
+			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+		}
 	}
 }
 
@@ -530,8 +567,8 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 		{
 			float DistanceToGround = HitResult.Distance;
 
-			// Editor 모드가 아닐때에만 Fly Mode를 종료
-			if (!EditorMode_B)
+			// Editor 모드가 아닐때 or Record Mode가 아닐때 Fly Mode를 종료
+			if (!EditorMode_B & !Record_b_On_Off)
 			{
 				// 원하는 거리 임계값 설정
 				if (DistanceToGround < 100.0f)
@@ -539,6 +576,7 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 					FlyMode(); 
 				}
 			}
+			
 			
 			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		}
@@ -611,7 +649,7 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		Camera_b_Third_First = false;
 
 
-		// 아래로 레이 한번 쏴서 , Fly 모드 종료
+		// Fly Mode를 끌때에 아래로 레이 한번 쏴서 , Fly 모드 종료
 		FVector Start = GetActorLocation();
 		FVector End = Start - FVector(0.f, 0.f, 1000.f);
 
@@ -633,6 +671,7 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 				{
 					FlyMode();
 				}
+				// Fly Mode가 아닌데 바닥이랑 가까우면 요렇게 꺼줌
 				else
 				{
 					GetCharacterMovement()->SetMovementMode(MOVE_Walking);
@@ -646,8 +685,6 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 			
 			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
-
-		
 	}
 }
 
