@@ -75,6 +75,11 @@ class AJSH_Player : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Camera_Third_First;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_EditMode;
+
+
+	
 public:
 	AJSH_Player();
 	
@@ -153,6 +158,10 @@ public:
 	void NetMulti_Visible_On_OFF();
 	UPROPERTY(Replicated)
 	bool PlayerVisible_b_On = true;
+
+	UPROPERTY()
+	AJSH_PlayerController* PlayerController;
+	
 #pragma endregion
 
 	
@@ -194,10 +203,7 @@ public:
 	
 	APlayerController* OriginController;
 	
-	UFUNCTION()
-	void EditModeON();
-	UFUNCTION()
-	void EditModeOFF();
+
 	UFUNCTION()
 	void EnableEdit();
 	UFUNCTION()

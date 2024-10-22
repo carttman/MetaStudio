@@ -104,12 +104,12 @@ void AJSH_SpectatorPawn::EditModeON()
 		EnableEdit();
 	}
 }
+
 void AJSH_SpectatorPawn::EditModeOFF()
 {
 	if (HasAuthority())
 	{
 		DisableEdit();
-
 	}
 }
 

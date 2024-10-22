@@ -114,6 +114,7 @@ void AJSH_Player::BeginPlay()
 	FallGuys_Camera->SetVisibility(false);
 
 	// Editor Mode
+	PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 }
 
 
@@ -167,7 +168,9 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_Camera_Spawn_Destroy, ETriggerEvent::Started, this, &AJSH_Player::CameraSpawn);
 		EnhancedInputComponent->BindAction(IA_Camera_Third_First, ETriggerEvent::Started, this, &AJSH_Player::Camera_Third_First_Change);
 
-		
+		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Triggered, this, &AJSH_Player::DisableEdit);
+		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Ongoing, this, &AJSH_Player::DisableEdit);
+		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Completed, this, &AJSH_Player::EnableEdit);
 	}
 	else
 	{
@@ -209,7 +212,6 @@ void AJSH_Player::Look(const FInputActionValue& Value)
 }
 
 #pragma endregion
-
 
 
 #pragma region Editor (Player <-> SpectatorPawn)
@@ -254,7 +256,9 @@ void AJSH_Player::NetMulti_SpectatorMode_Implementation()
 		//AActor* SpectatorActor = GetWorld()->SpawnActor<AActor>(SpectatorClass, CameraTransform, SpawnParams);
 		//ASpectatorPawn* SpectatorActor = GetWorld()->SpawnActor<ASpectatorPawn>(tt->SpectatorClass, CameraTransform, SpawnParams);
 		AActor* SpectatorActor = GetWorld()->SpawnActorDeferred<AActor>(SpectatorClass, CameraTransform);
-		AJSH_PlayerController* PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+
+		// 원랜 켜야하는데 beginplay에서 해주고 있어서 일단 주석 처리
+		//AJSH_PlayerController* PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 		
         
 		if (PlayerController && SpectatorActor)
@@ -571,6 +575,14 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		RecordCamera->SetActive(true);
 		bUseControllerRotationYaw = true;
 		Camera_b_Third_First = true;
+
+		// E를 누르지 않아도 임시 Fly Mode 
+		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		bUseControllerRotationPitch = true;
+		bUseControllerRotationYaw = true;
+		bUseControllerRotationRoll = true;
+
+		EnableEdit();
 	}
 	// Editor Mode Off
 	else
@@ -586,6 +598,8 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		if (!GetCharacterMovement()->IsFlying())
 		{
 			bUseControllerRotationYaw = false;
+			bUseControllerRotationPitch = false;
+			bUseControllerRotationRoll = false;
 		}
 		Camera_b_Third_First = false;
 
@@ -605,12 +619,12 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 			float DistanceToGround = HitResult.Distance;
 
 			// Editor 모드가 아닐때에만 Fly Mode를 종료
-			if (!EditorMode_B)
+			if (!GetCharacterMovement()->IsFlying())
 			{
 				// 원하는 거리 임계값 설정
 				if (DistanceToGround < 100.0f)
 				{
-					FlyMode(); 
+					GetCharacterMovement()->SetMovementMode(MOVE_Walking); 
 				}
 			}
 			
@@ -621,23 +635,43 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 			
 			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
+
+		DisableEdit();
 	}
 }
 
-void AJSH_Player::EditModeON()
-{
-}
-
-void AJSH_Player::EditModeOFF()
-{
-}
 
 void AJSH_Player::EnableEdit()
 {
+	GetMovementComponent()->SetComponentTickEnabled(false);
+
+	if (PlayerController)
+	{
+		// 마우스 커서 보이게 설정
+		PlayerController->bShowMouseCursor = true;
+		PlayerController->bEnableClickEvents = true;
+		PlayerController->bEnableMouseOverEvents = true;
+		
+		// 마우스를 UI와 게임에서 사용할 수 있도록 설정
+		PlayerController->SetInputMode(FInputModeGameAndUI());
+		GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::LockAlways);
+	}
 }
 
 void AJSH_Player::DisableEdit()
 {
+	
+	GetMovementComponent()->SetComponentTickEnabled(true);
+
+	if (PlayerController)
+	{
+		PlayerController->SetIgnoreLookInput(false);
+		
+		PlayerController->bShowMouseCursor = false;
+		PlayerController->bEnableClickEvents = false;
+		PlayerController->bEnableMouseOverEvents = false;
+		PlayerController->SetInputMode(FInputModeGameOnly());
+	}
 }
 
 #pragma endregion
