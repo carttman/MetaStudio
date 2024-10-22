@@ -1,8 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../../CHJ/Widgets/LobbyWidget.h"
+#include "../CHJ/Widgets/FilmRoomLobbyWidget.h"
 
+#include "FIlmSessionSlotWidget.h"
 #include "Components/Button.h"
 #include "Components/EditableText.h"
 #include "Components/ScrollBox.h"
@@ -10,40 +11,39 @@
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
-#include "SessionSlotWidget.h"
 
-void ULobbyWidget::NativeConstruct()
+void UFilmRoomLobbyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	// 게임인스턴스를 가져와서
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
 	// OnSearchSignatureCompleteDelegate에 AddSessionSlotWidget을 연결하고싶다.
-	gi->OnSearchSignatureCompleteDelegate.AddDynamic(this , &ULobbyWidget::AddSessionSlotWidget);
-	gi->OnFindSignatureCompleteDelegate.AddDynamic(this , &ULobbyWidget::SetFindActive);
+	gi->OnSearchSignatureCompleteDelegate.AddDynamic(this , &UFilmRoomLobbyWidget::AddSessionSlotWidget);
+	gi->OnFindSignatureCompleteDelegate.AddDynamic(this , &UFilmRoomLobbyWidget::SetFindActive);
 
 
-	MENU_Button_GoCreateRoom->OnClicked.AddDynamic(this , &ULobbyWidget::MENU_OnClickGoCreateRoom);
-	MENU_Button_GoFindSessions->OnClicked.AddDynamic(this , &ULobbyWidget::MENU_OnClickGoFindSessions);
+	MENU_Button_GoCreateRoom->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::MENU_OnClickGoCreateRoom);
+	MENU_Button_GoFindSessions->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::MENU_OnClickGoFindSessions);
 
-	CR_Button_GoMenu->OnClicked.AddDynamic(this , &ULobbyWidget::OnClickGoMenu);
-	FS_Button_GoMenu->OnClicked.AddDynamic(this , &ULobbyWidget::OnClickGoMenu);
+	CR_Button_GoMenu->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::OnClickGoMenu);
+	FS_Button_GoMenu->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::OnClickGoMenu);
 
-	CR_Button_CreateRoom->OnClicked.AddDynamic(this , &ULobbyWidget::CR_OnClickCreateRoom);
-	CR_Slider_PlayerCount->OnValueChanged.AddDynamic(this , &ULobbyWidget::CR_OnChangeSliderPlayerCount);
+	CR_Button_CreateRoom->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::CR_OnClickCreateRoom);
+	CR_Slider_PlayerCount->OnValueChanged.AddDynamic(this , &UFilmRoomLobbyWidget::CR_OnChangeSliderPlayerCount);
 
-	FS_Button_FindSessions->OnClicked.AddDynamic(this , &ULobbyWidget::FS_OnClickFindSessions);
+	FS_Button_FindSessions->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::FS_OnClickFindSessions);
 
 	CR_Slider_PlayerCount->SetValue(2);
 	SetFindActive(false);
 }
 
-void ULobbyWidget::OnClickGoMenu()
+void UFilmRoomLobbyWidget::OnClickGoMenu()
 {
 	LobbyWidgetSwitcher->SetActiveWidgetIndex(0);
 }
 
-void ULobbyWidget::MENU_OnClickGoCreateRoom()
+void UFilmRoomLobbyWidget::MENU_OnClickGoCreateRoom()
 {
 	// MENU_Edit_SessionName의 내용을 UNetTPSGameInstance의 MySessionName 에 반영하고싶다.
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
@@ -55,7 +55,7 @@ void ULobbyWidget::MENU_OnClickGoCreateRoom()
 	LobbyWidgetSwitcher->SetActiveWidgetIndex(1);
 }
 
-void ULobbyWidget::MENU_OnClickGoFindSessions()
+void UFilmRoomLobbyWidget::MENU_OnClickGoFindSessions()
 {
 	// MENU_Edit_SessionName의 내용을 UNetTPSGameInstance의 MySessionName 에 반영하고싶다.
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
@@ -69,7 +69,7 @@ void ULobbyWidget::MENU_OnClickGoFindSessions()
 	FS_OnClickFindSessions();
 }
 
-void ULobbyWidget::CR_OnClickCreateRoom()
+void UFilmRoomLobbyWidget::CR_OnClickCreateRoom()
 {
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
 	FString roomName = CR_Edit_RoomName->GetText().ToString();
@@ -82,17 +82,16 @@ void ULobbyWidget::CR_OnClickCreateRoom()
 	}
 
 	int32 count = (int32)CR_Slider_PlayerCount->GetValue();
-	gi->CreateMySession(roomName , count, 0);
+	gi->CreateMySession(roomName , count, 1);
 }
 
-void ULobbyWidget::CR_OnChangeSliderPlayerCount(float value)
+void UFilmRoomLobbyWidget::CR_OnChangeSliderPlayerCount(float value)
 {
 	// 슬라이더의 값이 변경되면 CR_Text_PlayerCount에 값을 반영하고 싶다.
 	CR_Text_PlayerCount->SetText(FText::AsNumber(value));
-
 }
 
-void ULobbyWidget::FS_OnClickFindSessions()
+void UFilmRoomLobbyWidget::FS_OnClickFindSessions()
 {
 	// 기존의 방 목록을 삭제하고
 	FS_ScrollBox->ClearChildren();
@@ -105,19 +104,18 @@ void ULobbyWidget::FS_OnClickFindSessions()
 	}
 }
 
-void ULobbyWidget::AddSessionSlotWidget(const struct FRoomInfo& info)
+void UFilmRoomLobbyWidget::AddSessionSlotWidget(const struct FRoomInfo& info)
 {
-	//if(info.)
 	// 슬롯을 생성해서 
-	auto* slot = CreateWidget<USessionSlotWidget>(this , SessionSlotWidgetFactory);
-	
+	auto* slot = CreateWidget<UFIlmSessionSlotWidget>(this , SessionSlotWidgetFactory);
+
 	slot->UpdateInfo(info);
 	// FS_ScrollBox에 추가 하고싶다.
 
 	FS_ScrollBox->AddChild(slot);
 }
 
-void ULobbyWidget::SetFindActive(bool value)
+void UFilmRoomLobbyWidget::SetFindActive(bool value)
 {
 	// 찾기를 시도하면 Find텍스트를 보이게, 버튼 비활성 하고싶다.
 	// 찾기가 끝나면 Find텍스트 안보이게, 버튼 활성 하고싶다.
@@ -133,5 +131,4 @@ void ULobbyWidget::SetFindActive(bool value)
 		FS_Text_Finding->SetVisibility(ESlateVisibility::Hidden);
 		FS_Button_FindSessions->SetIsEnabled(true);
 	}
-
 }

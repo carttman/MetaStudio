@@ -38,8 +38,10 @@ void UMainGameInstance::Init()
 
 }
 
-void UMainGameInstance::CreateMySession(FString roomName , int32 playerCount)
+void UMainGameInstance::CreateMySession(FString roomName , int32 playerCount, int32 RoomType)
 {
+	LevelType = RoomType;
+	
 	FOnlineSessionSettings settings;
 
 	// 1. 전용서버를 사용하는가?
@@ -48,7 +50,7 @@ void UMainGameInstance::CreateMySession(FString roomName , int32 playerCount)
 	// 2. 랜선(Lan)으로 매치하는가?
 	FName subsysName = IOnlineSubsystem::Get()->GetSubsystemName();
 	settings.bIsLANMatch = subsysName == "NULL";
-
+	
 	// 3. 매칭이 공개(true)혹은 비공개(false, 초대를 통해서 매칭)
 	settings.bShouldAdvertise = true;
 
@@ -66,6 +68,7 @@ void UMainGameInstance::CreateMySession(FString roomName , int32 playerCount)
 	
 	settings.Set(FName("ROOM_NAME") , StringBase64Encode(roomName) , EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	settings.Set(FName("HOST_NAME") , StringBase64Encode(MySessionName), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	settings.Set(FName("ROOM_TYPE"), RoomType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 	FUniqueNetIdPtr netID = GetWorld()->GetFirstLocalPlayerFromController()->GetUniqueNetIdForPlatformUser().GetUniqueNetId();
 
@@ -80,7 +83,14 @@ void UMainGameInstance::OnMyCreateSessionComplete(FName SessionName , bool bWasS
 	{
 		PRINTLOG(TEXT("OnMyCreateSessionComplete is Success~~~~~"));
 		// 서버가 여행을 떠나고싶다.
-		GetWorld()->ServerTravel(TEXT("/Game/Maps/CinemaMap?listen"));
+		if(LevelType == 0) // 극장 맵으로
+		{
+			GetWorld()->ServerTravel(TEXT("/Game/Maps/CinemaMainMap?listen"));
+		}
+		else // 촬영장 맵으로
+		{
+			GetWorld()->ServerTravel(TEXT("/Game/Maps/FilmRoomMainMap?listen"));
+		}
 	}
 	else
 	{
@@ -95,7 +105,7 @@ void UMainGameInstance::FindOtherSessions()
 	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
 	SessionSearch->MaxSearchResults = 40;
-
+	
 	SessionInterface->FindSessions(0 , SessionSearch.ToSharedRef());
 	// 찾기 UI를 활성화 하고싶다.
 	if ( OnFindSignatureCompleteDelegate.IsBound())
@@ -113,7 +123,7 @@ void UMainGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccessful)
 		for (int32 i=0 ; i< results.Num() ; i++)
 		{
 			FOnlineSessionSearchResult ret = results[i];
-			if (false == ret.IsValid())
+			if (!ret.IsValid())
 			{
 				continue;
 			}
@@ -135,10 +145,13 @@ void UMainGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccessful)
 			roomInfo.currentPlayerCount = roomInfo.maxPlayerCount - ret.Session.NumOpenPublicConnections;
 			// 핑 정보
 			roomInfo.pingMS = ret.PingInMs;
-
-			if ( OnSearchSignatureCompleteDelegate.IsBound() )
+			
+			int32 roomType;
+			ret.Session.SessionSettings.Get(FName("ROOM_TYPE") , roomType);
+			
+			if (OnSearchSignatureCompleteDelegate.IsBound() )
 				OnSearchSignatureCompleteDelegate.Broadcast(roomInfo);
-
+			
 			PRINTLOG(TEXT("%s") , *roomInfo.ToString());
 		}
 	}
@@ -154,7 +167,7 @@ void UMainGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccessful)
 	}
 }
 
-void UMainGameInstance::JoinSession(int32 index)
+void UMainGameInstance::JoinMySession(int32 index)
 {
 	auto result = SessionSearch->SearchResults[index];
 	SessionInterface->JoinSession(0 , FName(MySessionName) , result);
@@ -198,7 +211,7 @@ void UMainGameInstance::OnMyDestroySessionComplete(FName SessionName , bool bWas
 	{
 		// 클라이언트가 로비로 여행을 가고싶다.
 		auto* pc = GetWorld()->GetFirstPlayerController();
-		pc->ClientTravel(TEXT("/Game/Maps/MainMenu"), ETravelType::TRAVEL_Absolute);
+		pc->ClientTravel(TEXT("/Game/Maps/MainMap"), ETravelType::TRAVEL_Absolute);
 	}
 }
 

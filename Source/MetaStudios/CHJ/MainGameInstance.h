@@ -10,6 +10,12 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class ELevelType : uint8
+{
+	Cinema,
+	FlimRoom
+};
 
 USTRUCT(BlueprintType)
 struct FRoomInfo
@@ -26,12 +32,13 @@ struct FRoomInfo
 	int32 currentPlayerCount;
 	UPROPERTY(BlueprintReadOnly)
 	int32 pingMS;
-
+	
 	int32 index;
+	int32 SessionType = 0;
 
 	FString ToString()
 	{
-		return FString::Printf(TEXT("%d)[%s][%s] (%d / %d) -> %dms"), index, *roomName, *hostName, currentPlayerCount, maxPlayerCount, pingMS);
+		return FString::Printf(TEXT("(%d)[%s][%s] (%d / %d) -> %dms"), index, *roomName, *hostName, currentPlayerCount, maxPlayerCount, pingMS);
 	}
 };
 
@@ -51,8 +58,10 @@ public:
 
 	FString MySessionName = TEXT("CHJ");
 
+	int32 LevelType = 0;
+
 	// 방생성 요청
-	void CreateMySession(FString roomName, int32 playerCount);
+	void CreateMySession(FString roomName, int32 playerCount, int32 RoomType);
 	// 방생성 응답
 	void OnMyCreateSessionComplete(FName SessionName , bool bWasSuccessful);
 
@@ -69,7 +78,7 @@ public:
 	FFindSignature OnFindSignatureCompleteDelegate;
 
 	// 방입장 요청
-	void JoinSession(int32 index);
+	void JoinMySession(int32 index);
 	// 방입장 응답
 	void OnMyJoinSessionComplete(FName SessionName , EOnJoinSessionCompleteResult::Type EOnJoinSessionCompleteResult);
 
