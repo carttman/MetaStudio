@@ -114,7 +114,12 @@ void AJSH_Player::BeginPlay()
 	FallGuys_Camera->SetVisibility(false);
 
 	// Editor Mode
-	PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+
+	if (true)
+	{
+		
+	}
 }
 
 
@@ -260,17 +265,17 @@ void AJSH_Player::NetMulti_SpectatorMode_Implementation()
 		// 원랜 켜야하는데 beginplay에서 해주고 있어서 일단 주석 처리
 		//AJSH_PlayerController* PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 		
-        
-		if (PlayerController && SpectatorActor)
+
+		if (JPlayerController && SpectatorActor)
 		{
 			APawn* SpectatorPawn = Cast<APawn>(SpectatorActor);
 			if (SpectatorPawn)
 			{
-				PlayerController->SaveOriginCharacter();
+				JPlayerController->SaveOriginCharacter();
 				UE_LOG(LogTemp, Warning, TEXT("11111"));
 				// UnPossessed();
 				// PlayerController->SetPawn(SpectatorPawn);
-				PlayerController->Possess(SpectatorPawn);
+				JPlayerController->Possess(SpectatorPawn);
 				UGameplayStatics::FinishSpawningActor(SpectatorActor, CameraTransform);
 				//FinishSpawning(CameraTransform,true);
 				// SpectatorPawn->BeginPlay();
@@ -645,15 +650,15 @@ void AJSH_Player::EnableEdit()
 {
 	GetMovementComponent()->SetComponentTickEnabled(false);
 
-	if (PlayerController)
+	if (JPlayerController)
 	{
 		// 마우스 커서 보이게 설정
-		PlayerController->bShowMouseCursor = true;
-		PlayerController->bEnableClickEvents = true;
-		PlayerController->bEnableMouseOverEvents = true;
+		JPlayerController->bShowMouseCursor = true;
+		JPlayerController->bEnableClickEvents = true;
+		JPlayerController->bEnableMouseOverEvents = true;
 		
 		// 마우스를 UI와 게임에서 사용할 수 있도록 설정
-		PlayerController->SetInputMode(FInputModeGameAndUI());
+		JPlayerController->SetInputMode(FInputModeGameAndUI());
 		GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
 }
@@ -663,14 +668,14 @@ void AJSH_Player::DisableEdit()
 	
 	GetMovementComponent()->SetComponentTickEnabled(true);
 
-	if (PlayerController)
+	if (JPlayerController)
 	{
-		PlayerController->SetIgnoreLookInput(false);
+		JPlayerController->SetIgnoreLookInput(false);
 		
-		PlayerController->bShowMouseCursor = false;
-		PlayerController->bEnableClickEvents = false;
-		PlayerController->bEnableMouseOverEvents = false;
-		PlayerController->SetInputMode(FInputModeGameOnly());
+		JPlayerController->bShowMouseCursor = false;
+		JPlayerController->bEnableClickEvents = false;
+		JPlayerController->bEnableMouseOverEvents = false;
+		JPlayerController->SetInputMode(FInputModeGameOnly());
 	}
 }
 

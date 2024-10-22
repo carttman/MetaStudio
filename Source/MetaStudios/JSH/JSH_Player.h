@@ -15,6 +15,9 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+// 순환참조 문제로, Include 말고
+class AJSH_PlayerController;
+
 
 //DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -159,8 +162,8 @@ public:
 	UPROPERTY(Replicated)
 	bool PlayerVisible_b_On = true;
 
-	UPROPERTY()
-	AJSH_PlayerController* PlayerController;
+	
+	AJSH_PlayerController* JPlayerController;
 	
 #pragma endregion
 
