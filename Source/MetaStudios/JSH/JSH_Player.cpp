@@ -593,6 +593,8 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("EditorMode Off"));
+		DisableEdit();
+		
 		// FlyMode를 제어하는 bool 값 (Editor Mode 일때 항상 날아다니 도록)
 		EditorMode_B = false;
 		
@@ -623,13 +625,17 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		{
 			float DistanceToGround = HitResult.Distance;
 
-			// Editor 모드가 아닐때에만 Fly Mode를 종료
-			if (!GetCharacterMovement()->IsFlying())
+			
+			if (DistanceToGround < 100.0f)
 			{
-				// 원하는 거리 임계값 설정
-				if (DistanceToGround < 100.0f)
+				// 거리가 바닥이랑 가까울때 나는 모드면 , FLYMODE()를 가져와서 꺼주고
+				if (FlyMode_b_On_Off)
 				{
-					GetCharacterMovement()->SetMovementMode(MOVE_Walking); 
+					FlyMode();
+				}
+				else
+				{
+					GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 				}
 			}
 			
@@ -641,15 +647,19 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
 
-		DisableEdit();
+		
 	}
 }
 
 
 void AJSH_Player::EnableEdit()
 {
+	// Editor 모드에서 마우스를 누른 상태로 , Editor 모드를 껏을때 , 꺼지고 나서 마우스를 떼면 EnableEdit가 On되는 문제가 있어
+	// 이렇게 막아줌
+	if (!EditorMode_B) return;
+	
 	GetMovementComponent()->SetComponentTickEnabled(false);
-
+	
 	if (JPlayerController)
 	{
 		// 마우스 커서 보이게 설정
