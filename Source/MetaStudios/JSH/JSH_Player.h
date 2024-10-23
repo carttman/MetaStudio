@@ -216,5 +216,14 @@ public:
 	bool EditorMode_B = false;
 
 #pragma endregion
+
+
+#pragma region MainPlatform
+
+	// 메인 플랫폼 일떄 기능 막아두는 bool 값
+	UPROPERTY(Replicated)
+	bool Bool_MainLock = false;
+	
+#pragma endregion
 	
 };

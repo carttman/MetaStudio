@@ -43,7 +43,7 @@
 
 //DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
-
+#pragma region JSH_PLayer()
 AJSH_Player::AJSH_Player()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -100,6 +100,10 @@ AJSH_Player::AJSH_Player()
 		FallGuys_Camera->SetRelativeScale3D(FVector(100, 100, 100));
 	}
 }
+#pragma endregion
+
+
+#pragma region Begin, Multi, Input
 
 void AJSH_Player::BeginPlay()
 {
@@ -115,7 +119,6 @@ void AJSH_Player::BeginPlay()
 
 
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	
 }
 
 
@@ -178,6 +181,8 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		//UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
+#pragma endregion
+
 
 #pragma region Move / Look
 
@@ -222,6 +227,9 @@ void AJSH_Player::Look(const FInputActionValue& Value)
 // (F) 에디터 모드로 변환하는 함수
 void AJSH_Player::SpectatorMode()
 {
+	// 메인 플랫폼 일떄 기능 LOCK
+	if(Bool_MainLock) return;
+	
 	if (HasAuthority())
 	{
 		NetMulti_SpectatorMode();
@@ -324,6 +332,9 @@ void AJSH_Player::NetMulti_Visible_On_OFF_Implementation()
 // 녹화 시작, 종료 함수
 void AJSH_Player::StartRecording()
 {
+	// 메인 플랫폼 일떄 기능 LOCK
+	if(Bool_MainLock) return;
+	
 	if(EditorMode_B) return;
 	
 	if (HasAuthority())
@@ -475,6 +486,9 @@ void AJSH_Player::NetMulti_CameraSpawn_Implementation()
 
 void AJSH_Player::FlyMode()
 {
+	// 메인 플랫폼 일떄 기능 LOCK
+	if(Bool_MainLock) return;
+	
 	NetMulti_FlyMode();
 }
 void AJSH_Player::NetMulti_FlyMode_Implementation()
@@ -597,6 +611,9 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 // (key: 1) EditorMode On / Off
 void AJSH_Player::EditorMode()
 {
+	// 메인 플랫폼 일떄 기능 LOCK
+	if(Bool_MainLock) return;
+	
 	// 녹화 중이 아닐때에만 Editor 모드 가능
 	if (Record_b_On_Off) return;
 
