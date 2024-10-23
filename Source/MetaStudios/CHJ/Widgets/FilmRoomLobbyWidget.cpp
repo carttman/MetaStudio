@@ -9,6 +9,7 @@
 #include "Components/ScrollBox.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
+#include "Components/UniformGridPanel.h"
 #include "Components/WidgetSwitcher.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
 
@@ -16,13 +17,11 @@ void UFilmRoomLobbyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// 게임인스턴스를 가져와서
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
-	// OnSearchSignatureCompleteDelegate에 AddSessionSlotWidget을 연결하고싶다.
+	// 딜리게이트 바인딩
 	gi->OnSearchSignatureCompleteDelegate.AddDynamic(this , &UFilmRoomLobbyWidget::AddSessionSlotWidget);
 	gi->OnFindSignatureCompleteDelegate.AddDynamic(this , &UFilmRoomLobbyWidget::SetFindActive);
-
-
+	
 	MENU_Button_GoCreateRoom->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::MENU_OnClickGoCreateRoom);
 	MENU_Button_GoFindSessions->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::MENU_OnClickGoFindSessions);
 
@@ -94,8 +93,7 @@ void UFilmRoomLobbyWidget::CR_OnChangeSliderPlayerCount(float value)
 void UFilmRoomLobbyWidget::FS_OnClickFindSessions()
 {
 	// 기존의 방 목록을 삭제하고
-	FS_ScrollBox->ClearChildren();
-
+	UGP_Grid->ClearChildren();
 	// 방찾기를 요청하고싶다.
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
 	if ( gi )
@@ -104,15 +102,20 @@ void UFilmRoomLobbyWidget::FS_OnClickFindSessions()
 	}
 }
 
-void UFilmRoomLobbyWidget::AddSessionSlotWidget(const struct FRoomInfo& info)
+void UFilmRoomLobbyWidget::AddSessionSlotWidget(const struct FRoomInfo& info, int32 RoomType)
 {
-	// 슬롯을 생성해서 
+	if (RoomType == 0) return;
+	int32 index = UGP_Grid->GetChildrenCount();
+	int32 X = index % 2;
+	int32 Y = index / 2;
+	//UE_LOG(LogTemp, Warning, TEXT("index : %d X : %d Y : %d"), index, X, Y);
 	auto* slot = CreateWidget<UFIlmSessionSlotWidget>(this , SessionSlotWidgetFactory);
-
+	
 	slot->UpdateInfo(info);
-	// FS_ScrollBox에 추가 하고싶다.
-
-	FS_ScrollBox->AddChild(slot);
+	
+	UGP_Grid->AddChildToUniformGrid(slot, Y, X);
+	
+	//FS_ScrollBox->AddChild(slot);
 }
 
 void UFilmRoomLobbyWidget::SetFindActive(bool value)

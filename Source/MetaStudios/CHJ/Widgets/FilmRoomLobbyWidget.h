@@ -16,7 +16,7 @@ class METASTUDIOS_API UFilmRoomLobbyWidget : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
-
+	
 	UPROPERTY(meta=(BindWidget))
 	class UWidgetSwitcher* LobbyWidgetSwitcher;
 
@@ -72,14 +72,14 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	class UButton* FS_Button_GoMenu;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<class UFIlmSessionSlotWidget> SessionSlotWidgetFactory;
 
 	UFUNCTION()
 	void FS_OnClickFindSessions();
-
-	UFUNCTION()
-	void AddSessionSlotWidget(const struct FRoomInfo& info);
+	
+	UFUNCTION(BlueprintCallable)
+	void AddSessionSlotWidget(const struct FRoomInfo& info, int32 RoomType);
 
 	// 찾기를 시도하면 Find텍스트를 보이게, 버튼 비활성 하고싶다.
 	// 찾기가 끝나면 Find텍스트 안보이게, 버튼 활성 하고싶다.
@@ -88,4 +88,13 @@ public:
 
 	UFUNCTION()
 	void SetFindActive(bool value);
+
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	class UUniformGridPanel* UGP_Grid;
+	
+	UPROPERTY()
+	TArray<TObjectPtr<UFIlmSessionSlotWidget>> Slots;
+
+	UPROPERTY(meta=(BindWidget))
+	class UEditableText* TB_TEXT_SearchSession;
 };

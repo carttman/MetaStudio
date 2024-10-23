@@ -78,7 +78,7 @@ public:
 	void FS_OnClickFindSessions();
 
 	UFUNCTION()
-	void AddSessionSlotWidget(const struct FRoomInfo& info);
+	void AddSessionSlotWidget(const struct FRoomInfo& info, int32 RoomType);
 
 	// 찾기를 시도하면 Find텍스트를 보이게, 버튼 비활성 하고싶다.
 	// 찾기가 끝나면 Find텍스트 안보이게, 버튼 활성 하고싶다.
@@ -87,5 +87,9 @@ public:
 
 	UFUNCTION()
 	void SetFindActive(bool value);
-	
+
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	class UUniformGridPanel* UGP_Grid;
+	UPROPERTY()
+	TArray<TObjectPtr<USessionSlotWidget>> Slots;
 };

@@ -11,18 +11,17 @@
 #include "Components/WidgetSwitcher.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
 #include "SessionSlotWidget.h"
+#include "Components/UniformGridPanel.h"
 
 void ULobbyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// 게임인스턴스를 가져와서
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
-	// OnSearchSignatureCompleteDelegate에 AddSessionSlotWidget을 연결하고싶다.
+	// 딜리게이트 바인딩
 	gi->OnSearchSignatureCompleteDelegate.AddDynamic(this , &ULobbyWidget::AddSessionSlotWidget);
 	gi->OnFindSignatureCompleteDelegate.AddDynamic(this , &ULobbyWidget::SetFindActive);
-
-
+	
 	MENU_Button_GoCreateRoom->OnClicked.AddDynamic(this , &ULobbyWidget::MENU_OnClickGoCreateRoom);
 	MENU_Button_GoFindSessions->OnClicked.AddDynamic(this , &ULobbyWidget::MENU_OnClickGoFindSessions);
 
@@ -95,8 +94,8 @@ void ULobbyWidget::CR_OnChangeSliderPlayerCount(float value)
 void ULobbyWidget::FS_OnClickFindSessions()
 {
 	// 기존의 방 목록을 삭제하고
-	FS_ScrollBox->ClearChildren();
-
+	//FS_ScrollBox->ClearChildren();
+	UGP_Grid->ClearChildren();
 	// 방찾기를 요청하고싶다.
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
 	if ( gi )
@@ -105,16 +104,18 @@ void ULobbyWidget::FS_OnClickFindSessions()
 	}
 }
 
-void ULobbyWidget::AddSessionSlotWidget(const struct FRoomInfo& info)
+void ULobbyWidget::AddSessionSlotWidget(const struct FRoomInfo& info, int32 RoomType)
 {
-	//if(info.)
-	// 슬롯을 생성해서 
+	//RoomType이 0인것만 탐색한다.
+	if (RoomType == 1) return;
+	int32 index = UGP_Grid->GetChildrenCount();
+	int32 X = index % 2;
+	int32 Y = index / 2;
+	
 	auto* slot = CreateWidget<USessionSlotWidget>(this , SessionSlotWidgetFactory);
 	
 	slot->UpdateInfo(info);
-	// FS_ScrollBox에 추가 하고싶다.
-
-	FS_ScrollBox->AddChild(slot);
+	UGP_Grid->AddChildToUniformGrid(slot, Y, X);
 }
 
 void ULobbyWidget::SetFindActive(bool value)

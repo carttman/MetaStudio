@@ -7,16 +7,6 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "MainGameInstance.generated.h"
 
-/**
- * 
- */
-UENUM(BlueprintType)
-enum class ELevelType : uint8
-{
-	Cinema,
-	FlimRoom
-};
-
 USTRUCT(BlueprintType)
 struct FRoomInfo
 {
@@ -42,7 +32,8 @@ struct FRoomInfo
 	}
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSearchSignature , const struct FRoomInfo& , info);
+//RoomType으로 세션 탐색시 세션 타입에 따라 구분한다.
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FSearchSignature , const struct FRoomInfo& , info, int32, RoomType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFindSignature , bool, value);
 
 UCLASS()
@@ -72,17 +63,14 @@ public:
 	// 방찾기 응답
 	void OnMyFindSessionsCompleteDelegates(bool bWasSuccessful);
 
+	// 찾기를 위한 델리게이트
 	FSearchSignature OnSearchSignatureCompleteDelegate;
-
-	// 찾기를 위한 델리게이트...
 	FFindSignature OnFindSignatureCompleteDelegate;
 
 	// 방입장 요청
 	void JoinMySession(int32 index);
 	// 방입장 응답
 	void OnMyJoinSessionComplete(FName SessionName , EOnJoinSessionCompleteResult::Type EOnJoinSessionCompleteResult);
-
-
 
 	// 방퇴장 요청 -> UI에서 호출
 	void ExitSession();
@@ -93,13 +81,11 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCExitSession();
 	// 방퇴장 응답
-
 	void OnMyDestroySessionComplete(FName SessionName , bool bWasSuccessful);
 
-	// 스팀으로 한글이름 방을 만들어서 조회하면 한글이 깨지는 이슈발생!!
+	// 스팀으로 한글이름 방을 만들어서 조회하면 한글이 깨지는 이슈
 	// Base64 인코딩으로 해결하고자함!
 	FString StringBase64Encode(const FString& str);
-
 	FString StringBase64Decode(const FString& str);
 	
 };
