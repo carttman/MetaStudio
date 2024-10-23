@@ -81,7 +81,8 @@ class AJSH_Player : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_EditMode;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_MouseWheel;
 	
 public:
 	AJSH_Player();
@@ -192,6 +193,17 @@ public:
 	void Fly_Down_Ray(const FInputActionValue& Value);
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_Fly_Down_Ray(const FInputActionValue& Value);
+
+
+	// 마우스 휠로 FlyMode Speed 조정
+	UPROPERTY()
+	float MaxFlySpeed_C = 500.f;
+	UPROPERTY()
+	float BrakingDecelerationFlying_C = 5000.f;
+
+	
+	UFUNCTION()
+	void FlySpeed(const FInputActionValue& Value);
 	
 #pragma endregion
 

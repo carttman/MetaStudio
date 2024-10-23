@@ -99,6 +99,9 @@ AJSH_Player::AJSH_Player()
 		FallGuys_Camera->SetRelativeLocationAndRotation(FVector(-12477.217394, 3931.275206, 24551.795870), FRotator(1.727941, 0.148925, 9.851076));
 		FallGuys_Camera->SetRelativeScale3D(FVector(100, 100, 100));
 	}
+
+	GetCharacterMovement()->MaxFlySpeed = MaxFlySpeed_C;
+	GetCharacterMovement()->BrakingDecelerationFlying = BrakingDecelerationFlying_C;
 }
 #pragma endregion
 
@@ -168,6 +171,7 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		
 		EnhancedInputComponent->BindAction(IA_Up_Down, ETriggerEvent::Triggered, this, &AJSH_Player::Fly_Up_Down);
 		EnhancedInputComponent->BindAction(IA_Up_Down2, ETriggerEvent::Triggered, this, &AJSH_Player::Fly_Down_Ray);
+		EnhancedInputComponent->BindAction(IA_MouseWheel, ETriggerEvent::Started, this, &AJSH_Player::FlySpeed);
 		
 		EnhancedInputComponent->BindAction(IA_Camera_Spawn_Destroy, ETriggerEvent::Started, this, &AJSH_Player::CameraSpawn);
 		EnhancedInputComponent->BindAction(IA_Camera_Third_First, ETriggerEvent::Started, this, &AJSH_Player::Camera_Third_First_Change);
@@ -484,12 +488,24 @@ void AJSH_Player::NetMulti_CameraSpawn_Implementation()
 
 #pragma region FlyMode
 
+
+void AJSH_Player::FlySpeed(const FInputActionValue& Value)
+{
+	float tempvalue = Value.Get<float>();;
+	
+	UE_LOG(LogTemp, Warning, TEXT(" 마우스 휠: %f"), tempvalue)
+}
+
+
+
 void AJSH_Player::FlyMode()
 {
 	// 메인 플랫폼 일떄 기능 LOCK
 	if(Bool_MainLock) return;
 	
 	NetMulti_FlyMode();
+
+
 }
 void AJSH_Player::NetMulti_FlyMode_Implementation()
 {
@@ -606,7 +622,9 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 #pragma endregion
 
 
+
 #pragma region EditorMode
+
 
 // (key: 1) EditorMode On / Off
 void AJSH_Player::EditorMode()
@@ -750,3 +768,56 @@ void AJSH_Player::DisableEdit()
 
 
 
+
+#pragma region Text
+
+// 녹화 모드 시작 / 종료 (R)
+
+// 녹화 모드 on / ing 일떄
+// 1) 1인칭 변경
+// 2) 마우스 회전에 따라 시점 , 몸의 방향 움직임
+// [마우스를 바닥으로 내리면(화면 시점이 바닥으로 가고 캐릭터의 몸도 0---< 이런식으로 바닥 ]
+// 3) 캐릭터 주위에 카메라 모형 생성
+// 4) 녹화 모드 시작 하자 마자 FlyMode ON (Recrod 모드일때 항상 FlyMode)
+// 5) 날면서 아래로 하강 하여 바닥에 닿아도 FlyMode OFF 되지 않음 (아래에 있는 fly 모드 매커니즘 확인 필요)
+
+// 녹화 모드 종료 시
+// 1) 3인칭 -> 1인칭
+// 2) 마우스 회전에 따라 시점 , 몸의 방향 움직임 -> 일반적인 third person 카메라 회전 및 움직임
+// 3) 캐릭터 모형 제거
+// 4) 녹화 종료 버튼 눌렀을떄에 하늘에 날고 있다면 그대로 FlyMode 유지, 바닥과 아주 가까이 있다면 ? walk 모드로 변경(fly mode off)
+
+// + Record 모드일떄 Editor 모드 on 불가능
+
+
+// 위로 상승 (E) , 아래로 하강 (Q)
+
+// 1) 기본적으로 wasd로 걸어다니가가 e를 누르면 하늘로 몸 상승(꾸욱 누르고 있음 계속 올라가고 , 누르는 키를 떄면 올라가는거 멈춤)
+// 2) 몸이 공중에 있을때에 q를 누르면 아래로 하강 (꾸욱 누르고 있음 계속 내려가고 , 누르는 키를 떄면 올라가는거 멈춤)
+// 3) 하강 시 플레이어 아래에 있는 물체와 거리가 아주 가까워 지면 flymode 종료 -> walk mode로 돌아감
+// 4) 마우스 회전에 따라 시점 , 몸의 방향 움직임
+// [마우스를 바닥으로 내리면(화면 시점이 바닥으로 가고 캐릭터의 몸도 0---< 이런식으로 바닥 ]
+
+
+
+
+// Editor Mode ON / OFF (Z or 1 , 키 는 고민 중 에디터 모드 내에서 단축키 설정에 따라 바꾸려고 고민 중 )
+
+//Editor on / ing 일떄
+// 1) Editor 모드 시작시 1인칭 변경
+// 2) 마우스 회전에 따라 시점 , 몸의 방향 움직임
+// [마우스를 바닥으로 내리면(화면 시점이 바닥으로 가고 캐릭터의 몸도 0---< 이런식으로 바닥 ]
+// 3) 캐릭터 주위에 공구 모형 생성 (예정) , Editor 모드에서 에셋 배치하려고 클릭하고 있을떄에 애니메이션 모션 등등 (예정)
+// 4) Editor 시작 하자 마자 FlyMode ON (Editor 모드일때 항상 FlyMode)
+// 5) 날면서 아래로 하강 하여 바닥에 닿아도 FlyMode OFF 되지 않음 (아래에 있는 fly 모드 매커니즘 확인 필요)
+// 6) 언리얼 에디터와 동일하게 editor 모드가 켜졌을때에는 마우스 우클릭을 하고 있어야만 플레이어를 움직일 수 있음 (마우스 누르고 있을떄 마우스 포인터 없어짐)
+// 7) 마우스 우클릭을 하고 있지 않다면 마우스 포인터가 켜짐 , ui에 있는 물체들을 클릭하고 끌고 올 수 있게 됨
+
+// Editor 모드 종료 시
+// 1) 3인칭 -> 1인칭
+// 2) 마우스 회전에 따라 시점 , 몸의 방향 움직임 -> 일반적인 third person 카메라 회전 및 움직임
+// 3) 공구 모형 제거 (예정)
+// 4) Editor 종료 버튼 눌렀을떄에 하늘에 날고 있다면 그대로 FlyMode 유지, 바닥과 아주 가까이 있다면 ? walk 모드로 변경(fly mode off)
+
+// + Editor 모드일떄 record 모드 on 불가능
+#pragma endregion
