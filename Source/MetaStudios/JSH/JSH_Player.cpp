@@ -492,8 +492,13 @@ void AJSH_Player::NetMulti_CameraSpawn_Implementation()
 void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 {
 	float tempvalue = Value.Get<float>();;
+
+	MaxFlySpeed_C = MaxFlySpeed_C + tempvalue * 50;
 	
-	UE_LOG(LogTemp, Warning, TEXT(" 마우스 휠: %f"), tempvalue)
+	UE_LOG(LogTemp, Warning, TEXT(" 마우스 휠: %f"), tempvalue);
+	UE_LOG(LogTemp, Warning, TEXT(" MaxSpeed: %f"), MaxFlySpeed_C);
+
+	GetCharacterMovement()->MaxFlySpeed = MaxFlySpeed_C;
 }
 
 
