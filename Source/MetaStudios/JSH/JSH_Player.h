@@ -270,11 +270,25 @@ public:
 	void CameraLeft();
 	UFUNCTION()
 	void CameraDefault();
+	UFUNCTION()
+	void CameraReset();
 	
 	FRotator DefaultCameraleaning = FRotator(0, 0, 0);
 	FRotator NewCameraRotation;
 	float Amount = 0.1f;
 	float CurrentAngl = 0.0f;
+
+
+	float ZoomFOV = 0;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
+	float ZoomSpeed = 10.0f; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
+	float MinFOV = 120.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
+	float MaxFOV = 10.0f;
 	
 #pragma endregion
 	
