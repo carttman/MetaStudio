@@ -36,15 +36,9 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//if (!MovementDirection.IsZero())
-	//{
-	//	const FVector newLocation = GetActorLocation() + (MovementDirection * DeltaTime * MovementSpeed);
-	//	SetActorLocation(newLocation);
-	//}
-
 	FTransform trans = FTransform(this->GetControlRotation());
 	direction = trans.TransformVector(direction);
-	direction.Z = 0;
+	// direction.Z = 0;
 	direction.Normalize();
 
 	AddMovementInput(direction);
@@ -93,8 +87,17 @@ void ASpaceshipPawn::ExitSpaceship()
 {
 	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 
-	if (characterController)
+	if (characterController && player)
 	{
+		FVector spaceshipLoc = GetActorLocation();
+		FRotator spaceshipRot = GetActorRotation();
+
+		FVector offset = spaceshipRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
+		FVector playerSpawnLocation = spaceshipLoc + offset;
+
+		player->SetActorLocation(playerSpawnLocation);
+		player->SetActorRelativeRotation(spaceshipRot);
+
 		characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
 	}
@@ -105,6 +108,7 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 	FVector2D v = value.Get<FVector2D>();
 	direction.X = v.X;
 	direction.Y = v.Y;
+	direction.Z = v.Y;
 	direction.Normalize();
 
 }

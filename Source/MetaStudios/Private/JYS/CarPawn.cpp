@@ -56,7 +56,7 @@ void ACarPawn::Tick(float DeltaTime)
 void ACarPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	UE_LOG(LogTemp, Error, TEXT("Spaceship SetupPlayerInputComponent"));
+
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -95,8 +95,16 @@ void ACarPawn::ExitCar()
 {
 	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 
-	if (characterController)
+	if (characterController && player)
 	{
+		FVector carLoc = GetActorLocation();
+		FRotator carRot = GetActorRotation();
+
+		FVector offset = carRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
+		FVector playerSpawnLocation = carLoc + offset;
+
+		player->SetActorLocation(playerSpawnLocation);
+		player->SetActorRelativeRotation(carRot);
 		characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
 	}

@@ -87,24 +87,23 @@ void AMetaStudiosCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	APlayerController* playerController = Cast<APlayerController>(GetController());
-	//playerController->SetViewTargetWithBlend(TPSCamera->GetChildActor(), 2.f)
 
-	if (FPSCamera == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("111111111111"))
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("2222222222222222"));
+	//if (FPSCamera == nullptr)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("111111111111"))
+	//}
+	//else
+	//{
+	//	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("2222222222222222"));
 
-	}
+	//}
 
 }
 //////////////////////Input////////////////////////////////
 void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	UE_LOG(LogTemp, Error, TEXT("AMetaStudiosCharacter SetupPlayerInputComponent"));
+
 	// Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -337,7 +336,6 @@ void AMetaStudiosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 void AMetaStudiosCharacter::Move(const FInputActionValue& Value)
 {
-UE_LOG(LogTemp, Warning, TEXT("ppppppppppp"));
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
