@@ -100,4 +100,6 @@ public:
 
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* T_MyNickName;
+
+	void GetPlayerNickName();
 };

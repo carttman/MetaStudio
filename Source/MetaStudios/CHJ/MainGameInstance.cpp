@@ -62,11 +62,11 @@ void UMainGameInstance::CreateMySession(FString roomName , int32 playerCount, in
 			TSharedPtr<const FUniqueNetId> UserId = Identity->GetUniquePlayerId(0);
 			if(UserId.IsValid())
 			{
-				FString Nickname = Identity->GetPlayerNickname(*UserId);
-				UE_LOG(LogTemp, Log, TEXT("Steam Nickname: %s"), *Nickname);
+				FString nickName = Identity->GetPlayerNickname(*UserId);
+				UE_LOG(LogTemp, Log, TEXT("Steam Nickname: %s"), *nickName);
+				MySessionName = nickName;
 			}
 		}
-			
 	}
 	// 스팀 닉네임 가져온다 ===================================================================================
 

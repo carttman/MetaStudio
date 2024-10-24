@@ -95,4 +95,9 @@ public:
 
 	UPROPERTY(meta=(BindWidget))
 	class UEditableText* TB_TEXT_SearchSession;
+
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* T_MyNickName;
+
+	void GetPlayerNickName();
 };

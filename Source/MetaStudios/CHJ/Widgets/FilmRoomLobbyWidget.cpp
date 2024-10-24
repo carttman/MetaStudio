@@ -4,6 +4,7 @@
 #include "../CHJ/Widgets/FilmRoomLobbyWidget.h"
 
 #include "FIlmSessionSlotWidget.h"
+#include "OnlineSubsystem.h"
 #include "Components/Button.h"
 #include "Components/EditableText.h"
 #include "Components/ScrollBox.h"
@@ -11,6 +12,7 @@
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/WidgetSwitcher.h"
+#include "Interfaces/OnlineIdentityInterface.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
 
 void UFilmRoomLobbyWidget::NativeConstruct()
@@ -35,35 +37,39 @@ void UFilmRoomLobbyWidget::NativeConstruct()
 
 	CR_Slider_PlayerCount->SetValue(2);
 	SetFindActive(false);
+	
+	GetPlayerNickName();
+	
+	FS_OnClickFindSessions();
 }
 
 void UFilmRoomLobbyWidget::OnClickGoMenu()
 {
-	LobbyWidgetSwitcher->SetActiveWidgetIndex(0);
+	//LobbyWidgetSwitcher->SetActiveWidgetIndex(0);
 }
 
 void UFilmRoomLobbyWidget::MENU_OnClickGoCreateRoom()
 {
-	// MENU_Edit_SessionName의 내용을 UNetTPSGameInstance의 MySessionName 에 반영하고싶다.
-	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
+	// MENU_Edit_SessionName의 내용을 GameInstance의 MySessionName 에 반영하고싶다.
+	//auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
 	
-	FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
-	if ( gi && false == newSessionName.IsEmpty() )
-	{
-		gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
-	}
+	// FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
+	// if ( gi && false == newSessionName.IsEmpty() )
+	// {
+	// 	gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
+	// }
 	LobbyWidgetSwitcher->SetActiveWidgetIndex(1);
 }
 
 void UFilmRoomLobbyWidget::MENU_OnClickGoFindSessions()
 {
 	// MENU_Edit_SessionName의 내용을 UNetTPSGameInstance의 MySessionName 에 반영하고싶다.
-	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
-	FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
-	if ( gi && false == newSessionName.IsEmpty() )
-	{
-		gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
-	}
+	// auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
+	// FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
+	// if ( gi && false == newSessionName.IsEmpty() )
+	// {
+	// 	gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
+	// }
 	LobbyWidgetSwitcher->SetActiveWidgetIndex(2);
 
 	FS_OnClickFindSessions();
@@ -99,7 +105,7 @@ void UFilmRoomLobbyWidget::FS_OnClickFindSessions()
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
 	if ( gi )
 	{
-			gi->FindOtherSessions();
+		gi->FindOtherSessions();
 	}
 }
 
@@ -146,5 +152,24 @@ void UFilmRoomLobbyWidget::SetFindActive(bool value)
 		// 찾기 끝
 		FS_Text_Finding->SetVisibility(ESlateVisibility::Hidden);
 		FS_Button_FindSessions->SetIsEnabled(true);
+	}
+}
+
+void UFilmRoomLobbyWidget::GetPlayerNickName()
+{	//스팀 닉네임을 가져온다
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if(Subsystem)
+	{
+		IOnlineIdentityPtr Identity = Subsystem->GetIdentityInterface();
+		if(Identity.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> UserId = Identity->GetUniquePlayerId(0);
+			if(UserId.IsValid())
+			{
+				FString Nickname = Identity->GetPlayerNickname(*UserId);
+				UE_LOG(LogTemp, Log, TEXT("Steam Nickname: %s"), *Nickname);
+				T_MyNickName->SetText(FText::FromString(*Nickname));
+			}
+		}
 	}
 }

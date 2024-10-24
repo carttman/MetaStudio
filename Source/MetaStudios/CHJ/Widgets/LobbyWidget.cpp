@@ -3,6 +3,7 @@
 
 #include "../../CHJ/Widgets/LobbyWidget.h"
 
+#include "OnlineSubsystem.h"
 #include "Components/Button.h"
 #include "Components/EditableText.h"
 #include "Components/ScrollBox.h"
@@ -12,6 +13,7 @@
 #include "MetaStudios/CHJ/MainGameInstance.h"
 #include "SessionSlotWidget.h"
 #include "Components/UniformGridPanel.h"
+#include "Interfaces/OnlineIdentityInterface.h"
 
 void ULobbyWidget::NativeConstruct()
 {
@@ -35,6 +37,10 @@ void ULobbyWidget::NativeConstruct()
 
 	CR_Slider_PlayerCount->SetValue(2);
 	SetFindActive(false);
+
+	GetPlayerNickName();
+	
+	FS_OnClickFindSessions();
 }
 
 void ULobbyWidget::OnClickGoMenu()
@@ -44,25 +50,25 @@ void ULobbyWidget::OnClickGoMenu()
 
 void ULobbyWidget::MENU_OnClickGoCreateRoom()
 {
-	// MENU_Edit_SessionName의 내용을 UNetTPSGameInstance의 MySessionName 에 반영하고싶다.
-	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
-	FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
-	if ( gi && false == newSessionName.IsEmpty() )
-	{
-		gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
-	}
+	// // MENU_Edit_SessionName의 내용을 UNetTPSGameInstance의 MySessionName 에 반영하고싶다.
+	// auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
+	// FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
+	// if ( gi && false == newSessionName.IsEmpty() )
+	// {
+	// 	gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
+	// }
 	LobbyWidgetSwitcher->SetActiveWidgetIndex(1);
 }
 
 void ULobbyWidget::MENU_OnClickGoFindSessions()
 {
-	// MENU_Edit_SessionName의 내용을 UNetTPSGameInstance의 MySessionName 에 반영하고싶다.
-	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
-	FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
-	if ( gi && false == newSessionName.IsEmpty() )
-	{
-		gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
-	}
+	// // MENU_Edit_SessionName의 내용을 UNetTPSGameInstance의 MySessionName 에 반영하고싶다.
+	// auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
+	// FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
+	// if ( gi && false == newSessionName.IsEmpty() )
+	// {
+	// 	gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
+	// }
 	LobbyWidgetSwitcher->SetActiveWidgetIndex(2);
 
 	FS_OnClickFindSessions();
@@ -147,4 +153,23 @@ void ULobbyWidget::SetFindActive(bool value)
 		FS_Button_FindSessions->SetIsEnabled(true);
 	}
 
+}
+
+void ULobbyWidget::GetPlayerNickName()
+{//스팀 닉네임을 가져온다
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if(Subsystem)
+	{
+		IOnlineIdentityPtr Identity = Subsystem->GetIdentityInterface();
+		if(Identity.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> UserId = Identity->GetUniquePlayerId(0);
+			if(UserId.IsValid())
+			{
+				FString Nickname = Identity->GetPlayerNickname(*UserId);
+				UE_LOG(LogTemp, Log, TEXT("Steam Nickname: %s"), *Nickname);
+				T_MyNickName->SetText(FText::FromString(*Nickname));
+			}
+		}
+	}
 }
