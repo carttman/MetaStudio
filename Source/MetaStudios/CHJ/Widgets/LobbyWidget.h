@@ -92,4 +92,7 @@ public:
 	class UUniformGridPanel* UGP_Grid;
 	UPROPERTY()
 	TArray<TObjectPtr<USessionSlotWidget>> Slots;
+
+	UPROPERTY(meta=(BindWidget))
+	class UEditableText* TB_TEXT_SearchSession;
 };

@@ -92,30 +92,42 @@ void UFilmRoomLobbyWidget::CR_OnChangeSliderPlayerCount(float value)
 
 void UFilmRoomLobbyWidget::FS_OnClickFindSessions()
 {
-	// 기존의 방 목록을 삭제하고
+	// 기존의 방 목록을 삭제한다
 	UGP_Grid->ClearChildren();
-	// 방찾기를 요청하고싶다.
+	// 방찾기를 요청
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
 	if ( gi )
 	{
-		gi->FindOtherSessions();
+			gi->FindOtherSessions();
 	}
 }
 
 void UFilmRoomLobbyWidget::AddSessionSlotWidget(const struct FRoomInfo& info, int32 RoomType)
 {
 	if (RoomType == 0) return;
-	int32 index = UGP_Grid->GetChildrenCount();
-	int32 X = index % 2;
-	int32 Y = index / 2;
-	//UE_LOG(LogTemp, Warning, TEXT("index : %d X : %d Y : %d"), index, X, Y);
-	auto* slot = CreateWidget<UFIlmSessionSlotWidget>(this , SessionSlotWidgetFactory);
-	
-	slot->UpdateInfo(info);
-	
-	UGP_Grid->AddChildToUniformGrid(slot, Y, X);
-	
-	//FS_ScrollBox->AddChild(slot);
+	//검색칸에 내용이 있고 방이름에 검색칸 내용이 포함 되어 있다면
+	if(!TB_TEXT_SearchSession->GetText().IsEmpty() && info.roomName.Contains(TB_TEXT_SearchSession->GetText().ToString()))
+	{
+		int32 index = UGP_Grid->GetChildrenCount();
+		int32 X = index % 2;
+		int32 Y = index / 2;
+		auto* slot = CreateWidget<UFIlmSessionSlotWidget>(this , SessionSlotWidgetFactory);
+		
+		slot->UpdateInfo(info);
+		
+		UGP_Grid->AddChildToUniformGrid(slot, Y, X);
+	}
+	else if(TB_TEXT_SearchSession->GetText().IsEmpty())
+	{
+		int32 index = UGP_Grid->GetChildrenCount();
+		int32 X = index % 2;
+		int32 Y = index / 2;
+		auto* slot = CreateWidget<UFIlmSessionSlotWidget>(this , SessionSlotWidgetFactory);
+		
+		slot->UpdateInfo(info);
+		
+		UGP_Grid->AddChildToUniformGrid(slot, Y, X);
+	}
 }
 
 void UFilmRoomLobbyWidget::SetFindActive(bool value)

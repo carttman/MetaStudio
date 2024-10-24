@@ -108,14 +108,28 @@ void ULobbyWidget::AddSessionSlotWidget(const struct FRoomInfo& info, int32 Room
 {
 	//RoomType이 0인것만 탐색한다.
 	if (RoomType == 1) return;
-	int32 index = UGP_Grid->GetChildrenCount();
-	int32 X = index % 2;
-	int32 Y = index / 2;
-	
-	auto* slot = CreateWidget<USessionSlotWidget>(this , SessionSlotWidgetFactory);
-	
-	slot->UpdateInfo(info);
-	UGP_Grid->AddChildToUniformGrid(slot, Y, X);
+	//검색칸에 내용이 있고 방이름에 검색칸 내용이 포함 되어 있다면
+	if(!TB_TEXT_SearchSession->GetText().IsEmpty() && info.roomName.Contains(TB_TEXT_SearchSession->GetText().ToString()))
+	{
+		int32 index = UGP_Grid->GetChildrenCount();
+		int32 X = index % 2;
+		int32 Y = index / 2;
+		auto* slot = CreateWidget<USessionSlotWidget>(this , SessionSlotWidgetFactory);
+		slot->UpdateInfo(info);
+		
+		UGP_Grid->AddChildToUniformGrid(slot, Y, X);
+	}
+	else if(TB_TEXT_SearchSession->GetText().IsEmpty())
+	{
+		int32 index = UGP_Grid->GetChildrenCount();
+		int32 X = index % 2;
+		int32 Y = index / 2;
+		auto* slot = CreateWidget<USessionSlotWidget>(this , SessionSlotWidgetFactory);
+		
+		slot->UpdateInfo(info);
+		
+		UGP_Grid->AddChildToUniformGrid(slot, Y, X);
+	}
 }
 
 void ULobbyWidget::SetFindActive(bool value)
