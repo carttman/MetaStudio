@@ -78,6 +78,7 @@ AJSH_Player::AJSH_Player()
 	RecordCamera->SetRelativeLocation(FVector(440.0f, 0.0f, 0.0f));
 	// RecordCamera->SetRelativeRotation(FRotator(13.876860f, -0.433584f, -59.389724f));
 	RecordCamera->bUsePawnControlRotation = false;
+	RecordCamera->FieldOfView = 90.0f;
 
 	FallGuys = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	FallGuys->SetupAttachment(RootComponent);
@@ -352,6 +353,9 @@ void AJSH_Player::StartRecording()
 	
 	if (HasAuthority())
 	{
+		// 카메라 확대, 축소, 회전 , 초기화
+		CameraReset();
+		
 		// 인스턴스에 넣어둔 녹화 기능 시작
 		//ObsGamInstance->StartRecord();
 		JPlayerController->StartRecord();
@@ -665,6 +669,9 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 	// Editor Mode On
 	if (!EditorMode_B)
 	{
+		// 카메라 확대, 축소, 회전 , 초기화
+		CameraReset();
+		
 		UE_LOG(LogTemp, Error, TEXT("EditorModeOn"));
 		
 		// FlyMode를 제어하는 bool 값 (Editor Mode 일때 항상 날아다니 도록)
@@ -806,18 +813,44 @@ void AJSH_Player::Camera_Zoom_In()
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
 	if (Bool_ZoomMode && !EditorMode_B)
 	{
-		CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength-30.0f, 150.0f, 800.0f);
-		UE_LOG(LogTemp, Error, TEXT("IN"));
+		// CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength+30.0f, 150.0f, 800.0f);
+		UE_LOG(LogTemp, Error, TEXT("Out"));
+		
+		// float NewFOV = FMath::Clamp(RecordCamera->FieldOfView + ZoomSpeed, MinFOV, MaxFOV);
+		ZoomFOV = RecordCamera->FieldOfView - ZoomSpeed;
+		if (ZoomFOV <= 10.0f)
+		{
+			ZoomFOV = 10.0f;
+			RecordCamera->SetFieldOfView(ZoomFOV);
+		}
+		else
+		{
+			RecordCamera->SetFieldOfView(ZoomFOV);
+		}
 	}
 }
 
 void AJSH_Player::Camera_Zoom_Out()
 {
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
+	
 	if (Bool_ZoomMode && !EditorMode_B)
 	{
-		CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength+30.0f, 150.0f, 800.0f);
-		UE_LOG(LogTemp, Error, TEXT("Out"));
+		// CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength-30.0f, 150.0f, 800.0f);
+		UE_LOG(LogTemp, Error, TEXT("IN"));
+
+		// float NewFOV = FMath::Clamp(RecordCamera->FieldOfView - ZoomSpeed, MinFOV, MaxFOV);
+		
+		ZoomFOV = RecordCamera->FieldOfView + ZoomSpeed;
+		if (ZoomFOV >= 120.0f)
+		{
+			ZoomFOV = 120.0f;
+			RecordCamera->SetFieldOfView(ZoomFOV);
+		}
+		else
+		{
+			RecordCamera->SetFieldOfView(ZoomFOV);
+		}
 	}
 }
 
@@ -860,6 +893,14 @@ void AJSH_Player::CameraDefault()
 	// 1인칭이 아니라면 실행 하지 않음
 	if (!RecordCamera->IsActive()) return;
 	
+	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
+	CurrentAngl = 0;
+}
+
+void AJSH_Player::CameraReset()
+{
+	// 카메라 원상 복구 해주는 코드
+	RecordCamera->SetFieldOfView(90.0f);
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
 }
