@@ -1,20 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "JYS/SpaceshipPawn.h"
+#include "JYS/CarPawn.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
+#include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
+#include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
 
 // Sets default values
-ASpaceshipPawn::ASpaceshipPawn()
+ACarPawn::ACarPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;	
+	PrimaryActorTick.bCanEverTick = true;
 
-	SpaceshipMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpaceshipMesh"));
-	RootComponent= SpaceshipMesh;
+	CarMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CarMesh"));
+	RootComponent = CarMesh;
+
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
@@ -25,20 +26,26 @@ ASpaceshipPawn::ASpaceshipPawn()
 }
 
 // Called when the game starts or when spawned
-void ASpaceshipPawn::BeginPlay()
+void ACarPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
-
-// Called every frame 
-void ASpaceshipPawn::Tick(float DeltaTime)
+// Called every frame
+void ACarPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//if (!MovementDirection.IsZero())
+	//{
+	//	const FVector newLocation = GetActorLocation() + (MovementDirection * DeltaTime * MovementSpeed);
+	//	SetActorLocation(newLocation);
+	//}
+
 	FTransform trans = FTransform(this->GetControlRotation());
 	direction = trans.TransformVector(direction);
-	// direction.Z = 0;
+	direction.Z = 0;
 	direction.Normalize();
 
 	AddMovementInput(direction);
@@ -46,11 +53,9 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 }
 
 // Called to bind functionality to input
-void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ACarPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("ExitSpaceship", IE_Pressed, this, &ASpaceshipPawn::ExitSpaceship);
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -61,62 +66,65 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+	
+	PlayerInputComponent->BindAction("ExitCar", IE_Pressed, this, &ACarPawn::ExitCar);
+
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(SpaceshipLook, ETriggerEvent::Triggered, this, &ASpaceshipPawn::OnMyActionLook);
-		EnhancedInputComponent->BindAction(SpaceshipMove, ETriggerEvent::Triggered, this, &ASpaceshipPawn::OnMyActionMove);
+		EnhancedInputComponent->BindAction(CarLook, ETriggerEvent::Triggered, this, &ACarPawn::OnMyActionLook);
+		EnhancedInputComponent->BindAction(CarMove, ETriggerEvent::Triggered, this, &ACarPawn::OnMyActionMove);
 	}
 
 }
 
-bool ASpaceshipPawn::CanPlayerEnter()
+bool ACarPawn::CanPlayerEnterCar()
 {
 	// 플레이어와 우주선 사이의 간격
 	APlayerController* playerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 	if (!playerController) return false;
 
-	APawn* SpaceshipPawn = playerController->GetPawn();
-	if(!SpaceshipPawn) return false;
+	APawn* CarPawn = playerController->GetPawn();
+	if (!CarPawn) return false;
 
-	float distance = GetDistanceTo(SpaceshipPawn);
+	float distance = GetDistanceTo(CarPawn);
 	return distance <= 1000.0f;
 }
 
-void ASpaceshipPawn::ExitSpaceship()
+void ACarPawn::ExitCar()
 {
 	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 
 	if (characterController && player)
 	{
-		FVector spaceshipLoc = GetActorLocation();
-		FRotator spaceshipRot = GetActorRotation();
+		FVector carLoc = GetActorLocation();
+		FRotator carRot = GetActorRotation();
 
-		FVector offset = spaceshipRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
-		FVector playerSpawnLocation = spaceshipLoc + offset;
+		FVector offset = carRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
+		FVector playerSpawnLocation = carLoc + offset;
 
 		player->SetActorLocation(playerSpawnLocation);
-		player->SetActorRelativeRotation(spaceshipRot);
-
+		player->SetActorRelativeRotation(carRot);
 		characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
 	}
 }
 
-void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
+void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();
 	direction.X = v.X;
 	direction.Y = v.Y;
-	direction.Z = v.Y;
 	direction.Normalize();
-
 }
 
-void ASpaceshipPawn::OnMyActionLook(const FInputActionValue& value)
+void ACarPawn::OnMyActionLook(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();
 
 	AddControllerPitchInput(-v.Y);
 	AddControllerYawInput(v.X);
 }
+
+
+

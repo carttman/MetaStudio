@@ -5,32 +5,29 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "MetaStudiosCharacter.h"
-#include "SpaceshipPawn.generated.h"
+#include "CarPawn.generated.h"
 
 UCLASS()
-class METASTUDIOS_API ASpaceshipPawn : public APawn
+class METASTUDIOS_API ACarPawn : public APawn
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* SpaceshipMove;	
+	UInputAction* CarMove;	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* SpaceshipLook;
-
-
+	UInputAction* CarLook;
 
 public:
 	// Sets default values for this pawn's properties
-	ASpaceshipPawn();
+	ACarPawn();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 
 public:	
 	// Called every frame
@@ -39,21 +36,19 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	bool CanPlayerEnter();
+	bool CanPlayerEnterCar();
 
-	void ExitSpaceship();
+	void ExitCar();
 
 	AMetaStudiosCharacter* player;
 
-	UFUNCTION(BlueprintCallable)
 	void OnMyActionMove(const FInputActionValue& value);
 	void OnMyActionLook(const FInputActionValue& value);
 
-	float speed = 500.0f;
-
+	float carSpeed = 500.0f;
 
 private:
-	
+
 	FVector MovementDirection;
 
 	FVector direction;
@@ -62,12 +57,11 @@ private:
 	float MovementSpeed = 500.0f;
 
 	UPROPERTY(VisibleAnywhere)
-	class UStaticMeshComponent* SpaceshipMesh;
+	class UStaticMeshComponent* CarMesh;
 
 	UPROPERTY(VisibleAnywhere)
 	class USpringArmComponent* SpringArm;
 
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* CameraComp;
-
 };

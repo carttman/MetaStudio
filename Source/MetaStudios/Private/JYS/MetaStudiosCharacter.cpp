@@ -17,7 +17,7 @@
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
 #include "JYS/SpaceshipPawn.h"
-#include "JYS/CharacterController.h"
+#include "JYS/CarPawn.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -87,17 +87,16 @@ void AMetaStudiosCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	APlayerController* playerController = Cast<APlayerController>(GetController());
-	//playerController->SetViewTargetWithBlend(TPSCamera->GetChildActor(), 2.f)
 
-	if (FPSCamera == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("111111111111"))
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("2222222222222222"));
+	//if (FPSCamera == nullptr)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("111111111111"))
+	//}
+	//else
+	//{
+	//	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("2222222222222222"));
 
-	}
+	//}
 
 }
 //////////////////////Input////////////////////////////////
@@ -110,6 +109,8 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
+			// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
+			Subsystem->ClearAllMappings();
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
@@ -138,6 +139,7 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 		//// 우주선에서 앉았다가 일어나기 -> 컨트롤러 바뀌게////////
 		PlayerInputComponent->BindAction("EnterSpaceship", IE_Pressed, this, &AMetaStudiosCharacter::EnterSpaceship);
+		PlayerInputComponent->BindAction("EnterCar", IE_Pressed, this, &AMetaStudiosCharacter::EnterCar);
 	}
 	else
 	{
@@ -145,30 +147,6 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	}
 }
 
-//////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
-void AMetaStudiosCharacter::EnterSpaceship()
-{
-	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-
-	ASpaceshipPawn* SpaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
-
-	if (SpaceshipActor)
-	{
-		if (characterController && SpaceshipActor)
-		{
-			SpaceshipActor->player = this;
-			if (SpaceshipActor->CanPlayerEnter())
-			{
-				characterController->Possess(SpaceshipActor);
-				GetMesh()->SetVisibility(false);
-			}
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Spaceship class could not be loaded!"));
-	}
-}
 
 /////////////////////Booster/////////////////////////////////////////////////////
 
@@ -299,6 +277,56 @@ void AMetaStudiosCharacter::ChangeCameraMode()
 	IsTPSMode = !IsTPSMode;
 }
 
+//////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
+void AMetaStudiosCharacter::EnterSpaceship()
+{
+	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+
+	ASpaceshipPawn* SpaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
+
+	if (SpaceshipActor)
+	{
+		if (characterController && SpaceshipActor)
+		{
+			SpaceshipActor->player = this;
+			if (SpaceshipActor->CanPlayerEnter())
+			{
+				characterController->Possess(SpaceshipActor);
+				GetMesh()->SetVisibility(false);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Spaceship class could not be loaded!"));
+	}
+}
+
+/// 자동차랑 플레이어랑 컨트롤러 바꾸기
+void AMetaStudiosCharacter::EnterCar()
+{
+	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+
+	ACarPawn* CarActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
+
+	if (CarActor)
+	{
+		if (characterController && CarActor)
+		{
+			CarActor->player = this;
+			if (CarActor->CanPlayerEnterCar())
+			{
+				characterController->Possess(CarActor);
+				GetMesh()->SetVisibility(false);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Car class could not be loaded!"));
+	}
+}
+
 void AMetaStudiosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -329,15 +357,13 @@ void AMetaStudiosCharacter::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		AddControllerYawInput(LookAxisVector.X);
+		AddControllerYawInput(-LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
 
 void AMetaStudiosCharacter::FindObject()
 {
-	//AActor* findObject = UGameplayStatics::GetActorOfClass(GetWorld(), object);
-
 	auto playerLoc = GetWorld()->GetFirstPlayerController()->GetCharacter()->GetActorLocation();
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), object, objects);
