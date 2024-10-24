@@ -15,6 +15,9 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+// 순환참조 문제로, Include 말고
+class AJSH_PlayerController;
+
 
 //DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -29,6 +32,19 @@ class AJSH_Player : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* RecordCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* FallGuys;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* FallGuys_Camera;
+	
+	
+
+
+	// Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 	
@@ -40,14 +56,50 @@ class AJSH_Player : public ACharacter
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
-
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* StartRecord;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* SpectatorModeOnOff;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_EditorMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Up_Down;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Up_Down2;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Spawn_Destroy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Third_First;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_EditMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_MouseWheel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_ZOOM_In;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_ZOOM_Out;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Right;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Left;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Default;
+
+	
 public:
 	AJSH_Player();
 	
@@ -77,28 +129,43 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 
-	//// 녹화 관련 ////================================
+#pragma region Record
 
+	// 녹화 시작 / 종료
 	class UJSH_OBSWebSocket* ObsGamInstance;
-	
 	FProcHandle PH;
-	
-	// 녹화 시작
+
+	UFUNCTION()
 	void StartRecording();
 
-	// 녹화 종료
-	void StopRecording();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_StartRecording();
 
-	// 녹화 모드 On, Off 제어
 	UPROPERTY(Replicated)
-	bool Recording = false;
+	bool Record_b_On_Off = false;
+
+
+	// 3인칭 <-> 1인칭
+	UPROPERTY(Replicated)
+	bool Camera_b_Third_First = false;
+	UFUNCTION()
+	void Camera_Third_First_Change();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Camera_Third_First_Change();
+
+	// 카메라 Visible 껏다 키기
+	UPROPERTY(Replicated)
+	bool CameraSpawn_b_On_Off = false;
+	UFUNCTION()
+	void CameraSpawn();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_CameraSpawn();
 	
-	//// =================================== 녹화 관련 ////
-
-
+#pragma endregion
 
 	
-	//// Editor //// ================================
+#pragma region Editor (Player <-> SpectatorPawn)
+	
 	UFUNCTION()
 	void SpectatorMode();
 	UFUNCTION(NetMulticast, Reliable)
@@ -110,7 +177,105 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_Visible_On_OFF();
 	UPROPERTY(Replicated)
-	bool PlayerVisibleOn = true;
-	//// ================================== Editor ////
+	bool PlayerVisible_b_On = true;
+
+	
+	AJSH_PlayerController* JPlayerController;
+	
+#pragma endregion
+
+	
+#pragma region FlyMode
+	
+	UFUNCTION()
+	void FlyMode();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_FlyMode();
+	UPROPERTY(Replicated)
+	bool FlyMode_b_On_Off = false;
+
+
+	UFUNCTION()
+	void Fly_Up_Down(const FInputActionValue& Value);
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Fly_Up_Down(const FInputActionValue& Value);
+
+	float Fly_Zvalue = 0;
+	float Fly_Off_Value = 0 ;
+
+
+
+	UFUNCTION()
+	void Fly_Down_Ray(const FInputActionValue& Value);
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Fly_Down_Ray(const FInputActionValue& Value);
+
+
+	// 마우스 휠로 FlyMode Speed 조정
+	UPROPERTY()
+	float MaxFlySpeed_C = 500.f;
+	UPROPERTY()
+	float BrakingDecelerationFlying_C = 5000.f;
+
+	
+	UFUNCTION()
+	void FlySpeed(const FInputActionValue& Value);
+	
+#pragma endregion
+
+
+#pragma region EditorMode
+
+	UFUNCTION()
+	void EditorMode();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_EditorMode();
+
+	
+	APlayerController* OriginController;
+	
+
+	UFUNCTION()
+	void EnableEdit();
+	UFUNCTION()
+	void DisableEdit();
+
+	UPROPERTY(Replicated)
+	bool EditorMode_B = false;
+
+#pragma endregion
+
+
+#pragma region MainPlatform
+
+	// 메인 플랫폼 일떄 기능 막아두는 bool 값
+	UPROPERTY(Replicated)
+	bool Bool_MainLock = false;
+	
+#pragma endregion
+
+#pragma region Camera Control
+
+	bool Bool_ZoomMode = false;
+	
+	UFUNCTION()
+	void Camera_Zoom_In();
+	UFUNCTION()
+	void Camera_Zoom_Out();
+
+
+	UFUNCTION()
+	void CameraRight();
+	UFUNCTION()
+	void CameraLeft();
+	UFUNCTION()
+	void CameraDefault();
+	
+	FRotator DefaultCameraleaning = FRotator(0, 0, 0);
+	FRotator NewCameraRotation;
+	float Amount = 0.1f;
+	float CurrentAngl = 0.0f;
+	
+#pragma endregion
 	
 };
