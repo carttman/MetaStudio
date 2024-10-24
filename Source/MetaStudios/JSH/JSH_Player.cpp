@@ -122,7 +122,44 @@ void AJSH_Player::BeginPlay()
 
 
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	
+}
+
+void AJSH_Player::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+
+
+	// if (Bool_RightZoom)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("tick in"));
+	// 	float TargetFOV = RecordCamera->FieldOfView - ZoomSpeed;
+	// 	TargetFOV = FMath::Clamp(TargetFOV, MinFOV, MaxFOV); 
+	// 	
+	// 	RecordCamera->FieldOfView = FMath::FInterpTo(RecordCamera->FieldOfView, TargetFOV, DeltaTime, ZoomSpeed);
+	// 	
+	// 	if (RecordCamera->FieldOfView <= 10.0f)
+	// 	{
+	// 		UE_LOG(LogTemp, Warning, TEXT("120"));
+	// 		RecordCamera->FieldOfView = 10.0f;
+	// 	}
+	// }
+	//
+	//
+	// if (Bool_ZoomMode)
+	// {
+	//
+	// 	float TargetFOV = RecordCamera->FieldOfView + ZoomSpeed;
+	// 	TargetFOV = FMath::Clamp(TargetFOV, MinFOV, MaxFOV);
+	//
+	// 	// 선형 보간 사용
+	// 	RecordCamera->FieldOfView = FMath::FInterpTo(RecordCamera->FieldOfView, TargetFOV, DeltaTime, FMath::Abs(ZoomSpeed));
+	//
+	// 	if (RecordCamera->FieldOfView >= 120.0f)
+	// 	{
+	// 		RecordCamera->FieldOfView = 12.0f;
+	// 	}
+	// }
 }
 
 
@@ -182,12 +219,17 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Completed, this, &AJSH_Player::EnableEdit);
 
 
-		EnhancedInputComponent->BindAction(IA_ZOOM_In, ETriggerEvent::Started, this, &AJSH_Player::Camera_Zoom_In);
-		EnhancedInputComponent->BindAction(IA_ZOOM_Out, ETriggerEvent::Started, this, &AJSH_Player::Camera_Zoom_Out);
+		EnhancedInputComponent->BindAction(IA_ZOOM_In, ETriggerEvent::Triggered, this, &AJSH_Player::Camera_Zoom_In);
+		EnhancedInputComponent->BindAction(IA_ZOOM_Out, ETriggerEvent::Triggered, this, &AJSH_Player::Camera_Zoom_Out);
 
 		EnhancedInputComponent->BindAction(IA_Camera_Right, ETriggerEvent::Triggered, this, &AJSH_Player::CameraRight);
 		EnhancedInputComponent->BindAction(IA_Camera_Left, ETriggerEvent::Triggered, this, &AJSH_Player::CameraLeft);
 		EnhancedInputComponent->BindAction(IA_Camera_Default, ETriggerEvent::Started, this, &AJSH_Player::CameraDefault);
+
+
+		// EnhancedInputComponent->BindAction(IA_Camera_Zoom_LeftMouse, ETriggerEvent::Triggered, this, &AJSH_Player::MouseRight_CamearZoom);
+		// EnhancedInputComponent->BindAction(IA_Camera_Zoom_LeftMouse, ETriggerEvent::Ongoing, this, &AJSH_Player::MouseRight_CamearZoom);
+		// EnhancedInputComponent->BindAction(IA_Camera_Zoom_LeftMouse, ETriggerEvent::Completed, this, &AJSH_Player::MouseRight_CamearZoom_Complete);
 		
 	}
 	else
@@ -811,8 +853,13 @@ void AJSH_Player::DisableEdit()
 void AJSH_Player::Camera_Zoom_In()
 {
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
-	if (Bool_ZoomMode && !EditorMode_B)
+	// if (Bool_ZoomMode && !EditorMode_B)
+
+	if (!EditorMode_B)
 	{
+
+		WheelOn = true;
+		
 		// CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength+30.0f, 150.0f, 800.0f);
 		UE_LOG(LogTemp, Error, TEXT("Out"));
 		
@@ -833,8 +880,10 @@ void AJSH_Player::Camera_Zoom_In()
 void AJSH_Player::Camera_Zoom_Out()
 {
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
-	
-	if (Bool_ZoomMode && !EditorMode_B)
+	// if (Bool_ZoomMode && !EditorMode_B)
+
+
+	if (!EditorMode_B)
 	{
 		// CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength-30.0f, 150.0f, 800.0f);
 		UE_LOG(LogTemp, Error, TEXT("IN"));
@@ -904,6 +953,22 @@ void AJSH_Player::CameraReset()
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
 }
+
+// void AJSH_Player::MouseRight_CamearZoom()
+// {
+// 	UE_LOG(LogTemp, Warning, TEXT("lllllll"));
+// 	if (!Bool_RightZoom)
+// 	{
+// 		Bool_RightZoom = true;
+// 		UE_LOG(LogTemp, Warning, TEXT("l true"));
+// 	}
+// }
+//
+// void AJSH_Player::MouseRight_CamearZoom_Complete()
+// {
+// 	Bool_RightZoom = false;
+// 	UE_LOG(LogTemp, Warning, TEXT("false"));
+// }
 
 #pragma endregion
 

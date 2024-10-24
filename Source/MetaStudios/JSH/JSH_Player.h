@@ -99,7 +99,8 @@ class AJSH_Player : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Camera_Default;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Zoom_LeftMouse;
 public:
 	AJSH_Player();
 	
@@ -116,6 +117,8 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	virtual void BeginPlay();
+
+	virtual void Tick(float DeltaTime) override;
 
 public:
 
@@ -254,8 +257,10 @@ public:
 	
 #pragma endregion
 
+
 #pragma region Camera Control
 
+	UPROPERTY()
 	bool Bool_ZoomMode = false;
 	
 	UFUNCTION()
@@ -278,18 +283,28 @@ public:
 	float Amount = 0.1f;
 	float CurrentAngl = 0.0f;
 
-
+	UPROPERTY()
 	float ZoomFOV = 0;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
-	float ZoomSpeed = 10.0f; 
+	UPROPERTY()
+	float ZoomSpeed = 1.0f; 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
+	UPROPERTY()
 	float MinFOV = 120.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
+	UPROPERTY()
 	float MaxFOV = 10.0f;
-	
+
+	bool WheelOn = false;
+
+
+	// UFUNCTION()
+	// void MouseRight_CamearZoom();
+	// UFUNCTION()
+	// void MouseRight_CamearZoom_Complete();
+
+	UPROPERTY()
+	bool Bool_RightZoom = false;
 #pragma endregion
 	
 };
