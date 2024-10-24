@@ -504,6 +504,11 @@ void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
 	if (Bool_ZoomMode && !EditorMode_B) return;
 
+	// FlyMode가 아니라면 속도 조절 안 해 !!!
+	if (!GetCharacterMovement()->IsFlying()) return;
+
+
+
 	float tempvalue = Value.Get<float>();;
 
 	MaxFlySpeed_C = MaxFlySpeed_C + tempvalue * 50;
