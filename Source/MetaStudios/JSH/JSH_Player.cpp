@@ -122,6 +122,7 @@ void AJSH_Player::BeginPlay()
 
 
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	
 }
 
 
@@ -179,6 +180,15 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Triggered, this, &AJSH_Player::DisableEdit);
 		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Ongoing, this, &AJSH_Player::DisableEdit);
 		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Completed, this, &AJSH_Player::EnableEdit);
+
+
+		EnhancedInputComponent->BindAction(IA_ZOOM_In, ETriggerEvent::Started, this, &AJSH_Player::Camera_Zoom_In);
+		EnhancedInputComponent->BindAction(IA_ZOOM_Out, ETriggerEvent::Started, this, &AJSH_Player::Camera_Zoom_Out);
+
+		EnhancedInputComponent->BindAction(IA_Camera_Right, ETriggerEvent::Triggered, this, &AJSH_Player::CameraRight);
+		EnhancedInputComponent->BindAction(IA_Camera_Left, ETriggerEvent::Triggered, this, &AJSH_Player::CameraLeft);
+		EnhancedInputComponent->BindAction(IA_Camera_Default, ETriggerEvent::Started, this, &AJSH_Player::CameraDefault);
+		
 	}
 	else
 	{
@@ -491,6 +501,9 @@ void AJSH_Player::NetMulti_CameraSpawn_Implementation()
 
 void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 {
+	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
+	if (Bool_ZoomMode && !EditorMode_B) return;
+
 	float tempvalue = Value.Get<float>();;
 
 	MaxFlySpeed_C = MaxFlySpeed_C + tempvalue * 50;
@@ -627,7 +640,6 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 #pragma endregion
 
 
-
 #pragma region EditorMode
 
 
@@ -639,7 +651,8 @@ void AJSH_Player::EditorMode()
 	
 	// 녹화 중이 아닐때에만 Editor 모드 가능
 	if (Record_b_On_Off) return;
-
+	
+	
 	NetMulti_EditorMode();
 }
 
@@ -731,9 +744,15 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 
 void AJSH_Player::EnableEdit()
 {
+	// 마우스 우클릭을 안 하고 있으면 , ZoomMode를 Flase로
+	Bool_ZoomMode = false;
+	UE_LOG(LogTemp, Error, TEXT("false"));
+	
 	// Editor 모드에서 마우스를 누른 상태로 , Editor 모드를 껏을때 , 꺼지고 나서 마우스를 떼면 EnableEdit가 On되는 문제가 있어
 	// 이렇게 막아줌
 	if (!EditorMode_B) return;
+
+
 	
 	GetMovementComponent()->SetComponentTickEnabled(false);
 	
@@ -752,6 +771,12 @@ void AJSH_Player::EnableEdit()
 
 void AJSH_Player::DisableEdit()
 {
+	// 마우스 우클릭 하고 있으면, ZoomMode를 True로
+	if (!Bool_ZoomMode)
+	{
+		Bool_ZoomMode = true;
+		UE_LOG(LogTemp, Error, TEXT("true"));
+	}
 	
 	GetMovementComponent()->SetComponentTickEnabled(true);
 
@@ -766,9 +791,76 @@ void AJSH_Player::DisableEdit()
 	}
 }
 
+
 #pragma endregion
 	
 
+#pragma region Camera Control
+
+void AJSH_Player::Camera_Zoom_In()
+{
+	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
+	if (Bool_ZoomMode && !EditorMode_B)
+	{
+		CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength-30.0f, 150.0f, 800.0f);
+		UE_LOG(LogTemp, Error, TEXT("IN"));
+	}
+}
+
+void AJSH_Player::Camera_Zoom_Out()
+{
+	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
+	if (Bool_ZoomMode && !EditorMode_B)
+	{
+		CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength+30.0f, 150.0f, 800.0f);
+		UE_LOG(LogTemp, Error, TEXT("Out"));
+	}
+}
+
+void AJSH_Player::CameraRight()
+{
+	// 1인칭이 아니라면 실행 하지 않음
+	if (!RecordCamera->IsActive()) return;
+	
+	CurrentAngl += Amount;
+	
+	if (CurrentAngl > 45.0f) 
+	{
+		CurrentAngl = 45.0f;
+	}
+	
+	NewCameraRotation = RecordCamera->GetRelativeRotation();
+	NewCameraRotation.Roll = CurrentAngl;
+	RecordCamera->SetRelativeRotation(NewCameraRotation);
+}
+
+void AJSH_Player::CameraLeft()
+{
+	// 1인칭이 아니라면 실행 하지 않음
+	if (!RecordCamera->IsActive()) return;
+	
+	CurrentAngl -= Amount;
+	
+	if (CurrentAngl < -45.0f) 
+	{
+		CurrentAngl = -45.0f;
+	}
+	
+	NewCameraRotation = RecordCamera->GetRelativeRotation();
+	NewCameraRotation.Roll = CurrentAngl;
+	RecordCamera->SetRelativeRotation(NewCameraRotation);
+}
+
+void AJSH_Player::CameraDefault()
+{
+	// 1인칭이 아니라면 실행 하지 않음
+	if (!RecordCamera->IsActive()) return;
+	
+	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
+	CurrentAngl = 0;
+}
+
+#pragma endregion
 
 
 

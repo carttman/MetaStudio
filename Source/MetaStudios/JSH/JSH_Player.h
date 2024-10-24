@@ -83,6 +83,22 @@ class AJSH_Player : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_MouseWheel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_ZOOM_In;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_ZOOM_Out;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Right;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Left;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Default;
+
 	
 public:
 	AJSH_Player();
@@ -235,6 +251,30 @@ public:
 	// 메인 플랫폼 일떄 기능 막아두는 bool 값
 	UPROPERTY(Replicated)
 	bool Bool_MainLock = false;
+	
+#pragma endregion
+
+#pragma region Camera Control
+
+	bool Bool_ZoomMode = false;
+	
+	UFUNCTION()
+	void Camera_Zoom_In();
+	UFUNCTION()
+	void Camera_Zoom_Out();
+
+
+	UFUNCTION()
+	void CameraRight();
+	UFUNCTION()
+	void CameraLeft();
+	UFUNCTION()
+	void CameraDefault();
+	
+	FRotator DefaultCameraleaning = FRotator(0, 0, 0);
+	FRotator NewCameraRotation;
+	float Amount = 0.1f;
+	float CurrentAngl = 0.0f;
 	
 #pragma endregion
 	
