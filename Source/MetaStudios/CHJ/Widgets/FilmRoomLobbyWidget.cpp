@@ -7,6 +7,7 @@
 #include "OnlineSubsystem.h"
 #include "Components/Button.h"
 #include "Components/EditableText.h"
+#include "Components/Overlay.h"
 #include "Components/ScrollBox.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
@@ -28,7 +29,7 @@ void UFilmRoomLobbyWidget::NativeConstruct()
 	MENU_Button_GoFindSessions->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::MENU_OnClickGoFindSessions);
 
 	CR_Button_GoMenu->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::OnClickGoMenu);
-	FS_Button_GoMenu->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::OnClickGoMenu);
+	FS_Button_GoMenu->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::ExitMenu);
 
 	CR_Button_CreateRoom->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::CR_OnClickCreateRoom);
 	CR_Slider_PlayerCount->OnValueChanged.AddDynamic(this , &UFilmRoomLobbyWidget::CR_OnChangeSliderPlayerCount);
@@ -46,6 +47,8 @@ void UFilmRoomLobbyWidget::NativeConstruct()
 void UFilmRoomLobbyWidget::OnClickGoMenu()
 {
 	//LobbyWidgetSwitcher->SetActiveWidgetIndex(0);
+	//O_CreateRoom->RemoveFromParent();
+	O_CreateRoom->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UFilmRoomLobbyWidget::MENU_OnClickGoCreateRoom()
@@ -58,7 +61,8 @@ void UFilmRoomLobbyWidget::MENU_OnClickGoCreateRoom()
 	// {
 	// 	gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
 	// }
-	LobbyWidgetSwitcher->SetActiveWidgetIndex(1);
+	//LobbyWidgetSwitcher->SetActiveWidgetIndex(1);
+	O_CreateRoom->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UFilmRoomLobbyWidget::MENU_OnClickGoFindSessions()
@@ -172,4 +176,9 @@ void UFilmRoomLobbyWidget::GetPlayerNickName()
 			}
 		}
 	}
+}
+
+void UFilmRoomLobbyWidget::ExitMenu()
+{
+	//LobbyWidgetSwitcher->SetVisibility(ESlateVisibility::Hidden);
 }

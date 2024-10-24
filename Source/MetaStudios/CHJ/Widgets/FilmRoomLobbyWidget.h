@@ -102,4 +102,10 @@ public:
 	class UTextBlock* T_MyNickName;
 
 	void GetPlayerNickName();
+
+	UPROPERTY(meta=(BindWidget))
+	class UOverlay* O_CreateRoom;
+
+	UFUNCTION()
+	void ExitMenu();
 };

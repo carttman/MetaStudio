@@ -99,5 +99,8 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* T_MyNickName;
 
+	UPROPERTY(meta=(BindWidget))
+	class UOverlay* O_CreateRoom;
+	
 	void GetPlayerNickName();
 };

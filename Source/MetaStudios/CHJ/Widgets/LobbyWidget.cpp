@@ -12,6 +12,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
 #include "SessionSlotWidget.h"
+#include "Components/Overlay.h"
 #include "Components/UniformGridPanel.h"
 #include "Interfaces/OnlineIdentityInterface.h"
 
@@ -45,7 +46,9 @@ void ULobbyWidget::NativeConstruct()
 
 void ULobbyWidget::OnClickGoMenu()
 {
-	LobbyWidgetSwitcher->SetActiveWidgetIndex(0);
+	//LobbyWidgetSwitcher->SetActiveWidgetIndex(0);
+	O_CreateRoom->SetVisibility(ESlateVisibility::Hidden);
+
 }
 
 void ULobbyWidget::MENU_OnClickGoCreateRoom()
@@ -57,7 +60,9 @@ void ULobbyWidget::MENU_OnClickGoCreateRoom()
 	// {
 	// 	gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
 	// }
-	LobbyWidgetSwitcher->SetActiveWidgetIndex(1);
+	//LobbyWidgetSwitcher->SetActiveWidgetIndex(1);
+	O_CreateRoom->SetVisibility(ESlateVisibility::Visible);
+
 }
 
 void ULobbyWidget::MENU_OnClickGoFindSessions()
