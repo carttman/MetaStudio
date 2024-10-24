@@ -5,6 +5,8 @@
 #include <string>
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystem.h"
+#include "OnlineSubsystemUtils.h"
+#include "Interfaces/OnlineIdentityInterface.h"
 #include "MetaStudios/MetaStudios.h"
 #include "Online/OnlineSessionNames.h"
 
@@ -47,9 +49,28 @@ void UMainGameInstance::CreateMySession(FString roomName , int32 playerCount, in
 
 	// 1. 전용서버를 사용하는가?
 	settings.bIsDedicated = false;
-
 	// 2. 랜선(Lan)으로 매치하는가?
 	FName subsysName = IOnlineSubsystem::Get()->GetSubsystemName();
+	
+	// 스팀 닉네임 가져온다 ===================================================================================
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if(Subsystem)
+	{
+		IOnlineIdentityPtr Identity = Subsystem->GetIdentityInterface();
+		if(Identity.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> UserId = Identity->GetUniquePlayerId(0);
+			if(UserId.IsValid())
+			{
+				FString Nickname = Identity->GetPlayerNickname(*UserId);
+				UE_LOG(LogTemp, Log, TEXT("Steam Nickname: %s"), *Nickname);
+			}
+		}
+			
+	}
+	// 스팀 닉네임 가져온다 ===================================================================================
+
+	
 	settings.bIsLANMatch = subsysName == "NULL";
 	
 	// 3. 매칭이 공개(true)혹은 비공개(false, 초대를 통해서 매칭)
@@ -74,7 +95,7 @@ void UMainGameInstance::CreateMySession(FString roomName , int32 playerCount, in
 
 	SessionInterface->CreateSession(*netID , FName(MySessionName), settings);
 
-	PRINTLOG(TEXT("Create Session Start roomNamd : %s / hostName : %s") , *roomName , *MySessionName);
+	PRINTLOG(TEXT("Create Session Start / roomName : %s / hostName : %s") , *roomName , *MySessionName);
 }
 #pragma endregion
 

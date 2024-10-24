@@ -93,8 +93,6 @@ void ULobbyWidget::CR_OnChangeSliderPlayerCount(float value)
 
 void ULobbyWidget::FS_OnClickFindSessions()
 {
-	// 기존의 방 목록을 삭제하고
-	//FS_ScrollBox->ClearChildren();
 	UGP_Grid->ClearChildren();
 	// 방찾기를 요청하고싶다.
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());

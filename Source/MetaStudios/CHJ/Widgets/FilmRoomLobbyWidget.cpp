@@ -46,6 +46,7 @@ void UFilmRoomLobbyWidget::MENU_OnClickGoCreateRoom()
 {
 	// MENU_Edit_SessionName의 내용을 UNetTPSGameInstance의 MySessionName 에 반영하고싶다.
 	auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
+	
 	FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
 	if ( gi && false == newSessionName.IsEmpty() )
 	{
