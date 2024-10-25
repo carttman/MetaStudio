@@ -127,39 +127,6 @@ void AJSH_Player::BeginPlay()
 void AJSH_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-
-
-	// if (Bool_RightZoom)
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("tick in"));
-	// 	float TargetFOV = RecordCamera->FieldOfView - ZoomSpeed;
-	// 	TargetFOV = FMath::Clamp(TargetFOV, MinFOV, MaxFOV); 
-	// 	
-	// 	RecordCamera->FieldOfView = FMath::FInterpTo(RecordCamera->FieldOfView, TargetFOV, DeltaTime, ZoomSpeed);
-	// 	
-	// 	if (RecordCamera->FieldOfView <= 10.0f)
-	// 	{
-	// 		UE_LOG(LogTemp, Warning, TEXT("120"));
-	// 		RecordCamera->FieldOfView = 10.0f;
-	// 	}
-	// }
-	//
-	//
-	// if (Bool_ZoomMode)
-	// {
-	//
-	// 	float TargetFOV = RecordCamera->FieldOfView + ZoomSpeed;
-	// 	TargetFOV = FMath::Clamp(TargetFOV, MinFOV, MaxFOV);
-	//
-	// 	// 선형 보간 사용
-	// 	RecordCamera->FieldOfView = FMath::FInterpTo(RecordCamera->FieldOfView, TargetFOV, DeltaTime, FMath::Abs(ZoomSpeed));
-	//
-	// 	if (RecordCamera->FieldOfView >= 120.0f)
-	// 	{
-	// 		RecordCamera->FieldOfView = 12.0f;
-	// 	}
-	// }
 }
 
 
@@ -221,16 +188,11 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 		EnhancedInputComponent->BindAction(IA_ZOOM_In, ETriggerEvent::Triggered, this, &AJSH_Player::Camera_Zoom_In);
 		EnhancedInputComponent->BindAction(IA_ZOOM_Out, ETriggerEvent::Triggered, this, &AJSH_Player::Camera_Zoom_Out);
+		EnhancedInputComponent->BindAction(IA_ZOOM_Default, ETriggerEvent::Started, this, &AJSH_Player::Camera_Zoom_Default);
 
 		EnhancedInputComponent->BindAction(IA_Camera_Right, ETriggerEvent::Triggered, this, &AJSH_Player::CameraRight);
 		EnhancedInputComponent->BindAction(IA_Camera_Left, ETriggerEvent::Triggered, this, &AJSH_Player::CameraLeft);
 		EnhancedInputComponent->BindAction(IA_Camera_Default, ETriggerEvent::Started, this, &AJSH_Player::CameraDefault);
-
-
-		// EnhancedInputComponent->BindAction(IA_Camera_Zoom_LeftMouse, ETriggerEvent::Triggered, this, &AJSH_Player::MouseRight_CamearZoom);
-		// EnhancedInputComponent->BindAction(IA_Camera_Zoom_LeftMouse, ETriggerEvent::Ongoing, this, &AJSH_Player::MouseRight_CamearZoom);
-		// EnhancedInputComponent->BindAction(IA_Camera_Zoom_LeftMouse, ETriggerEvent::Completed, this, &AJSH_Player::MouseRight_CamearZoom_Complete);
-		
 	}
 	else
 	{
@@ -857,22 +819,22 @@ void AJSH_Player::Camera_Zoom_In()
 
 	if (!EditorMode_B)
 	{
-
-		WheelOn = true;
-		
 		// CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength+30.0f, 150.0f, 800.0f);
 		UE_LOG(LogTemp, Error, TEXT("Out"));
 		
 		// float NewFOV = FMath::Clamp(RecordCamera->FieldOfView + ZoomSpeed, MinFOV, MaxFOV);
-		ZoomFOV = RecordCamera->FieldOfView - ZoomSpeed;
-		if (ZoomFOV <= 10.0f)
+		//ZoomFOV = RecordCamera->FieldOfView - ZoomSpeed;
+
+		RecordCamera->FieldOfView = RecordCamera->FieldOfView - ZoomSpeed;
+		
+		if (RecordCamera->FieldOfView  <= 10.0f)
 		{
-			ZoomFOV = 10.0f;
-			RecordCamera->SetFieldOfView(ZoomFOV);
+			RecordCamera->FieldOfView  = 10.0f;
+			RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
 		}
 		else
 		{
-			RecordCamera->SetFieldOfView(ZoomFOV);
+			RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
 		}
 	}
 }
@@ -887,21 +849,25 @@ void AJSH_Player::Camera_Zoom_Out()
 	{
 		// CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength-30.0f, 150.0f, 800.0f);
 		UE_LOG(LogTemp, Error, TEXT("IN"));
-
-		// float NewFOV = FMath::Clamp(RecordCamera->FieldOfView - ZoomSpeed, MinFOV, MaxFOV);
 		
-		ZoomFOV = RecordCamera->FieldOfView + ZoomSpeed;
-		if (ZoomFOV >= 120.0f)
-		{
-			ZoomFOV = 120.0f;
-			RecordCamera->SetFieldOfView(ZoomFOV);
-		}
-		else
-		{
-			RecordCamera->SetFieldOfView(ZoomFOV);
-		}
+		RecordCamera->FieldOfView  = RecordCamera->FieldOfView + ZoomSpeed;
+		 if (RecordCamera->FieldOfView  >= 120.0f)
+		 {
+		 	RecordCamera->FieldOfView  = 120.0f;
+		 	RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
+		 }
+		 else
+		 {
+		 	RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
+		 }
 	}
 }
+
+void AJSH_Player::Camera_Zoom_Default()
+{
+	RecordCamera->SetFieldOfView(90.0f);
+}
+
 
 void AJSH_Player::CameraRight()
 {
@@ -953,22 +919,6 @@ void AJSH_Player::CameraReset()
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
 }
-
-// void AJSH_Player::MouseRight_CamearZoom()
-// {
-// 	UE_LOG(LogTemp, Warning, TEXT("lllllll"));
-// 	if (!Bool_RightZoom)
-// 	{
-// 		Bool_RightZoom = true;
-// 		UE_LOG(LogTemp, Warning, TEXT("l true"));
-// 	}
-// }
-//
-// void AJSH_Player::MouseRight_CamearZoom_Complete()
-// {
-// 	Bool_RightZoom = false;
-// 	UE_LOG(LogTemp, Warning, TEXT("false"));
-// }
 
 #pragma endregion
 

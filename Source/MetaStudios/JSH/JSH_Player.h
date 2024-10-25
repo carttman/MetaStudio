@@ -91,6 +91,9 @@ class AJSH_Player : public ACharacter
 	UInputAction* IA_ZOOM_Out;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_ZOOM_Default;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Camera_Right;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -267,6 +270,8 @@ public:
 	void Camera_Zoom_In();
 	UFUNCTION()
 	void Camera_Zoom_Out();
+	UFUNCTION()
+	void Camera_Zoom_Default();
 
 
 	UFUNCTION()
@@ -287,7 +292,7 @@ public:
 	float ZoomFOV = 0;
 	
 	UPROPERTY()
-	float ZoomSpeed = 1.0f; 
+	float ZoomSpeed = 0.5f; 
 
 	UPROPERTY()
 	float MinFOV = 120.0f;
@@ -296,12 +301,6 @@ public:
 	float MaxFOV = 10.0f;
 
 	bool WheelOn = false;
-
-
-	// UFUNCTION()
-	// void MouseRight_CamearZoom();
-	// UFUNCTION()
-	// void MouseRight_CamearZoom_Complete();
 
 	UPROPERTY()
 	bool Bool_RightZoom = false;
