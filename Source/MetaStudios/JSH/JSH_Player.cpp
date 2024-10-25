@@ -822,12 +822,12 @@ void AJSH_Player::Camera_Zoom_In()
 
 	if (!EditorMode_B)
 	{
-		RecordCamera->FieldOfView = RecordCamera->FieldOfView - ZoomSpeed;
+		RecordCamera->FieldOfView -= ZoomSpeed;
 		
 		if (RecordCamera->FieldOfView  <= 10.0f)
 		{
 			RecordCamera->FieldOfView  = 10.0f;
-			RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
+			RecordCamera->SetFieldOfView(RecordCamera->FieldOfView);
 		}
 		else
 		{
@@ -846,7 +846,7 @@ void AJSH_Player::Camera_Zoom_Out()
 	
 	if (!EditorMode_B)
 	{
-		RecordCamera->FieldOfView  = RecordCamera->FieldOfView + ZoomSpeed;
+		RecordCamera->FieldOfView += ZoomSpeed;
 		 if (RecordCamera->FieldOfView  >= 120.0f)
 		 {
 		 	RecordCamera->FieldOfView  = 120.0f;

@@ -285,7 +285,7 @@ public:
 	
 	FRotator DefaultCameraleaning = FRotator(0, 0, 0);
 	FRotator NewCameraRotation;
-	float Amount = 0.1f;
+	float Amount = 0.3f;
 	float CurrentAngl = 0.0f;
 
 	UPROPERTY()
