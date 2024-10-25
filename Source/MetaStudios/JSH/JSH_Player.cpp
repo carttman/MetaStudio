@@ -11,29 +11,21 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-#include "IWebSocket.h"
 #include "JSH_OBSWebSocket.h"
-#include "WebSocketsModule.h"
 #include <cstdlib>
-
-#include "DelayAction.h"
 #include "JSH_PlayerController.h"
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/CommandLine.h"
 #include "HAL/PlatformFilemanager.h"
 #include "Kismet/GameplayStatics.h"
-#include "UniversalObjectLocators/UniversalObjectLocatorUtils.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
-#include "Kismet/GameplayStatics.h"
 #include "Components/SceneComponent.h"
 #include "Engine/Engine.h"
-#include "EntitySystem/MovieSceneEntitySystemRunner.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/Pawn.h"
-#include "GameFramework/SpectatorPawn.h"
 #include "GameFramework/SpectatorPawnMovement.h"
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
@@ -88,7 +80,9 @@ AJSH_Player::AJSH_Player()
 		FallGuys->SetSkeletalMesh(TMesh.Object);
 		FallGuys->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 		FallGuys->SetRelativeScale3D(FVector(0.005, 0.005, 0.005));
+		FallGuys->SetCastShadow(true);
 	}
+	
 
 	FallGuys_Camera = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Record Camera"));
 	FallGuys_Camera->SetupAttachment(FallGuys);
@@ -386,6 +380,7 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 		CameraSpawn_b_On_Off = true;
 		UE_LOG(LogTemp, Warning, TEXT("visible true"));
 
+		FallGuys->SetCastShadow(false);
 		Record_b_On_Off = true;
 	}
 	else
@@ -404,6 +399,7 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 		FallGuys_Camera->SetVisibility(false);
 		CameraSpawn_b_On_Off = false;
 
+		FallGuys->SetCastShadow(true);
 		Record_b_On_Off = false;
 
 
@@ -436,12 +432,12 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 				}
 			}
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		}
 		else
 		{
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
 	}
 }
@@ -638,12 +634,12 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 			}
 			
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		}
 		else
 		{
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
 	}
 
@@ -746,12 +742,12 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 				}
 			}
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		}
 		else
 		{
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
 	}
 }
@@ -878,10 +874,10 @@ void AJSH_Player::CameraRight()
 	
 	CurrentAngl += Amount;
 	
-	if (CurrentAngl > 45.0f) 
-	{
-		CurrentAngl = 45.0f;
-	}
+	// if (CurrentAngl > 90.0f) 
+	// {
+	// 	CurrentAngl = 90.0f;
+	// }
 	
 	NewCameraRotation = RecordCamera->GetRelativeRotation();
 	NewCameraRotation.Roll = CurrentAngl;
@@ -898,10 +894,10 @@ void AJSH_Player::CameraLeft()
 	
 	CurrentAngl -= Amount;
 	
-	if (CurrentAngl < -45.0f) 
-	{
-		CurrentAngl = -45.0f;
-	}
+	// if (CurrentAngl < -90.0f) 
+	// {
+	// 	CurrentAngl = -90.0f;
+	// }
 	
 	NewCameraRotation = RecordCamera->GetRelativeRotation();
 	NewCameraRotation.Roll = CurrentAngl;
