@@ -25,12 +25,6 @@ public:
 	// Menu ===============================================
 	UPROPERTY(meta=(BindWidget))
 	class UButton* MENU_Button_GoCreateRoom;
-	
-	UPROPERTY(meta=(BindWidget))
-	class UButton* MENU_Button_GoFindSessions;
-
-	UPROPERTY(meta=(BindWidget))
-	class UEditableText* MENU_Edit_SessionName;
 
 	UFUNCTION()
 	void MENU_OnClickGoCreateRoom();
@@ -45,21 +39,13 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	class UEditableText* CR_Edit_RoomName;
 
-	UPROPERTY(meta=(BindWidget))
-	class USlider* CR_Slider_PlayerCount;
-
-	UPROPERTY(meta=(BindWidget))
-	class UTextBlock* CR_Text_PlayerCount;
-
+	
+	
 	UPROPERTY(meta=(BindWidget))
 	class UButton* CR_Button_GoMenu;
 
 	UFUNCTION()
 	void CR_OnClickCreateRoom();
-
-	UFUNCTION()
-	void CR_OnChangeSliderPlayerCount(float value);
-
 
 	// FindSessions ===============================================
 	UPROPERTY(meta=(BindWidget))
@@ -101,6 +87,18 @@ public:
 
 	UPROPERTY(meta=(BindWidget))
 	class UOverlay* O_CreateRoom;
+	
+	UFUNCTION()
+	void ExitMenu();
+	
+	UPROPERTY(meta=(BindWidget))
+	class UComboBoxString* CBS_PlayerCountCombo;
+
+	UPROPERTY(meta=(BindWidget))
+	class UComboBoxString* CBS_PrivateCombo;
+
+	TArray<FString> MaxPlayerCount;
+	TArray<FString> FilmRoomValue;
 	
 	void GetPlayerNickName();
 };

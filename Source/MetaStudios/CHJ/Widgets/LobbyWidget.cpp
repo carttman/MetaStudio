@@ -12,6 +12,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
 #include "SessionSlotWidget.h"
+#include "Components/ComboBoxString.h"
 #include "Components/Overlay.h"
 #include "Components/UniformGridPanel.h"
 #include "Interfaces/OnlineIdentityInterface.h"
@@ -26,22 +27,22 @@ void ULobbyWidget::NativeConstruct()
 	gi->OnFindSignatureCompleteDelegate.AddDynamic(this , &ULobbyWidget::SetFindActive);
 	
 	MENU_Button_GoCreateRoom->OnClicked.AddDynamic(this , &ULobbyWidget::MENU_OnClickGoCreateRoom);
-	MENU_Button_GoFindSessions->OnClicked.AddDynamic(this , &ULobbyWidget::MENU_OnClickGoFindSessions);
 
 	CR_Button_GoMenu->OnClicked.AddDynamic(this , &ULobbyWidget::OnClickGoMenu);
-	FS_Button_GoMenu->OnClicked.AddDynamic(this , &ULobbyWidget::OnClickGoMenu);
+	FS_Button_GoMenu->OnClicked.AddDynamic(this , &ULobbyWidget::ExitMenu);
 
 	CR_Button_CreateRoom->OnClicked.AddDynamic(this , &ULobbyWidget::CR_OnClickCreateRoom);
-	CR_Slider_PlayerCount->OnValueChanged.AddDynamic(this , &ULobbyWidget::CR_OnChangeSliderPlayerCount);
 
 	FS_Button_FindSessions->OnClicked.AddDynamic(this , &ULobbyWidget::FS_OnClickFindSessions);
-
-	CR_Slider_PlayerCount->SetValue(2);
-	SetFindActive(false);
-
-	GetPlayerNickName();
 	
+	SetFindActive(false);
+	GetPlayerNickName();
 	FS_OnClickFindSessions();
+
+	for(int32 i=2; i < 40; i++)
+	{
+		CBS_PlayerCountCombo->AddOption(FString::FromInt(i));
+	}
 }
 
 void ULobbyWidget::OnClickGoMenu()
@@ -58,7 +59,7 @@ void ULobbyWidget::MENU_OnClickGoCreateRoom()
 	// FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
 	// if ( gi && false == newSessionName.IsEmpty() )
 	// {
-	// 	gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
+	// 	gi->MySessionName = MENU_Edit_SwessionName->GetText().ToString();
 	// }
 	//LobbyWidgetSwitcher->SetActiveWidgetIndex(1);
 	O_CreateRoom->SetVisibility(ESlateVisibility::Visible);
@@ -90,17 +91,12 @@ void ULobbyWidget::CR_OnClickCreateRoom()
 	{
 		return;
 	}
-
-	int32 count = (int32)CR_Slider_PlayerCount->GetValue();
+	int32 count = FCString::Atoi(*CBS_PlayerCountCombo->GetSelectedOption());
+	UE_LOG(LogTemp, Warning, TEXT("222222222222 : %d"), count);
 	gi->CreateMySession(roomName , count, 0);
 }
 
-void ULobbyWidget::CR_OnChangeSliderPlayerCount(float value)
-{
-	// 슬라이더의 값이 변경되면 CR_Text_PlayerCount에 값을 반영하고 싶다.
-	CR_Text_PlayerCount->SetText(FText::AsNumber(value));
 
-}
 
 void ULobbyWidget::FS_OnClickFindSessions()
 {
@@ -158,6 +154,10 @@ void ULobbyWidget::SetFindActive(bool value)
 		FS_Button_FindSessions->SetIsEnabled(true);
 	}
 
+}
+
+void ULobbyWidget::ExitMenu()
+{
 }
 
 void ULobbyWidget::GetPlayerNickName()

@@ -6,6 +6,7 @@
 #include "FIlmSessionSlotWidget.h"
 #include "OnlineSubsystem.h"
 #include "Components/Button.h"
+#include "Components/ComboBoxString.h"
 #include "Components/EditableText.h"
 #include "Components/Overlay.h"
 #include "Components/ScrollBox.h"
@@ -26,22 +27,24 @@ void UFilmRoomLobbyWidget::NativeConstruct()
 	gi->OnFindSignatureCompleteDelegate.AddDynamic(this , &UFilmRoomLobbyWidget::SetFindActive);
 	
 	MENU_Button_GoCreateRoom->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::MENU_OnClickGoCreateRoom);
-	MENU_Button_GoFindSessions->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::MENU_OnClickGoFindSessions);
 
 	CR_Button_GoMenu->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::OnClickGoMenu);
 	FS_Button_GoMenu->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::ExitMenu);
 
 	CR_Button_CreateRoom->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::CR_OnClickCreateRoom);
-	CR_Slider_PlayerCount->OnValueChanged.AddDynamic(this , &UFilmRoomLobbyWidget::CR_OnChangeSliderPlayerCount);
 
 	FS_Button_FindSessions->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::FS_OnClickFindSessions);
 
-	CR_Slider_PlayerCount->SetValue(2);
+	//CR_Slider_PlayerCount->SetValue(2);
 	SetFindActive(false);
-	
 	GetPlayerNickName();
-	
 	FS_OnClickFindSessions();
+
+	for(int32 i=2; i <= 40; i++)
+	{
+		CBS_PlayerCountCombo->AddOption(FString::FromInt(i));
+	}
+	
 }
 
 void UFilmRoomLobbyWidget::OnClickGoMenu()
@@ -53,30 +56,7 @@ void UFilmRoomLobbyWidget::OnClickGoMenu()
 
 void UFilmRoomLobbyWidget::MENU_OnClickGoCreateRoom()
 {
-	// MENU_Edit_SessionName의 내용을 GameInstance의 MySessionName 에 반영하고싶다.
-	//auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
-	
-	// FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
-	// if ( gi && false == newSessionName.IsEmpty() )
-	// {
-	// 	gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
-	// }
-	//LobbyWidgetSwitcher->SetActiveWidgetIndex(1);
 	O_CreateRoom->SetVisibility(ESlateVisibility::Visible);
-}
-
-void UFilmRoomLobbyWidget::MENU_OnClickGoFindSessions()
-{
-	// MENU_Edit_SessionName의 내용을 UNetTPSGameInstance의 MySessionName 에 반영하고싶다.
-	// auto* gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
-	// FString newSessionName = MENU_Edit_SessionName->GetText().ToString();
-	// if ( gi && false == newSessionName.IsEmpty() )
-	// {
-	// 	gi->MySessionName = MENU_Edit_SessionName->GetText().ToString();
-	// }
-	LobbyWidgetSwitcher->SetActiveWidgetIndex(2);
-
-	FS_OnClickFindSessions();
 }
 
 void UFilmRoomLobbyWidget::CR_OnClickCreateRoom()
@@ -90,16 +70,10 @@ void UFilmRoomLobbyWidget::CR_OnClickCreateRoom()
 	{
 		return;
 	}
-
-	int32 count = (int32)CR_Slider_PlayerCount->GetValue();
+	int32 count = FCString::Atoi(*CBS_PlayerCountCombo->GetSelectedOption());
 	gi->CreateMySession(roomName , count, 1);
 }
 
-void UFilmRoomLobbyWidget::CR_OnChangeSliderPlayerCount(float value)
-{
-	// 슬라이더의 값이 변경되면 CR_Text_PlayerCount에 값을 반영하고 싶다.
-	CR_Text_PlayerCount->SetText(FText::AsNumber(value));
-}
 
 void UFilmRoomLobbyWidget::FS_OnClickFindSessions()
 {
@@ -181,4 +155,10 @@ void UFilmRoomLobbyWidget::GetPlayerNickName()
 void UFilmRoomLobbyWidget::ExitMenu()
 {
 	//LobbyWidgetSwitcher->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UFilmRoomLobbyWidget::SetFilmRoomCombo()
+{
+	//CBS_FilmRoomCombo->DefaultOptions
+
 }
