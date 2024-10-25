@@ -816,15 +816,12 @@ void AJSH_Player::Camera_Zoom_In()
 {
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
 	// if (Bool_ZoomMode && !EditorMode_B)
+	
+	// Recording 중이 아니라면 실행 하지 않음
+	if (!Record_b_On_Off) return;
 
 	if (!EditorMode_B)
 	{
-		// CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength+30.0f, 150.0f, 800.0f);
-		UE_LOG(LogTemp, Error, TEXT("Out"));
-		
-		// float NewFOV = FMath::Clamp(RecordCamera->FieldOfView + ZoomSpeed, MinFOV, MaxFOV);
-		//ZoomFOV = RecordCamera->FieldOfView - ZoomSpeed;
-
 		RecordCamera->FieldOfView = RecordCamera->FieldOfView - ZoomSpeed;
 		
 		if (RecordCamera->FieldOfView  <= 10.0f)
@@ -843,13 +840,12 @@ void AJSH_Player::Camera_Zoom_Out()
 {
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
 	// if (Bool_ZoomMode && !EditorMode_B)
-
-
+	
+	// Recording 중이 아니라면 실행 하지 않음
+	if (!Record_b_On_Off) return;
+	
 	if (!EditorMode_B)
 	{
-		// CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength-30.0f, 150.0f, 800.0f);
-		UE_LOG(LogTemp, Error, TEXT("IN"));
-		
 		RecordCamera->FieldOfView  = RecordCamera->FieldOfView + ZoomSpeed;
 		 if (RecordCamera->FieldOfView  >= 120.0f)
 		 {
@@ -865,6 +861,9 @@ void AJSH_Player::Camera_Zoom_Out()
 
 void AJSH_Player::Camera_Zoom_Default()
 {
+	if (EditorMode_B) return;
+	
+		
 	RecordCamera->SetFieldOfView(90.0f);
 }
 
@@ -873,6 +872,9 @@ void AJSH_Player::CameraRight()
 {
 	// 1인칭이 아니라면 실행 하지 않음
 	if (!RecordCamera->IsActive()) return;
+
+	// Recording 중이 아니라면 실행 하지 않음
+	if (!Record_b_On_Off) return;
 	
 	CurrentAngl += Amount;
 	
@@ -890,6 +892,9 @@ void AJSH_Player::CameraLeft()
 {
 	// 1인칭이 아니라면 실행 하지 않음
 	if (!RecordCamera->IsActive()) return;
+
+	// Recording 중이 아니라면 실행 하지 않음
+	if (!Record_b_On_Off) return;
 	
 	CurrentAngl -= Amount;
 	
@@ -907,6 +912,9 @@ void AJSH_Player::CameraDefault()
 {
 	// 1인칭이 아니라면 실행 하지 않음
 	if (!RecordCamera->IsActive()) return;
+
+	// Recording 중이 아니라면 실행 하지 않음
+	if (!Record_b_On_Off) return;
 	
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
