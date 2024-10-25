@@ -21,8 +21,6 @@ class METASTUDIOS_API ASpaceshipPawn : public APawn
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* SpaceshipLook;
 
-
-
 public:
 	// Sets default values for this pawn's properties
 	ASpaceshipPawn();
@@ -39,17 +37,31 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	bool CanPlayerEnter();
+	bool CanPlayerEnter(AMetaStudiosCharacter* targetCharacter);
 
 	void ExitSpaceship();
 
+	UFUNCTION(Server, Reliable)
+	void Server_ExitSpaceship();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_ExitSpaceship();
+
+	void ResetEnhancedInputSetting(class APlayerController* pc);
+
 	AMetaStudiosCharacter* player;
 
-	UFUNCTION(BlueprintCallable)
 	void OnMyActionMove(const FInputActionValue& value);
+
+
+
 	void OnMyActionLook(const FInputActionValue& value);
 
 	float speed = 500.0f;
+
+
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
 
 
 private:

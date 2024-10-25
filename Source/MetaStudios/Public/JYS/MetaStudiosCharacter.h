@@ -62,10 +62,13 @@ class AMetaStudiosCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* CameraMode;
 
+
 public:
 	AMetaStudiosCharacter();
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void PossessedBy(AController* NewController) override;
 	
 	// Tick에서 부스터 관리 함수
 	void ManageBooster(float DeltaTime);
@@ -93,6 +96,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_ToggleBoosting_Complete();
 
+	void ResetEnhancedInputSetting(class APlayerController* pc);
+
 	// 중력
 	void GravityScaleOff();
 
@@ -101,25 +106,32 @@ public:
 	// 가장 가까운 액터 찾기
 	void FindObject();
 
+	UFUNCTION(Server, Reliable)
+	void Server_FindObject();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_FindObject();
+
 	void DestroyObject();
 
 	// 카메라 전환 (TPS, FPS)
-	//UPROPERTY(EditDefaultsOnly)
-	//class USpringArmComponent* TPSSpringArm;	
-	//
-	//UPROPERTY(EditDefaultsOnly)
-	//class USpringArmComponent* FPSSpringArm;
-
-	//UPROPERTY(EditDefaultsOnly)
-	//class UChildActorComponent* TPSCamera;
-
-	//UPROPERTY(EditDefaultsOnly)
-	//class UChildActorComponent* FPSCamera;
 
 	void ChangeCameraMode();
 
+	UFUNCTION(Server, Reliable)
+	void Server_ChangeCameraMode();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_ChangeCameraMode();
+
 	// 플레이어랑 우주선 컨트롤러 바꾸기
 	void EnterSpaceship();
+
+	UFUNCTION(Server, Reliable)
+	void Server_EnterSpaceship();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_EnterSpaceship(class ASpaceshipPawn* SpaceshipActor);
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<APawn> SpaceshipPawnFactory;	
@@ -143,7 +155,6 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
@@ -162,11 +173,6 @@ protected:
 
 	// int32 itemCount = 0;
 
-public:
-	/** Returns CameraBoom subobject **/
-	// FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
-	// FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 private:
 	// 부스터 사용 여부

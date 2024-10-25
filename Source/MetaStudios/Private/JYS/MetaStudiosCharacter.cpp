@@ -79,31 +79,29 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	ManageBooster(DeltaTime);
+	// ManageBooster(DeltaTime);
 }
 
-void AMetaStudiosCharacter::BeginPlay()
+void AMetaStudiosCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+}
+
+void AMetaStudiosCharacter::BeginPlay() 
 {
 	Super::BeginPlay();
 
-	APlayerController* playerController = Cast<APlayerController>(GetController());
-
-	//if (FPSCamera == nullptr)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("111111111111"))
-	//}
-	//else
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("2222222222222222"));
-
-	//}
+	
 
 }
+
 //////////////////////Input////////////////////////////////
 void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	//UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent"));
 	// Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -239,6 +237,33 @@ void AMetaStudiosCharacter::NetMulticast_ToggleBoosting_Complete_Implementation(
 	GravityScaleOn();
 }
 
+void AMetaStudiosCharacter::ResetEnhancedInputSetting(APlayerController* PlayerController)
+{
+	UE_LOG(LogTemp, Error, TEXT("ResetEnhancedInputSetting"));
+
+	if (PlayerController)
+	{
+		if (PlayerController->GetLocalPlayer() == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent111111111111111111111111111111111111111111"));
+		}
+
+		
+		
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetWorld()->GetFirstPlayerController()->GetLocalPlayer()))
+		{
+			// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent3333333333333333333333333333"));
+		}
+	}
+}
+
 void AMetaStudiosCharacter::GravityScaleOff()
 {
 	// 중력 끄기
@@ -255,8 +280,18 @@ void AMetaStudiosCharacter::GravityScaleOn()
 /////////////////////Booster/////////////////////////////////////////////////////
 
 
-/////////////카메라 전환 (TPS, FPS)////////////////
+/////////////카메라 전환 (TPS, FPS)////////////////나중에 녹화기능 할때 확인 필요
 void AMetaStudiosCharacter::ChangeCameraMode()
+{
+	Server_ChangeCameraMode();
+}
+
+void AMetaStudiosCharacter::Server_ChangeCameraMode_Implementation()
+{
+	NetMulticast_ChangeCameraMode();
+}
+
+void AMetaStudiosCharacter::NetMulticast_ChangeCameraMode_Implementation()
 {
 	if (IsTPSMode)
 	{
@@ -280,21 +315,43 @@ void AMetaStudiosCharacter::ChangeCameraMode()
 //////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
 void AMetaStudiosCharacter::EnterSpaceship()
 {
-	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-
-	ASpaceshipPawn* SpaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
-
-	if (SpaceshipActor)
+	if (IsLocallyControlled())
 	{
-		if (characterController && SpaceshipActor)
+		Server_EnterSpaceship();
+	}
+}
+
+void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation()
+{
+	if (HasAuthority())
+	{
+		ASpaceshipPawn* SpaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
+		if (SpaceshipActor == nullptr)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpaceshipActor = GetWorld()->SpawnActor<ASpaceshipPawn>(SpaceshipPawnFactory, SpawnParams);
+			UE_LOG(LogTemp, Error, TEXT("Failed to find or spawn SpaceshipActor."));
+		}
+		else
 		{
 			SpaceshipActor->player = this;
-			if (SpaceshipActor->CanPlayerEnter())
+			if (SpaceshipActor->CanPlayerEnter(this))
 			{
-				characterController->Possess(SpaceshipActor);
-				GetMesh()->SetVisibility(false);
+				GetController()->Possess(SpaceshipActor);
+				UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn SpaceshipActor."));
 			}
 		}
+		NetMulticast_EnterSpaceship(SpaceshipActor);
+	}
+}
+
+void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshipPawn* SpaceshipActor)
+{
+	if (SpaceshipActor)
+	{
+		SpaceshipActor->player = this;
+		GetMesh()->SetVisibility(false);
+		SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
 	else
 	{
@@ -332,6 +389,8 @@ void AMetaStudiosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AMetaStudiosCharacter, bIsBoosting);
+	DOREPLIFETIME(AMetaStudiosCharacter, IsTPSMode);
+
 }
 
 void AMetaStudiosCharacter::Move(const FInputActionValue& Value)
@@ -362,7 +421,18 @@ void AMetaStudiosCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+//////// 가까운 물건 Destroy /////////
 void AMetaStudiosCharacter::FindObject()
+{
+	Server_FindObject();
+}
+
+void AMetaStudiosCharacter::Server_FindObject_Implementation()
+{
+	NetMulticast_FindObject();
+}
+
+void AMetaStudiosCharacter::NetMulticast_FindObject_Implementation()
 {
 	auto playerLoc = GetWorld()->GetFirstPlayerController()->GetCharacter()->GetActorLocation();
 
