@@ -104,6 +104,11 @@ class AJSH_Player : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Camera_Zoom_LeftMouse;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Mouse_Sensitive_Down;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Mouse_Sensitive_Up;
 public:
 	AJSH_Player();
 	
@@ -138,7 +143,9 @@ public:
 #pragma region Record
 
 	// 녹화 시작 / 종료
+	UPROPERTY()
 	class UJSH_OBSWebSocket* ObsGamInstance;
+	
 	FProcHandle PH;
 
 	UFUNCTION()
@@ -185,7 +192,7 @@ public:
 	UPROPERTY(Replicated)
 	bool PlayerVisible_b_On = true;
 
-	
+	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
 	
 #pragma endregion
@@ -205,8 +212,9 @@ public:
 	void Fly_Up_Down(const FInputActionValue& Value);
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_Fly_Up_Down(const FInputActionValue& Value);
-
+	UPROPERTY()
 	float Fly_Zvalue = 0;
+	UPROPERTY()
 	float Fly_Off_Value = 0 ;
 
 
@@ -237,7 +245,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_EditorMode();
 
-	
+	UPROPERTY()
 	APlayerController* OriginController;
 	
 
@@ -263,6 +271,7 @@ public:
 
 #pragma region Camera Control
 
+	// 카메라 줌
 	UPROPERTY()
 	bool Bool_ZoomMode = false;
 	
@@ -273,7 +282,21 @@ public:
 	UFUNCTION()
 	void Camera_Zoom_Default();
 
+	UPROPERTY()
+	float ZoomFOV = 0;
+	UPROPERTY()
+	float ZoomSpeed = 0.5f; 
+	UPROPERTY()
+	float MinFOV = 120.0f;
+	UPROPERTY()
+	float MaxFOV = 10.0f;
+	UPROPERTY()
+	bool WheelOn = false;
+	UPROPERTY()
+	bool Bool_RightZoom = false;
 
+
+	// 카메라 회전
 	UFUNCTION()
 	void CameraRight();
 	UFUNCTION()
@@ -282,28 +305,24 @@ public:
 	void CameraDefault();
 	UFUNCTION()
 	void CameraReset();
-	
+	UPROPERTY()
 	FRotator DefaultCameraleaning = FRotator(0, 0, 0);
+	UPROPERTY()
 	FRotator NewCameraRotation;
-	float Amount = 0.3f;
+	UPROPERTY()
+	float RotateSpeed = 0.2f;
+	UPROPERTY()
 	float CurrentAngl = 0.0f;
 
-	UPROPERTY()
-	float ZoomFOV = 0;
-	
-	UPROPERTY()
-	float ZoomSpeed = 0.5f; 
 
-	UPROPERTY()
-	float MinFOV = 120.0f;
+	// 마우스 감도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float MouseSensitivityYaw = 0.8f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float MouseSensitivityPitch = 0.8f;
 
-	UPROPERTY()
-	float MaxFOV = 10.0f;
-
-	bool WheelOn = false;
-
-	UPROPERTY()
-	bool Bool_RightZoom = false;
+	UFUNCTION()
+	void Mouse_Sensitivity(const FInputActionValue& Value);
 #pragma endregion
 	
 };

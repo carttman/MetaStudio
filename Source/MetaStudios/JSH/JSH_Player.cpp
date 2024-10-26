@@ -179,18 +179,23 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Ongoing, this, &AJSH_Player::DisableEdit);
 		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Completed, this, &AJSH_Player::EnableEdit);
 
-
+		// 카메라 줌
 		EnhancedInputComponent->BindAction(IA_ZOOM_In, ETriggerEvent::Triggered, this, &AJSH_Player::Camera_Zoom_In);
 		EnhancedInputComponent->BindAction(IA_ZOOM_Out, ETriggerEvent::Triggered, this, &AJSH_Player::Camera_Zoom_Out);
 		EnhancedInputComponent->BindAction(IA_ZOOM_Default, ETriggerEvent::Started, this, &AJSH_Player::Camera_Zoom_Default);
 
+		// 카메라 회전
 		EnhancedInputComponent->BindAction(IA_Camera_Right, ETriggerEvent::Triggered, this, &AJSH_Player::CameraRight);
 		EnhancedInputComponent->BindAction(IA_Camera_Left, ETriggerEvent::Triggered, this, &AJSH_Player::CameraLeft);
 		EnhancedInputComponent->BindAction(IA_Camera_Default, ETriggerEvent::Started, this, &AJSH_Player::CameraDefault);
+
+		// 마우스 감도
+		EnhancedInputComponent->BindAction(IA_Mouse_Sensitive_Down, ETriggerEvent::Started, this, &AJSH_Player::Mouse_Sensitivity);
+		EnhancedInputComponent->BindAction(IA_Mouse_Sensitive_Up, ETriggerEvent::Started, this, &AJSH_Player::Mouse_Sensitivity);
 	}
 	else
 	{
-		//UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		//UE_LOG(LogTemplateCharacter, Error, TEXT("'%s"), *GetNameSafe(this));
 	}
 }
 #pragma endregion
@@ -224,8 +229,9 @@ void AJSH_Player::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		// * MouseSensitivity Yaw/Pitch 마우스 감도 조절
+		AddControllerYawInput(LookAxisVector.X * MouseSensitivityYaw);
+		AddControllerPitchInput(LookAxisVector.Y * MouseSensitivityPitch);
 	}
 }
 
@@ -512,7 +518,7 @@ void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 
 
 
-	float tempvalue = Value.Get<float>();;
+	float tempvalue = Value.Get<float>();
 
 	MaxFlySpeed_C = MaxFlySpeed_C + tempvalue * 50;
 	
@@ -872,7 +878,7 @@ void AJSH_Player::CameraRight()
 	// Recording 중이 아니라면 실행 하지 않음
 	if (!Record_b_On_Off) return;
 	
-	CurrentAngl += Amount;
+	CurrentAngl += RotateSpeed;
 	
 	// if (CurrentAngl > 90.0f) 
 	// {
@@ -892,7 +898,7 @@ void AJSH_Player::CameraLeft()
 	// Recording 중이 아니라면 실행 하지 않음
 	if (!Record_b_On_Off) return;
 	
-	CurrentAngl -= Amount;
+	CurrentAngl -= RotateSpeed;
 	
 	// if (CurrentAngl < -90.0f) 
 	// {
@@ -922,6 +928,40 @@ void AJSH_Player::CameraReset()
 	RecordCamera->SetFieldOfView(90.0f);
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
+}
+
+void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
+{
+	float Temp_FG = Value.Get<float>();
+
+	// UE_LOG(LogTemp, Error, TEXT("tttt %f"), Temp_FG);
+
+	
+	if (Temp_FG >= +1)
+	{
+		MouseSensitivityYaw += 0.05;
+		MouseSensitivityPitch += 0.05;
+
+		if (MouseSensitivityYaw >= 1.0)
+		{
+			MouseSensitivityYaw = 1.0;
+			MouseSensitivityPitch = 1.0;
+		}
+	}
+	else
+	{
+		MouseSensitivityYaw -= 0.05;
+		MouseSensitivityPitch -= 0.05;
+		
+		if (MouseSensitivityYaw <= 0.05)
+		{
+			MouseSensitivityYaw = 0.05;
+			MouseSensitivityPitch = 0.05;
+		}
+	}
+	
+	UE_LOG(LogTemp, Error, TEXT("YYY %f"), MouseSensitivityYaw);
+	UE_LOG(LogTemp, Error, TEXT("PPP %f"), MouseSensitivityPitch);
 }
 
 #pragma endregion
