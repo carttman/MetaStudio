@@ -256,6 +256,14 @@ public:
 	UPROPERTY(Replicated)
 	bool EditorMode_B = false;
 
+
+	// UI
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UUserWidget> UI_Editor_Main;
+	
+	UPROPERTY(EditDefaultsOnly)
+	class UUserWidget* PlayerMainUI;
+
 #pragma endregion
 
 

@@ -14,6 +14,7 @@
 #include "JSH_OBSWebSocket.h"
 #include <cstdlib>
 #include "JSH_PlayerController.h"
+#include "Blueprint/UserWidget.h"
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/CommandLine.h"
@@ -116,6 +117,11 @@ void AJSH_Player::BeginPlay()
 
 
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	if (JPlayerController)
+	{
+		JPlayerController->bEnableTouchEvents = false;
+		UE_LOG(LogTemp, Error, TEXT("Succed"));
+	}
 }
 
 void AJSH_Player::Tick(float DeltaTime)
@@ -784,6 +790,18 @@ void AJSH_Player::EnableEdit()
 		JPlayerController->SetInputMode(FInputModeGameAndUI());
 		GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
+
+	if (IsLocallyControlled() && !PlayerMainUI)
+	{
+		if (UI_Editor_Main)
+		{
+			PlayerMainUI = CreateWidget<UUserWidget>(GetWorld(), UI_Editor_Main);
+			if(PlayerMainUI)
+			{
+				PlayerMainUI->AddToViewport(0);
+			}
+		}
+	}
 }
 
 void AJSH_Player::DisableEdit()
@@ -805,6 +823,15 @@ void AJSH_Player::DisableEdit()
 		JPlayerController->bEnableClickEvents = false;
 		JPlayerController->bEnableMouseOverEvents = false;
 		JPlayerController->SetInputMode(FInputModeGameOnly());
+	}
+
+		JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+
+	if (PlayerMainUI)
+	{
+		PlayerMainUI->RemoveFromParent();
+		PlayerMainUI = nullptr;  // 포인터를 null로 설정
+		UE_LOG(LogTemp, Warning, TEXT("UI null"));
 	}
 }
 
