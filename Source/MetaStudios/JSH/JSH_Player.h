@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "IWebSocket.h"
 #include "JSH_Player.generated.h"
 
 
@@ -317,9 +316,9 @@ public:
 
 	// 마우스 감도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-	float MouseSensitivityYaw = 0.8f;
+	float MouseSensitivityYaw = 0.7f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-	float MouseSensitivityPitch = 0.8f;
+	float MouseSensitivityPitch = 0.7f;
 
 	UFUNCTION()
 	void Mouse_Sensitivity(const FInputActionValue& Value);

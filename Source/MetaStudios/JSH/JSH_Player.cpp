@@ -930,6 +930,7 @@ void AJSH_Player::CameraReset()
 	CurrentAngl = 0;
 }
 
+// 마우스 감도 조절 , 줌 했을때 마우스(화면 회전)가 너무 빨라서 추가
 void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 {
 	float Temp_FG = Value.Get<float>();
@@ -942,6 +943,7 @@ void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 		MouseSensitivityYaw += 0.05;
 		MouseSensitivityPitch += 0.05;
 
+		// 1도 완저ㅓㅓㅓㅓ언 빠라서 굳이 1 이상으로 갈 필요가 있을까 싶음
 		if (MouseSensitivityYaw >= 1.0)
 		{
 			MouseSensitivityYaw = 1.0;
@@ -952,7 +954,8 @@ void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 	{
 		MouseSensitivityYaw -= 0.05;
 		MouseSensitivityPitch -= 0.05;
-		
+
+		// - 값으로 가면 마우스 움직임이 아예 반대로 들어가서 막았으
 		if (MouseSensitivityYaw <= 0.05)
 		{
 			MouseSensitivityYaw = 0.05;
