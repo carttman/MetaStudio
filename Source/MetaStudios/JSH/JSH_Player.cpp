@@ -126,13 +126,17 @@ void AJSH_Player::BeginPlay()
 		//UE_LOG(LogTemp, Error, TEXT("Succed"));
 	}
 
-	AGameModeBase* currGameMode = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
-	FString currgamemodename = currGameMode->GetName();
 	
-	if(currgamemodename.Contains(FString(TEXT("filmroom"))))
+	AGameModeBase* currGameMode = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
+
+	if (currGameMode != nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Succed"));
-		Bool_MainLock = true;
+		currgamemodename = currGameMode->GetName();
+		if(currgamemodename.Contains(FString(TEXT("filmroom"))))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Succed"));
+			Bool_MainLock = true;
+		}
 	}
 }
 
