@@ -14,7 +14,12 @@ class METASTUDIOS_API AFilmRoomMainGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
-	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot) override;
+	
 	UPROPERTY(EditAnywhere)
-	class AJSH_Player* Player;
+	TSubclassOf<class AJSH_Player> ServerPlayer;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AMetaStudiosCharacter> ClientPlayer;
+	
 };

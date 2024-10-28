@@ -77,7 +77,7 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	// ManageBooster(DeltaTime);
+	ManageBooster(DeltaTime);
 }
 
 void AMetaStudiosCharacter::PossessedBy(AController* NewController)
@@ -129,8 +129,10 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Completed, this, &AMetaStudiosCharacter::ToggleBoosting_Complete);
 
+		// 물건 Destroy
 		EnhancedInputComponent->BindAction(GetObjectAction, ETriggerEvent::Started, this, &AMetaStudiosCharacter::FindObject);
 
+		// TPS/FPS 전환
 		EnhancedInputComponent->BindAction(CameraMode, ETriggerEvent::Started, this, &AMetaStudiosCharacter::ChangeCameraMode);
 
 		//// 우주선에서 앉았다가 일어나기 -> 컨트롤러 바뀌게////////
@@ -140,6 +142,33 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component!"), *GetNameSafe(this));
+	}
+}
+
+void AMetaStudiosCharacter::ResetEnhancedInputSetting(APlayerController* PlayerController)
+{
+	UE_LOG(LogTemp, Error, TEXT("ResetEnhancedInputSetting"));
+
+	if (PlayerController)
+	{
+		if (PlayerController->GetLocalPlayer() == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent111111111111111111111111111111111111111111"));
+		}
+
+
+
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetWorld()->GetFirstPlayerController()->GetLocalPlayer()))
+		{
+			// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent3333333333333333333333333333"));
+		}
 	}
 }
 
@@ -235,32 +264,6 @@ void AMetaStudiosCharacter::NetMulticast_ToggleBoosting_Complete_Implementation(
 	GravityScaleOn();
 }
 
-void AMetaStudiosCharacter::ResetEnhancedInputSetting(APlayerController* PlayerController)
-{
-	UE_LOG(LogTemp, Error, TEXT("ResetEnhancedInputSetting"));
-
-	if (PlayerController)
-	{
-		if (PlayerController->GetLocalPlayer() == nullptr)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent111111111111111111111111111111111111111111"));
-		}
-
-		
-		
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetWorld()->GetFirstPlayerController()->GetLocalPlayer()))
-		{
-			// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
-			Subsystem->ClearAllMappings();
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent3333333333333333333333333333"));
-		}
-	}
-}
 
 void AMetaStudiosCharacter::GravityScaleOff()
 {
