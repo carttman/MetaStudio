@@ -70,8 +70,6 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	FPSCamera->SetupAttachment(FPSCameraSpringArm);
 	FPSCamera->bUsePawnControlRotation = false;
 
-
-
 }
 
 void AMetaStudiosCharacter::Tick(float DeltaTime)
@@ -92,7 +90,7 @@ void AMetaStudiosCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+
 
 }
 
@@ -392,6 +390,7 @@ void AMetaStudiosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(AMetaStudiosCharacter, IsTPSMode);
 
 }
+
 
 void AMetaStudiosCharacter::Move(const FInputActionValue& Value)
 {

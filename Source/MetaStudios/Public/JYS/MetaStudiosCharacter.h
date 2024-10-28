@@ -147,6 +147,9 @@ public:
 	// bool°ª ¸ÖÆ¼
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+
+
+
 protected:
 
 	/** Called for movement input */
