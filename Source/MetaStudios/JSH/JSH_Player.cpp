@@ -11,29 +11,22 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-#include "IWebSocket.h"
 #include "JSH_OBSWebSocket.h"
-#include "WebSocketsModule.h"
 #include <cstdlib>
-
-#include "DelayAction.h"
 #include "JSH_PlayerController.h"
+#include "Blueprint/UserWidget.h"
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/CommandLine.h"
 #include "HAL/PlatformFilemanager.h"
 #include "Kismet/GameplayStatics.h"
-#include "UniversalObjectLocators/UniversalObjectLocatorUtils.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
-#include "Kismet/GameplayStatics.h"
 #include "Components/SceneComponent.h"
 #include "Engine/Engine.h"
-#include "EntitySystem/MovieSceneEntitySystemRunner.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/Pawn.h"
-#include "GameFramework/SpectatorPawn.h"
 #include "GameFramework/SpectatorPawnMovement.h"
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
@@ -88,7 +81,9 @@ AJSH_Player::AJSH_Player()
 		FallGuys->SetSkeletalMesh(TMesh.Object);
 		FallGuys->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 		FallGuys->SetRelativeScale3D(FVector(0.005, 0.005, 0.005));
+		FallGuys->SetCastShadow(true);
 	}
+	
 
 	FallGuys_Camera = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Record Camera"));
 	FallGuys_Camera->SetupAttachment(FallGuys);
@@ -122,7 +117,16 @@ void AJSH_Player::BeginPlay()
 
 
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	
+	if (JPlayerController)
+	{
+		JPlayerController->bEnableTouchEvents = false;
+		UE_LOG(LogTemp, Error, TEXT("Succed"));
+	}
+}
+
+void AJSH_Player::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 
@@ -181,18 +185,23 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Ongoing, this, &AJSH_Player::DisableEdit);
 		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Completed, this, &AJSH_Player::EnableEdit);
 
+		// 카메라 줌
+		EnhancedInputComponent->BindAction(IA_ZOOM_In, ETriggerEvent::Triggered, this, &AJSH_Player::Camera_Zoom_In);
+		EnhancedInputComponent->BindAction(IA_ZOOM_Out, ETriggerEvent::Triggered, this, &AJSH_Player::Camera_Zoom_Out);
+		EnhancedInputComponent->BindAction(IA_ZOOM_Default, ETriggerEvent::Started, this, &AJSH_Player::Camera_Zoom_Default);
 
-		EnhancedInputComponent->BindAction(IA_ZOOM_In, ETriggerEvent::Started, this, &AJSH_Player::Camera_Zoom_In);
-		EnhancedInputComponent->BindAction(IA_ZOOM_Out, ETriggerEvent::Started, this, &AJSH_Player::Camera_Zoom_Out);
-
+		// 카메라 회전
 		EnhancedInputComponent->BindAction(IA_Camera_Right, ETriggerEvent::Triggered, this, &AJSH_Player::CameraRight);
 		EnhancedInputComponent->BindAction(IA_Camera_Left, ETriggerEvent::Triggered, this, &AJSH_Player::CameraLeft);
 		EnhancedInputComponent->BindAction(IA_Camera_Default, ETriggerEvent::Started, this, &AJSH_Player::CameraDefault);
-		
+
+		// 마우스 감도
+		EnhancedInputComponent->BindAction(IA_Mouse_Sensitive_Down, ETriggerEvent::Started, this, &AJSH_Player::Mouse_Sensitivity);
+		EnhancedInputComponent->BindAction(IA_Mouse_Sensitive_Up, ETriggerEvent::Started, this, &AJSH_Player::Mouse_Sensitivity);
 	}
 	else
 	{
-		//UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		//UE_LOG(LogTemplateCharacter, Error, TEXT("'%s"), *GetNameSafe(this));
 	}
 }
 #pragma endregion
@@ -226,8 +235,9 @@ void AJSH_Player::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		// * MouseSensitivity Yaw/Pitch 마우스 감도 조절
+		AddControllerYawInput(LookAxisVector.X * MouseSensitivityYaw);
+		AddControllerPitchInput(LookAxisVector.Y * MouseSensitivityPitch);
 	}
 }
 
@@ -382,6 +392,7 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 		CameraSpawn_b_On_Off = true;
 		UE_LOG(LogTemp, Warning, TEXT("visible true"));
 
+		FallGuys->SetCastShadow(false);
 		Record_b_On_Off = true;
 	}
 	else
@@ -400,6 +411,7 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 		FallGuys_Camera->SetVisibility(false);
 		CameraSpawn_b_On_Off = false;
 
+		FallGuys->SetCastShadow(true);
 		Record_b_On_Off = false;
 
 
@@ -432,12 +444,12 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 				}
 			}
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		}
 		else
 		{
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
 	}
 }
@@ -512,7 +524,7 @@ void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 
 
 
-	float tempvalue = Value.Get<float>();;
+	float tempvalue = Value.Get<float>();
 
 	MaxFlySpeed_C = MaxFlySpeed_C + tempvalue * 50;
 	
@@ -634,12 +646,12 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 			}
 			
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		}
 		else
 		{
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
 	}
 
@@ -742,12 +754,12 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 				}
 			}
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		}
 		else
 		{
 			
-			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
 		}
 	}
 }
@@ -778,6 +790,18 @@ void AJSH_Player::EnableEdit()
 		JPlayerController->SetInputMode(FInputModeGameAndUI());
 		GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
+
+	if (IsLocallyControlled() && !PlayerMainUI)
+	{
+		if (UI_Editor_Main)
+		{
+			PlayerMainUI = CreateWidget<UUserWidget>(GetWorld(), UI_Editor_Main);
+			if(PlayerMainUI)
+			{
+				PlayerMainUI->AddToViewport(0);
+			}
+		}
+	}
 }
 
 void AJSH_Player::DisableEdit()
@@ -800,6 +824,15 @@ void AJSH_Player::DisableEdit()
 		JPlayerController->bEnableMouseOverEvents = false;
 		JPlayerController->SetInputMode(FInputModeGameOnly());
 	}
+
+		JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+
+	if (PlayerMainUI)
+	{
+		PlayerMainUI->RemoveFromParent();
+		PlayerMainUI = nullptr;  // 포인터를 null로 설정
+		UE_LOG(LogTemp, Warning, TEXT("UI null"));
+	}
 }
 
 
@@ -811,21 +844,23 @@ void AJSH_Player::DisableEdit()
 void AJSH_Player::Camera_Zoom_In()
 {
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
-	if (Bool_ZoomMode && !EditorMode_B)
+	// if (Bool_ZoomMode && !EditorMode_B)
+	
+	// Recording 중이 아니라면 실행 하지 않음
+	if (!Record_b_On_Off) return;
+
+	if (!EditorMode_B)
 	{
-		// CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength+30.0f, 150.0f, 800.0f);
-		UE_LOG(LogTemp, Error, TEXT("Out"));
+		RecordCamera->FieldOfView -= ZoomSpeed;
 		
-		// float NewFOV = FMath::Clamp(RecordCamera->FieldOfView + ZoomSpeed, MinFOV, MaxFOV);
-		ZoomFOV = RecordCamera->FieldOfView - ZoomSpeed;
-		if (ZoomFOV <= 10.0f)
+		if (RecordCamera->FieldOfView  <= 10.0f)
 		{
-			ZoomFOV = 10.0f;
-			RecordCamera->SetFieldOfView(ZoomFOV);
+			RecordCamera->FieldOfView  = 10.0f;
+			RecordCamera->SetFieldOfView(RecordCamera->FieldOfView);
 		}
 		else
 		{
-			RecordCamera->SetFieldOfView(ZoomFOV);
+			RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
 		}
 	}
 }
@@ -833,38 +868,49 @@ void AJSH_Player::Camera_Zoom_In()
 void AJSH_Player::Camera_Zoom_Out()
 {
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
+	// if (Bool_ZoomMode && !EditorMode_B)
 	
-	if (Bool_ZoomMode && !EditorMode_B)
+	// Recording 중이 아니라면 실행 하지 않음
+	if (!Record_b_On_Off) return;
+	
+	if (!EditorMode_B)
 	{
-		// CameraBoom->TargetArmLength = FMath::Clamp<float>(CameraBoom->TargetArmLength-30.0f, 150.0f, 800.0f);
-		UE_LOG(LogTemp, Error, TEXT("IN"));
-
-		// float NewFOV = FMath::Clamp(RecordCamera->FieldOfView - ZoomSpeed, MinFOV, MaxFOV);
-		
-		ZoomFOV = RecordCamera->FieldOfView + ZoomSpeed;
-		if (ZoomFOV >= 120.0f)
-		{
-			ZoomFOV = 120.0f;
-			RecordCamera->SetFieldOfView(ZoomFOV);
-		}
-		else
-		{
-			RecordCamera->SetFieldOfView(ZoomFOV);
-		}
+		RecordCamera->FieldOfView += ZoomSpeed;
+		 if (RecordCamera->FieldOfView  >= 120.0f)
+		 {
+		 	RecordCamera->FieldOfView  = 120.0f;
+		 	RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
+		 }
+		 else
+		 {
+		 	RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
+		 }
 	}
 }
+
+void AJSH_Player::Camera_Zoom_Default()
+{
+	if (EditorMode_B) return;
+	
+		
+	RecordCamera->SetFieldOfView(90.0f);
+}
+
 
 void AJSH_Player::CameraRight()
 {
 	// 1인칭이 아니라면 실행 하지 않음
 	if (!RecordCamera->IsActive()) return;
+
+	// Recording 중이 아니라면 실행 하지 않음
+	if (!Record_b_On_Off) return;
 	
-	CurrentAngl += Amount;
+	CurrentAngl += RotateSpeed;
 	
-	if (CurrentAngl > 45.0f) 
-	{
-		CurrentAngl = 45.0f;
-	}
+	// if (CurrentAngl > 90.0f) 
+	// {
+	// 	CurrentAngl = 90.0f;
+	// }
 	
 	NewCameraRotation = RecordCamera->GetRelativeRotation();
 	NewCameraRotation.Roll = CurrentAngl;
@@ -875,13 +921,16 @@ void AJSH_Player::CameraLeft()
 {
 	// 1인칭이 아니라면 실행 하지 않음
 	if (!RecordCamera->IsActive()) return;
+
+	// Recording 중이 아니라면 실행 하지 않음
+	if (!Record_b_On_Off) return;
 	
-	CurrentAngl -= Amount;
+	CurrentAngl -= RotateSpeed;
 	
-	if (CurrentAngl < -45.0f) 
-	{
-		CurrentAngl = -45.0f;
-	}
+	// if (CurrentAngl < -90.0f) 
+	// {
+	// 	CurrentAngl = -90.0f;
+	// }
 	
 	NewCameraRotation = RecordCamera->GetRelativeRotation();
 	NewCameraRotation.Roll = CurrentAngl;
@@ -892,6 +941,9 @@ void AJSH_Player::CameraDefault()
 {
 	// 1인칭이 아니라면 실행 하지 않음
 	if (!RecordCamera->IsActive()) return;
+
+	// Recording 중이 아니라면 실행 하지 않음
+	if (!Record_b_On_Off) return;
 	
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
@@ -903,6 +955,43 @@ void AJSH_Player::CameraReset()
 	RecordCamera->SetFieldOfView(90.0f);
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
+}
+
+// 마우스 감도 조절 , 줌 했을때 마우스(화면 회전)가 너무 빨라서 추가
+void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
+{
+	float Temp_FG = Value.Get<float>();
+
+	// UE_LOG(LogTemp, Error, TEXT("tttt %f"), Temp_FG);
+
+	
+	if (Temp_FG >= +1)
+	{
+		MouseSensitivityYaw += 0.05;
+		MouseSensitivityPitch += 0.05;
+
+		// 1도 완저ㅓㅓㅓㅓ언 빠라서 굳이 1 이상으로 갈 필요가 있을까 싶음
+		if (MouseSensitivityYaw >= 1.0)
+		{
+			MouseSensitivityYaw = 1.0;
+			MouseSensitivityPitch = 1.0;
+		}
+	}
+	else
+	{
+		MouseSensitivityYaw -= 0.05;
+		MouseSensitivityPitch -= 0.05;
+
+		// - 값으로 가면 마우스 움직임이 아예 반대로 들어가서 막았으
+		if (MouseSensitivityYaw <= 0.05)
+		{
+			MouseSensitivityYaw = 0.05;
+			MouseSensitivityPitch = 0.05;
+		}
+	}
+	
+	UE_LOG(LogTemp, Error, TEXT("YYY %f"), MouseSensitivityYaw);
+	UE_LOG(LogTemp, Error, TEXT("PPP %f"), MouseSensitivityPitch);
 }
 
 #pragma endregion

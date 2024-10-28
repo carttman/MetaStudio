@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "IWebSocket.h"
 #include "JSH_Player.generated.h"
 
 
@@ -91,6 +90,9 @@ class AJSH_Player : public ACharacter
 	UInputAction* IA_ZOOM_Out;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_ZOOM_Default;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Camera_Right;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -99,7 +101,13 @@ class AJSH_Player : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Camera_Default;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Camera_Zoom_LeftMouse;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Mouse_Sensitive_Down;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Mouse_Sensitive_Up;
 public:
 	AJSH_Player();
 	
@@ -117,6 +125,8 @@ protected:
 	
 	virtual void BeginPlay();
 
+	virtual void Tick(float DeltaTime) override;
+
 public:
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -132,7 +142,9 @@ public:
 #pragma region Record
 
 	// 녹화 시작 / 종료
+	UPROPERTY()
 	class UJSH_OBSWebSocket* ObsGamInstance;
+	
 	FProcHandle PH;
 
 	UFUNCTION()
@@ -179,7 +191,7 @@ public:
 	UPROPERTY(Replicated)
 	bool PlayerVisible_b_On = true;
 
-	
+	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
 	
 #pragma endregion
@@ -199,8 +211,9 @@ public:
 	void Fly_Up_Down(const FInputActionValue& Value);
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_Fly_Up_Down(const FInputActionValue& Value);
-
+	UPROPERTY()
 	float Fly_Zvalue = 0;
+	UPROPERTY()
 	float Fly_Off_Value = 0 ;
 
 
@@ -231,7 +244,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_EditorMode();
 
-	
+	UPROPERTY()
 	APlayerController* OriginController;
 	
 
@@ -242,6 +255,14 @@ public:
 
 	UPROPERTY(Replicated)
 	bool EditorMode_B = false;
+
+
+	// UI
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UUserWidget> UI_Editor_Main;
+	
+	UPROPERTY(EditDefaultsOnly)
+	class UUserWidget* PlayerMainUI;
 
 #pragma endregion
 
@@ -254,16 +275,35 @@ public:
 	
 #pragma endregion
 
+
 #pragma region Camera Control
 
+	// 카메라 줌
+	UPROPERTY()
 	bool Bool_ZoomMode = false;
 	
 	UFUNCTION()
 	void Camera_Zoom_In();
 	UFUNCTION()
 	void Camera_Zoom_Out();
+	UFUNCTION()
+	void Camera_Zoom_Default();
+
+	UPROPERTY()
+	float ZoomFOV = 0;
+	UPROPERTY()
+	float ZoomSpeed = 0.5f; 
+	UPROPERTY()
+	float MinFOV = 120.0f;
+	UPROPERTY()
+	float MaxFOV = 10.0f;
+	UPROPERTY()
+	bool WheelOn = false;
+	UPROPERTY()
+	bool Bool_RightZoom = false;
 
 
+	// 카메라 회전
 	UFUNCTION()
 	void CameraRight();
 	UFUNCTION()
@@ -272,24 +312,24 @@ public:
 	void CameraDefault();
 	UFUNCTION()
 	void CameraReset();
-	
+	UPROPERTY()
 	FRotator DefaultCameraleaning = FRotator(0, 0, 0);
+	UPROPERTY()
 	FRotator NewCameraRotation;
-	float Amount = 0.1f;
+	UPROPERTY()
+	float RotateSpeed = 0.2f;
+	UPROPERTY()
 	float CurrentAngl = 0.0f;
 
 
-	float ZoomFOV = 0;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
-	float ZoomSpeed = 10.0f; 
+	// 마우스 감도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float MouseSensitivityYaw = 0.7f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float MouseSensitivityPitch = 0.7f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
-	float MinFOV = 120.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zoom")
-	float MaxFOV = 10.0f;
-	
+	UFUNCTION()
+	void Mouse_Sensitivity(const FInputActionValue& Value);
 #pragma endregion
 	
 };
