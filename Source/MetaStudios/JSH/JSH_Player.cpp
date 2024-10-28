@@ -264,7 +264,7 @@ void AJSH_Player::Look(const FInputActionValue& Value)
 void AJSH_Player::SpectatorMode()
 {
 	// 메인 플랫폼 일떄 기능 LOCK
-	if(Bool_MainLock) return;
+	if(!Bool_MainLock) return;
 	
 	if (HasAuthority())
 	{
@@ -369,7 +369,7 @@ void AJSH_Player::NetMulti_Visible_On_OFF_Implementation()
 void AJSH_Player::StartRecording()
 {
 	// 메인 플랫폼 일떄 기능 LOCK
-	if(Bool_MainLock) return;
+	if(!Bool_MainLock) return;
 	
 	if(EditorMode_B) return;
 	
@@ -551,7 +551,7 @@ void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 void AJSH_Player::FlyMode()
 {
 	// 메인 플랫폼 일떄 기능 LOCK
-	if(Bool_MainLock) return;
+	if(!Bool_MainLock) return;
 	
 	NetMulti_FlyMode();
 
@@ -679,7 +679,7 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 void AJSH_Player::EditorMode()
 {
 	// 메인 플랫폼 일떄 기능 LOCK
-	if(Bool_MainLock) return;
+	if(!Bool_MainLock) return;
 	
 	// 녹화 중이 아닐때에만 Editor 모드 가능
 	if (Record_b_On_Off) return;
