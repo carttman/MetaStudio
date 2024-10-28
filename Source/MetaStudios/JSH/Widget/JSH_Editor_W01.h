@@ -23,8 +23,20 @@ public:
 protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
-private:
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	
+public:
 	// FGeometry를 직접 저장하는 대신 필요한 정보만 저장
+	UPROPERTY()
 	FVector2D LastMousePosition;
+	UPROPERTY()
 	bool bIsDragging;
+
+
+	// UI
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UUserWidget> UI_Editor_WBP01;
+	
+	UPROPERTY(EditDefaultsOnly)
+	class UUserWidget* PlayerMainUI;
 };

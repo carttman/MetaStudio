@@ -9,8 +9,6 @@
 void UJSH_Editor_W01::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
-	
 }
 
 FReply UJSH_Editor_W01::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -28,4 +26,31 @@ FReply UJSH_Editor_W01::NativeOnMouseButtonDown(const FGeometry& InGeometry, con
 	}
 
 	return FReply::Unhandled();
+}
+
+void UJSH_Editor_W01::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent,
+	UDragDropOperation*& OutOperation)
+{
+	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+
+	PlayerMainUI = CreateWidget<UUserWidget>(GetWorld()->GetFirstPlayerController(), UI_Editor_WBP01);
+	
+	
+	if (PlayerMainUI)
+	{
+		// Drag Drop Operation 생성
+		UDragDropOperation* DragDropOp = NewObject<UDragDropOperation>(this, UDragDropOperation::StaticClass());
+
+		if (DragDropOp)
+		{
+			// Payload 및 Default Drag Visual 설정
+			DragDropOp->Payload = nullptr; // Payload에 필요한 데이터를 설정할 수 있습니다.
+			DragDropOp->DefaultDragVisual = PlayerMainUI; // 드래그 시 보여질 비주얼 설정
+			DragDropOp->Pivot = EDragPivot::CenterCenter; // 드래그 핏 설정 (CenterCenter)
+
+			// 생성한 DragDropOperation을 OutOperation에 할당
+			OutOperation = DragDropOp;
+		}
+	}
+	
 }
