@@ -28,6 +28,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpectatorPawnMovement.h"
+#include "MetaStudios/CHJ/Component/FirebaseComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
 #include "UObject/UObjectGlobals.h"
@@ -97,6 +98,8 @@ AJSH_Player::AJSH_Player()
 
 	GetCharacterMovement()->MaxFlySpeed = MaxFlySpeed_C;
 	GetCharacterMovement()->BrakingDecelerationFlying = BrakingDecelerationFlying_C;
+
+	FirebaseComponent = CreateDefaultSubobject<UFirebaseComponent>(TEXT("FirebaseComponent"));
 }
 #pragma endregion
 
@@ -120,7 +123,16 @@ void AJSH_Player::BeginPlay()
 	if (JPlayerController)
 	{
 		JPlayerController->bEnableTouchEvents = false;
+		//UE_LOG(LogTemp, Error, TEXT("Succed"));
+	}
+
+	AGameModeBase* currGameMode = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
+	FString currgamemodename = currGameMode->GetName();
+	
+	if(currgamemodename.Contains(FString(TEXT("filmroom"))))
+	{
 		UE_LOG(LogTemp, Error, TEXT("Succed"));
+		Bool_MainLock = true;
 	}
 }
 

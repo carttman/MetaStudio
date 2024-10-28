@@ -13,5 +13,8 @@ UCLASS()
 class METASTUDIOS_API AFilmRoomMainGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	UPROPERTY(EditAnywhere)
+	class AJSH_Player* Player;
 };

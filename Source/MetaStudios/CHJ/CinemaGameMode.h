@@ -13,5 +13,6 @@ UCLASS()
 class METASTUDIOS_API ACinemaGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+
 	
 };

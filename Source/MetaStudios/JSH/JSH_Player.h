@@ -331,5 +331,7 @@ public:
 	UFUNCTION()
 	void Mouse_Sensitivity(const FInputActionValue& Value);
 #pragma endregion
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UFirebaseComponent* FirebaseComponent;
 };
