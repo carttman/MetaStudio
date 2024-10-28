@@ -127,17 +127,21 @@ void AJSH_Player::BeginPlay()
 	}
 
 	
-	AGameModeBase* currGameMode = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
-
-	if (currGameMode != nullptr)
-	{
-		currgamemodename = currGameMode->GetName();
-		if(currgamemodename.Contains(FString(TEXT("filmroom"))))
-		{
-			UE_LOG(LogTemp, Error, TEXT("Succed"));
-			Bool_MainLock = true;
-		}
-	}
+	// AGameModeBase* currGameMode = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
+	//
+	// if (currGameMode != nullptr)
+	// {
+	// 	currgamemodename = currGameMode->GetName();
+	// 	if(currgamemodename.Contains(FString(TEXT("filmroom"))))
+	// 	{
+	// 		UE_LOG(LogTemp, Error, TEXT("Succed"));
+	// 		Bool_MainLock = true;
+	// 	}
+	// 	else
+	// 	{
+	// 		Bool_MainLock = false;
+	// 	}
+	// }
 }
 
 void AJSH_Player::Tick(float DeltaTime)
@@ -682,6 +686,8 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 // (key: 1) EditorMode On / Off
 void AJSH_Player::EditorMode()
 {
+	JPlayerController->ConvertMKVToMP4();
+
 	// 메인 플랫폼 일떄 기능 LOCK
 	if(!Bool_MainLock) return;
 	
