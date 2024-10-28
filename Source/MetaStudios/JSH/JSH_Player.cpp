@@ -110,7 +110,6 @@ void AJSH_Player::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
 	// Record 함수를 끌고 오기 위한 GameInstance 
 	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
 
@@ -126,14 +125,14 @@ void AJSH_Player::BeginPlay()
 		//UE_LOG(LogTemp, Error, TEXT("Succed"));
 	}
 
-	AGameModeBase* currGameMode = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
-	FString currgamemodename = currGameMode->GetName();
-	
-	if(currgamemodename.Contains(FString(TEXT("filmroom"))))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Succed"));
-		Bool_MainLock = true;
-	}
+	// AGameModeBase* currGameMode = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
+	// FString currgamemodename = currGameMode->GetName();
+	//
+	// if(currgamemodename.Contains(FString(TEXT("filmroom"))))
+	// {
+	// 	UE_LOG(LogTemp, Error, TEXT("Succed"));
+	// 	Bool_MainLock = true;
+	// }
 }
 
 void AJSH_Player::Tick(float DeltaTime)
