@@ -272,6 +272,9 @@ public:
 	// 메인 플랫폼 일떄 기능 막아두는 bool 값
 	UPROPERTY(Replicated)
 	bool Bool_MainLock = false;
+
+	UPROPERTY(Replicated)
+	FString currgamemodename;
 	
 #pragma endregion
 

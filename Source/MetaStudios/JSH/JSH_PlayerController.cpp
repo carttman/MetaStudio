@@ -49,6 +49,10 @@ void AJSH_PlayerController::StartRecord()
 			FString Params = FString::Printf(TEXT("-f dshow -i audio=\"Microphone Array(Intel® Smart Sound Technology for Digital Microphones)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 2560x1600 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 %s.mkv"), *FilePath);
 			// FString Params = TEXT(" -y -rtbufsize 100M -f gdigrab -show_region 1 -offset_x 0 -offset_y 0 -video_size 2560x1600 -framerate 30 -probesize 10M -draw_mouse 1 -i desktop -f dshow -i audio=\"Microphone Array(Intel® Smart Sound Technology for Digital Microphones)\" -c:v h264_nvenc -r 30 -preset llhq -crf 25 -pix_fmt yuv420p \"output_with_mic.mp4\"");
 			
+			UE_LOG(LogTemp, Warning, TEXT("AutoPath: %s"), *AutoPath);
+			UE_LOG(LogTemp, Warning, TEXT("VideoFileName: %s"), *VideoFileName);
+			UE_LOG(LogTemp, Warning, TEXT("FilePath: %s"), *FilePath);
+			UE_LOG(LogTemp, Warning, TEXT(" ExecutablePath: %s"), * ExecutablePath);
 			
 			FProcHandle ProcessHandle = FPlatformProcess::CreateProc(
 				*ExecutablePath, // Executable path
