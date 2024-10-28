@@ -44,7 +44,7 @@ void UJSH_Editor_W01::NativeOnDragDetected(const FGeometry& InGeometry, const FP
 		if (DragDropOp)
 		{
 			// Payload 및 Default Drag Visual 설정
-			DragDropOp->Payload = nullptr; // Payload에 필요한 데이터를 설정할 수 있습니다.
+			DragDropOp->Payload = PlayerMainUI; // Payload에 필요한 데이터를 설정할 수 있습니다.
 			DragDropOp->DefaultDragVisual = PlayerMainUI; // 드래그 시 보여질 비주얼 설정
 			DragDropOp->Pivot = EDragPivot::CenterCenter; // 드래그 핏 설정 (CenterCenter)
 
