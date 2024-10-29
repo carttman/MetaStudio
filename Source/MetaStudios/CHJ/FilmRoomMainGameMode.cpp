@@ -19,7 +19,7 @@ APawn* AFilmRoomMainGameMode::SpawnDefaultPawnFor_Implementation(AController* Ne
 	{
 		return GetWorld()->SpawnActor<AMetaStudiosCharacter>(ClientPlayer, StartSpot->GetActorLocation(), StartSpot->GetActorRotation());
 	}
-	return nullptr;
+	//return nullptr;
 }
 
 

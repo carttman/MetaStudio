@@ -20,5 +20,5 @@ APawn* ACinemaGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlaye
 	{
 		return GetWorld()->SpawnActor<AMetaStudiosCharacter>(ClientPlayer, StartSpot->GetActorLocation(), StartSpot->GetActorRotation());
 	}
-	return nullptr;
+	//return nullptr;
 }
