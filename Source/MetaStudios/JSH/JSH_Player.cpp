@@ -110,6 +110,13 @@ void AJSH_Player::BeginPlay()
 {
 	Super::BeginPlay();
 
+
+	FString RelativePath = FPaths::ProjectContentDir();
+
+	FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
+	IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
+	UE_LOG(LogTemp, Error, TEXT("RelativePath: %s"), *RelativePath);
+	UE_LOG(LogTemp, Error, TEXT("FullPath: %s"), *FullPath);
 	
 	// Record 함수를 끌고 오기 위한 GameInstance 
 	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
