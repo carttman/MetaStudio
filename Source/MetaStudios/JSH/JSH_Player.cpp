@@ -13,6 +13,8 @@
 #include "InputActionValue.h"
 #include "JSH_OBSWebSocket.h"
 #include <cstdlib>
+
+#include "JSH_Editor_SpawnActor.h"
 #include "JSH_PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "Misc/Paths.h"
@@ -660,26 +662,49 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 
 		if (bHit)
 		{
-			float DistanceToGround = HitResult.Distance;
+		
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	
+			AGameModeBase* tt = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
+			
+			UClass* SpectatorClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/BP_Asset1.BP_Asset1_C"));
+			
+			AActor* SpectatorActor = GetWorld()->SpawnActorDeferred<AActor>(SpectatorClass, HitResult.GetActor()->GetActorTransform());
 
-			// Editor 모드가 아닐때 or Record Mode가 아닐때 Fly Mode를 종료
-			if (!EditorMode_B & !Record_b_On_Off)
+			
+			if (SpectatorActor)
 			{
-				// 원하는 거리 임계값 설정
-				if (DistanceToGround < 100.0f)
+				APawn* SpectatorPawn = Cast<APawn>(SpectatorActor);
+				if (SpectatorPawn)
 				{
-					FlyMode(); 
+					UGameplayStatics::FinishSpawningActor(SpectatorActor, HitResult.GetActor()->GetActorTransform());
 				}
 			}
-			
-			
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		}
-		else
-		{
-			
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
-		}
+		
+		// if (bHit)
+		// {
+		// 	float DistanceToGround = HitResult.Distance;
+		//
+		// 	// Editor 모드가 아닐때 or Record Mode가 아닐때 Fly Mode를 종료
+		// 	if (!EditorMode_B & !Record_b_On_Off)
+		// 	{
+		// 		// 원하는 거리 임계값 설정
+		// 		if (DistanceToGround < 100.0f)
+		// 		{
+		// 			FlyMode(); 
+		// 		}
+		// 	}
+		// 	
+		// 	
+		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+		// }
+		// else
+		// {
+		// 	
+		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+		// }
 	}
 
 }
