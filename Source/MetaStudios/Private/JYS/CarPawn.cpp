@@ -17,9 +17,8 @@ ACarPawn::ACarPawn()
 	SetRootComponent(DefaultScene);
 
 	CarMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CarMesh"));
-	// CarMesh = SetRelativeRotation(FRotator(0, 0, -90));
 	CarMesh->SetupAttachment(DefaultScene);
-	//RootComponent = CarMesh;
+
 	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(CarMesh);
