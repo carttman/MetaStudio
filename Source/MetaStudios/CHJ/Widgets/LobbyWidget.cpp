@@ -173,7 +173,8 @@ void ULobbyWidget::GetPlayerNickName()
 			{
 				FString Nickname = Identity->GetPlayerNickname(*UserId);
 				UE_LOG(LogTemp, Log, TEXT("Steam Nickname: %s"), *Nickname);
-				T_MyNickName->SetText(FText::FromString(*Nickname));
+				FString N = Nickname.Left(8);
+				T_MyNickName->SetText(FText::FromString(*N));
 			}
 		}
 	}

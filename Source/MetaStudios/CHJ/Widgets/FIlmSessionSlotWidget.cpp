@@ -27,7 +27,8 @@ void UFIlmSessionSlotWidget::OnClickJoin()
 void UFIlmSessionSlotWidget::UpdateInfo(const struct FRoomInfo& info)
 {
 	Text_RoomName->SetText(FText::FromString(info.roomName));
-	Text_HostName->SetText(FText::FromString(info.hostName));
+	FString newRoomName = info.hostName.Left(8);
+	Text_HostName->SetText(FText::FromString(newRoomName));
 	FString count = FString::Printf(TEXT("%d / %d") , info.currentPlayerCount, info.maxPlayerCount);
 	Text_PlayerCount->SetText(FText::FromString(count));
 	Text_PingMS->SetText(FText::AsNumber(info.pingMS));
