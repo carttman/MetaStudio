@@ -60,6 +60,7 @@ AJSH_Player::AJSH_Player()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
+	
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -72,7 +73,7 @@ AJSH_Player::AJSH_Player()
 	
 	RecordCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("RecordCamera"));
 	RecordCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	RecordCamera->SetRelativeLocation(FVector(440.0f, 0.0f, 0.0f));
+	RecordCamera->SetRelativeLocation(FVector(460.0f, 0.0f, 0.0f));
 	// RecordCamera->SetRelativeRotation(FRotator(13.876860f, -0.433584f, -59.389724f));
 	RecordCamera->bUsePawnControlRotation = false;
 	RecordCamera->FieldOfView = 90.0f;
@@ -106,7 +107,7 @@ AJSH_Player::AJSH_Player()
 	if (TMesh.Succeeded())
 	{
 		FallGuys->SetSkeletalMesh(TMesh.Object);
-		FallGuys->SetRelativeLocationAndRotation(FVector(0, 0, -27), FRotator(0, -90, 0));
+		FallGuys->SetRelativeLocationAndRotation(FVector(20, 0, -12), FRotator(0, -90, 0));
 		FallGuys->SetRelativeScale3D(FVector(0.5, 0.5, 0.5));
 		FallGuys->SetCastShadow(true);
 	}
