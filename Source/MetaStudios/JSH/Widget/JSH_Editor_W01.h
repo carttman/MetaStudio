@@ -25,6 +25,7 @@ protected:
 
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	
+	// virtual void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 public:
 	// FGeometry를 직접 저장하는 대신 필요한 정보만 저장
 	UPROPERTY()
@@ -39,4 +40,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly)
 	class UUserWidget* PlayerMainUI;
+
+	
+	FVector Start;
+	FVector End;
+	APlayerController* PlayerController;
 };
