@@ -36,9 +36,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	bool CanPlayerEnterCar();
+	bool CanPlayerEnterCar(AMetaStudiosCharacter* targetCharacter);
 
 	void ExitCar();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ExitCar();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_ExitCar();
 
 	AMetaStudiosCharacter* player;
 
@@ -59,6 +65,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USceneComponent* DefaultScene;
+
+
+	void ResetEnhancedInputSetting(class APlayerController* pc);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
+
+
+
 private:
 
 	FVector MovementDirection;

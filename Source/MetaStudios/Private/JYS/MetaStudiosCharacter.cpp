@@ -363,25 +363,49 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 /// 자동차랑 플레이어랑 컨트롤러 바꾸기
 void AMetaStudiosCharacter::EnterCar()
 {
-	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 
-	ACarPawn* CarActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
-
-	if (CarActor)
+	if (IsLocallyControlled())
 	{
-		if (characterController && CarActor)
+		Server_EnterCar();
+	}
+}
+
+void AMetaStudiosCharacter::Server_EnterCar_Implementation()
+{
+	if (HasAuthority())
+	{
+		ACarPawn* CarActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
+		if (CarActor == nullptr)
+		{
+			FActorSpawnParameters SpawnParams;
+			CarActor = GetWorld()->SpawnActor<ACarPawn>(CarPawnFactory, SpawnParams);
+			UE_LOG(LogTemp, Error, TEXT("Failed to find or spawn SpaceshipActor."));
+		}
+		else
 		{
 			CarActor->player = this;
-			if (CarActor->CanPlayerEnterCar())
+			if (CarActor->CanPlayerEnterCar(this))
 			{
-				characterController->Possess(CarActor);
-				GetMesh()->SetVisibility(false);
+				GetController()->Possess(CarActor);
+				UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn SpaceshipActor."));
 			}
 		}
+		NetMulticast_EnterCar(CarActor);
+	}
+
+}
+
+void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarActor)
+{
+	if (CarActor)
+	{
+		CarActor->player = this;
+		GetMesh()->SetVisibility(false);
+		CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Car class could not be loaded!"));
+		UE_LOG(LogTemp, Error, TEXT("Spaceship class could not be loaded!"));
 	}
 }
 
