@@ -41,8 +41,8 @@ void AJSH_PlayerController::StartRecord()
 			FDateTime Now = FDateTime::Now();
 			FString DateTimeString = Now.ToString(TEXT("%Y-%m-%d_%H-%M-%S")); 
 			FString AutoPath = FPaths::ProjectUserDir();
-			VideoFileName = TEXT("A");
-			// VideoFileName = FString::Printf(TEXT("UE_%s"), *DateTimeString);
+			//VideoFileName = TEXT("A");
+			VideoFileName = FString::Printf(TEXT("UE_%s"), *DateTimeString);
 
 			
 			FString FilePath = FString::Printf(TEXT("%sffmpeg/%s"), *AutoPath, *VideoFileName);
@@ -120,11 +120,17 @@ void AJSH_PlayerController::ConvertMKVToMP4()
 		FString WorkingDirectory2 = FString::Printf(TEXT("%sffmpeg/"), *AutoPath);
 		UE_LOG(LogTemp, Error, TEXT("convert: %s"), *AutoPath);
 
+		
+		FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AutoPath);
+		IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AutoPath);
+		
+		UE_LOG(LogTemp, Error, TEXT("FullPath: %s"), *FullPath);
+
 		// FString Params2 = FString::Printf(TEXT("-i \"%s/%s.mkv\" -vcodec copy -acodec copy \"%s/%s.mp4\""), *WorkingDirectory, *VideoFileName, *WorkingDirectory, *VideoFileName);
 		// 위처럼 copy하면 mp4a 문제 생김
 	
-		//FString Params2 = FString::Printf(TEXT("-i \"./%s%s.mkv\" -vcodec h264 -acodec aac -strict experimental \"./%s%s.mp4\""), *WorkingDirectory2, *VideoFileName, *WorkingDirectory2, *VideoFileName);
-		FString Params2 = FString::Printf(TEXT("-i \"C:/Users/Admin/Documents/GitHub/MetaStudio/MetaStudios/ffmpeg/A.mkv\" -vcodec h264 -acodec aac -strict experimental \"C:/Users/Admin/Documents/GitHub/MetaStudio/MetaStudios/ffmpeg/A.mp4\""));
+		FString Params2 = FString::Printf(TEXT("-i \"%s/ffmpeg/%s.mkv\" -vcodec h264 -acodec aac -strict experimental \"%s/ffmpeg/%s.mp4\""), *FullPath, *VideoFileName, *FullPath, *VideoFileName);
+		//FString Params2 = FString::Printf(TEXT("-i \"C:/Users/Admin/Documents/GitHub/MetaStudio/MetaStudios/ffmpeg/A.mkv\" -vcodec h264 -acodec aac -strict experimental \"C:/Users/Admin/Documents/GitHub/MetaStudio/MetaStudios/ffmpeg/A.mp4\""));
 
 
 		

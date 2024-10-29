@@ -13,6 +13,8 @@
 #include "InputActionValue.h"
 #include "JSH_OBSWebSocket.h"
 #include <cstdlib>
+
+#include "JSH_Editor_SpawnActor.h"
 #include "JSH_PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "Misc/Paths.h"
@@ -28,6 +30,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpectatorPawnMovement.h"
+#include "MetaStudios/CHJ/MainGameInstance.h"
 #include "MetaStudios/CHJ/Component/FirebaseComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
@@ -110,10 +113,17 @@ void AJSH_Player::BeginPlay()
 {
 	Super::BeginPlay();
 
+
+	FString RelativePath = FPaths::ProjectContentDir();
+
+	FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
+	IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
+	UE_LOG(LogTemp, Error, TEXT("RelativePath: %s"), *RelativePath);
+	UE_LOG(LogTemp, Error, TEXT("FullPath: %s"), *FullPath);
 	
 	// Record 함수를 끌고 오기 위한 GameInstance 
 	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
-
+	CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
 
 	// 카메라 처음에는 안 보이게
 	FallGuys_Camera->SetVisibility(false);
@@ -218,6 +228,9 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		// 마우스 감도
 		EnhancedInputComponent->BindAction(IA_Mouse_Sensitive_Down, ETriggerEvent::Started, this, &AJSH_Player::Mouse_Sensitivity);
 		EnhancedInputComponent->BindAction(IA_Mouse_Sensitive_Up, ETriggerEvent::Started, this, &AJSH_Player::Mouse_Sensitivity);
+
+
+		EnhancedInputComponent->BindAction(IA_ESC, ETriggerEvent::Started, this, &AJSH_Player::Esc);
 	}
 	else
 	{
@@ -653,26 +666,49 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 
 		if (bHit)
 		{
-			float DistanceToGround = HitResult.Distance;
+		
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	
+			AGameModeBase* tt = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
+			
+			UClass* SpectatorClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/BP_Asset1.BP_Asset1_C"));
+			
+			AActor* SpectatorActor = GetWorld()->SpawnActorDeferred<AActor>(SpectatorClass, HitResult.GetActor()->GetActorTransform());
 
-			// Editor 모드가 아닐때 or Record Mode가 아닐때 Fly Mode를 종료
-			if (!EditorMode_B & !Record_b_On_Off)
+			
+			if (SpectatorActor)
 			{
-				// 원하는 거리 임계값 설정
-				if (DistanceToGround < 100.0f)
+				APawn* SpectatorPawn = Cast<APawn>(SpectatorActor);
+				if (SpectatorPawn)
 				{
-					FlyMode(); 
+					UGameplayStatics::FinishSpawningActor(SpectatorActor, HitResult.GetActor()->GetActorTransform());
 				}
 			}
-			
-			
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		}
-		else
-		{
-			
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
-		}
+		
+		// if (bHit)
+		// {
+		// 	float DistanceToGround = HitResult.Distance;
+		//
+		// 	// Editor 모드가 아닐때 or Record Mode가 아닐때 Fly Mode를 종료
+		// 	if (!EditorMode_B & !Record_b_On_Off)
+		// 	{
+		// 		// 원하는 거리 임계값 설정
+		// 		if (DistanceToGround < 100.0f)
+		// 		{
+		// 			FlyMode(); 
+		// 		}
+		// 	}
+		// 	
+		// 	
+		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+		// }
+		// else
+		// {
+		// 	
+		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+		// }
 	}
 
 }
@@ -1016,11 +1052,17 @@ void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 	UE_LOG(LogTemp, Error, TEXT("PPP %f"), MouseSensitivityPitch);
 }
 
+
+
 #pragma endregion
 
 
 
-
+void AJSH_Player::Esc()
+{
+	UE_LOG(LogTemp, Error, TEXT("ESC"));
+	CHJ_Instance->ExitSession();
+}
 
 #pragma region Text
 
