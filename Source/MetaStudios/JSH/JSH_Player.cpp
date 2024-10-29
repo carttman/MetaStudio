@@ -77,14 +77,37 @@ AJSH_Player::AJSH_Player()
 	RecordCamera->bUsePawnControlRotation = false;
 	RecordCamera->FieldOfView = 90.0f;
 
+	// FallGuys = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
+	// FallGuys->SetupAttachment(RootComponent);
+	// ConstructorHelpers::FObjectFinder<USkeletalMesh> TMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/JSH/Asset/FallGuys02/yoshi_-_fall_guys_fan_art.yoshi_-_fall_guys_fan_art'"));
+	// if (TMesh.Succeeded())
+	// {
+	// 	FallGuys->SetSkeletalMesh(TMesh.Object);
+	// 	FallGuys->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+	// 	FallGuys->SetRelativeScale3D(FVector(0.005, 0.005, 0.005));
+	// 	FallGuys->SetCastShadow(true);
+	// }
+	//
+	//
+	// FallGuys_Camera = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Record Camera"));
+	// FallGuys_Camera->SetupAttachment(FallGuys);
+	// ConstructorHelpers::FObjectFinder<USkeletalMesh> TMesh2(TEXT("/Script/Engine.SkeletalMesh'/Game/JSH/Asset/Camera03/source/video-cam.video-cam'"));
+	// if (TMesh2.Succeeded())
+	// {
+	// 	FallGuys_Camera->SetSkeletalMesh(TMesh2.Object);
+	// 	FallGuys_Camera->SetRelativeLocationAndRotation(FVector(-12477.217394, 3931.275206, 24551.795870), FRotator(1.727941, 0.148925, 9.851076));
+	// 	FallGuys_Camera->SetRelativeScale3D(FVector(100, 100, 100));
+	// }
+
+
 	FallGuys = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	FallGuys->SetupAttachment(RootComponent);
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> TMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/JSH/Asset/FallGuys02/yoshi_-_fall_guys_fan_art.yoshi_-_fall_guys_fan_art'"));
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> TMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/JSH/Asset/Corgi/untitled.untitled'"));
 	if (TMesh.Succeeded())
 	{
 		FallGuys->SetSkeletalMesh(TMesh.Object);
-		FallGuys->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
-		FallGuys->SetRelativeScale3D(FVector(0.005, 0.005, 0.005));
+		FallGuys->SetRelativeLocationAndRotation(FVector(0, 0, -27), FRotator(0, -90, 0));
+		FallGuys->SetRelativeScale3D(FVector(0.5, 0.5, 0.5));
 		FallGuys->SetCastShadow(true);
 	}
 	
@@ -99,6 +122,7 @@ AJSH_Player::AJSH_Player()
 		FallGuys_Camera->SetRelativeScale3D(FVector(100, 100, 100));
 	}
 
+	
 	GetCharacterMovement()->MaxFlySpeed = MaxFlySpeed_C;
 	GetCharacterMovement()->BrakingDecelerationFlying = BrakingDecelerationFlying_C;
 
@@ -664,51 +688,51 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 
 		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 
-		if (bHit)
-		{
-		
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	
-			AGameModeBase* tt = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
-			
-			UClass* SpectatorClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/BP_Asset1.BP_Asset1_C"));
-			
-			AActor* SpectatorActor = GetWorld()->SpawnActorDeferred<AActor>(SpectatorClass, HitResult.GetActor()->GetActorTransform());
-
-			
-			if (SpectatorActor)
-			{
-				APawn* SpectatorPawn = Cast<APawn>(SpectatorActor);
-				if (SpectatorPawn)
-				{
-					UGameplayStatics::FinishSpawningActor(SpectatorActor, HitResult.GetActor()->GetActorTransform());
-				}
-			}
-		}
-		
 		// if (bHit)
 		// {
-		// 	float DistanceToGround = HitResult.Distance;
 		//
-		// 	// Editor 모드가 아닐때 or Record Mode가 아닐때 Fly Mode를 종료
-		// 	if (!EditorMode_B & !Record_b_On_Off)
+		// 	FActorSpawnParameters SpawnParams;
+		// 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		//
+		// 	AGameModeBase* tt = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
+		// 	
+		// 	UClass* SpectatorClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/BP_Asset1.BP_Asset1_C"));
+		// 	
+		// 	AActor* SpectatorActor = GetWorld()->SpawnActorDeferred<AActor>(SpectatorClass, HitResult.GetActor()->GetActorTransform());
+		//
+		// 	
+		// 	if (SpectatorActor)
 		// 	{
-		// 		// 원하는 거리 임계값 설정
-		// 		if (DistanceToGround < 100.0f)
+		// 		APawn* SpectatorPawn = Cast<APawn>(SpectatorActor);
+		// 		if (SpectatorPawn)
 		// 		{
-		// 			FlyMode(); 
+		// 			UGameplayStatics::FinishSpawningActor(SpectatorActor, HitResult.GetActor()->GetActorTransform());
 		// 		}
 		// 	}
-		// 	
-		// 	
-		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		// }
-		// else
-		// {
-		// 	
-		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
-		// }
+		
+		if (bHit)
+		{
+			float DistanceToGround = HitResult.Distance;
+		
+			// Editor 모드가 아닐때 or Record Mode가 아닐때 Fly Mode를 종료
+			if (!EditorMode_B & !Record_b_On_Off)
+			{
+				// 원하는 거리 임계값 설정
+				if (DistanceToGround < 100.0f)
+				{
+					FlyMode(); 
+				}
+			}
+			
+			
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+		}
+		else
+		{
+			
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+		}
 	}
 
 }
@@ -722,8 +746,6 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 // (key: 1) EditorMode On / Off
 void AJSH_Player::EditorMode()
 {
-	JPlayerController->ConvertMKVToMP4();
-
 	// 메인 플랫폼 일떄 기능 LOCK
 	if(!Bool_MainLock) return;
 	
@@ -1057,12 +1079,16 @@ void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 #pragma endregion
 
 
+#pragma region Session
 
 void AJSH_Player::Esc()
 {
 	UE_LOG(LogTemp, Error, TEXT("ESC"));
 	CHJ_Instance->ExitSession();
 }
+
+#pragma endregion
+
 
 #pragma region Text
 
