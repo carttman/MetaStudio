@@ -61,6 +61,8 @@ AJSH_Player::AJSH_Player()
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
+	CapsuleComponent->SetCapsuleHalfHeight(76.0f);
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f; 
@@ -106,7 +108,7 @@ AJSH_Player::AJSH_Player()
 	if (TMesh.Succeeded())
 	{
 		FallGuys->SetSkeletalMesh(TMesh.Object);
-		FallGuys->SetRelativeLocationAndRotation(FVector(0, 0, -25), FRotator(0, -90, 0));
+		FallGuys->SetRelativeLocationAndRotation(FVector(20, 0, -12), FRotator(0, -90, 0));
 		FallGuys->SetRelativeScale3D(FVector(0.5, 0.5, 0.5));
 		FallGuys->SetCastShadow(true);
 	}
