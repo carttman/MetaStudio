@@ -13,14 +13,18 @@ ACarPawn::ACarPawn()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	DefaultScene = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComp"));
+	SetRootComponent(DefaultScene);
+
 	CarMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CarMesh"));
-	RootComponent = CarMesh;
-
-
+	// CarMesh = SetRelativeRotation(FRotator(0, 0, -90));
+	CarMesh->SetupAttachment(DefaultScene);
+	//RootComponent = CarMesh;
+	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(RootComponent);
+	SpringArm->SetupAttachment(CarMesh);
 	SpringArm->TargetArmLength = 300.0f;
-
+	
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArm);
 }
@@ -122,8 +126,8 @@ void ACarPawn::OnMyActionLook(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();
 
-	AddControllerPitchInput(-v.Y);
-	AddControllerYawInput(v.X);
+	AddControllerPitchInput(-v.Y * 0.5f);
+	AddControllerYawInput(v.X * 0.5f);
 }
 
 

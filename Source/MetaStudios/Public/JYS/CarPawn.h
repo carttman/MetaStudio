@@ -47,6 +47,18 @@ public:
 
 	float carSpeed = 500.0f;
 
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* CarMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USpringArmComponent* SpringArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UCameraComponent* CameraComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USceneComponent* DefaultScene;
 private:
 
 	FVector MovementDirection;
@@ -55,13 +67,4 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 500.0f;
-
-	UPROPERTY(VisibleAnywhere)
-	class UStaticMeshComponent* CarMesh;
-
-	UPROPERTY(VisibleAnywhere)
-	class USpringArmComponent* SpringArm;
-
-	UPROPERTY(VisibleAnywhere)
-	class UCameraComponent* CameraComp;
 };
