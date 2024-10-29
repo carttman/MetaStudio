@@ -30,6 +30,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpectatorPawnMovement.h"
+#include "MetaStudios/CHJ/MainGameInstance.h"
 #include "MetaStudios/CHJ/Component/FirebaseComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
@@ -122,7 +123,7 @@ void AJSH_Player::BeginPlay()
 	
 	// Record 함수를 끌고 오기 위한 GameInstance 
 	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
-
+	CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
 
 	// 카메라 처음에는 안 보이게
 	FallGuys_Camera->SetVisibility(false);
@@ -227,6 +228,9 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		// 마우스 감도
 		EnhancedInputComponent->BindAction(IA_Mouse_Sensitive_Down, ETriggerEvent::Started, this, &AJSH_Player::Mouse_Sensitivity);
 		EnhancedInputComponent->BindAction(IA_Mouse_Sensitive_Up, ETriggerEvent::Started, this, &AJSH_Player::Mouse_Sensitivity);
+
+
+		EnhancedInputComponent->BindAction(IA_ESC, ETriggerEvent::Started, this, &AJSH_Player::Esc);
 	}
 	else
 	{
@@ -1048,11 +1052,17 @@ void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 	UE_LOG(LogTemp, Error, TEXT("PPP %f"), MouseSensitivityPitch);
 }
 
+
+
 #pragma endregion
 
 
 
-
+void AJSH_Player::Esc()
+{
+	UE_LOG(LogTemp, Error, TEXT("ESC"));
+	CHJ_Instance->ExitSession();
+}
 
 #pragma region Text
 
