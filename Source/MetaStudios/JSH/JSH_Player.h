@@ -108,6 +108,10 @@ class AJSH_Player : public ACharacter
 	UInputAction* IA_Mouse_Sensitive_Down;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Mouse_Sensitive_Up;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_ESC;
 public:
 	AJSH_Player();
 	
@@ -144,6 +148,10 @@ public:
 	// 녹화 시작 / 종료
 	UPROPERTY()
 	class UJSH_OBSWebSocket* ObsGamInstance;
+
+	UPROPERTY()
+	class UMainGameInstance* CHJ_Instance;
+
 	
 	FProcHandle PH;
 
@@ -335,6 +343,12 @@ public:
 	void Mouse_Sensitivity(const FInputActionValue& Value);
 #pragma endregion
 
+
+#pragma region Session
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UFirebaseComponent* FirebaseComponent;
+
+	void Esc();
+#pragma endregion
 };

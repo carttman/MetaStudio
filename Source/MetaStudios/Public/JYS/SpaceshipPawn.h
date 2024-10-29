@@ -37,6 +37,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USceneComponent* DefaultScene;
+
 	bool CanPlayerEnter(AMetaStudiosCharacter* targetCharacter);
 
 	void ExitSpaceship();
@@ -74,7 +77,7 @@ private:
 	float MovementSpeed = 500.0f;
 
 	UPROPERTY(VisibleAnywhere)
-	class UStaticMeshComponent* SpaceshipMesh;
+	class USkeletalMeshComponent* SpaceshipMesh;
 
 	UPROPERTY(VisibleAnywhere)
 	class USpringArmComponent* SpringArm;

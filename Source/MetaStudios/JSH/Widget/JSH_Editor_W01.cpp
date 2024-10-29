@@ -2,8 +2,13 @@
 
 
 #include "../../JSH/Widget/JSH_Editor_W01.h"
+#include "DrawDebugHelpers.h"
 #include "Framework/Application/SlateApplication.h"
-#include "Components/Image.h"
+#include "Engine/World.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
 
 void UJSH_Editor_W01::NativeConstruct()
@@ -54,3 +59,66 @@ void UJSH_Editor_W01::NativeOnDragDetected(const FGeometry& InGeometry, const FP
 	}
 	
 }
+
+// void UJSH_Editor_W01::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+// {
+//     Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
+//
+// 	UE_LOG(LogTemp, Error, TEXT("11 cancelled"));
+// 	
+//     
+//     FVector2D MousePosition;
+// 	
+//     if (GetWorld()->GetGameViewport()->GetMousePosition(MousePosition))
+//     {
+//     	UE_LOG(LogTemp, Error, TEXT("22"));
+//         FVector WorldPosition;
+//         FVector WorldDirection;
+//
+//         
+//         PlayerController = GetWorld()->GetFirstPlayerController();
+//         if (PlayerController)
+//         {
+//         	UE_LOG(LogTemp, Error, TEXT("333"));
+//             PlayerController->DeprojectScreenPositionToWorld(MousePosition.X, MousePosition.Y, WorldPosition, WorldDirection);
+//
+//            
+//             Start = WorldPosition;
+//             End = Start + (WorldDirection * 2000.0f);
+//
+//             
+//             FHitResult HitResult;
+//             FCollisionQueryParams Params;
+//             Params.AddIgnoredActor(PlayerController->GetPawn());
+//
+//             bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+//
+//         	
+//         	if (bHit)
+//         	{
+//         		UE_LOG(LogTemp, Error, TEXT("bhit"));
+//         		FActorSpawnParameters SpawnParams;
+//         		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+// 	
+//         		AGameModeBase* tt = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
+// 			
+//         		UClass* SpectatorClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/BP_Asset1.BP_Asset1_C"));
+// 			
+//         		AActor* SpectatorActor = GetWorld()->SpawnActorDeferred<AActor>(SpectatorClass, HitResult.GetActor()->GetActorTransform());
+//
+// 			
+//         		if (SpectatorActor)
+//         		{
+//         			UE_LOG(LogTemp, Error, TEXT("spectator"));
+//         			APawn* SpectatorPawn = Cast<APawn>(SpectatorActor);
+//         			if (SpectatorPawn)
+//         			{
+//         				UGameplayStatics::FinishSpawningActor(SpectatorActor, HitResult.GetActor()->GetActorTransform());
+//         			}
+//         		}
+//         	}
+//
+//         }
+//     }
+// }
+
