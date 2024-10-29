@@ -14,8 +14,8 @@ ASpaceshipPawn::ASpaceshipPawn()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	DefaultScene = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComp"));
-	SetRootComponent(DefaultScene);
+	//DefaultScene = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComp"));
+	//SetRootComponent(DefaultScene);
 	
 	SpaceshipMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SpaceshipMesh"));
 	RootComponent = SpaceshipMesh;

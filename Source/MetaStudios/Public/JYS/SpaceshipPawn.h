@@ -55,9 +55,6 @@ public:
 	AMetaStudiosCharacter* player;
 
 	void OnMyActionMove(const FInputActionValue& value);
-
-
-
 	void OnMyActionLook(const FInputActionValue& value);
 
 	float speed = 500.0f;

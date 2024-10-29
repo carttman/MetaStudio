@@ -33,6 +33,8 @@ void ACarPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
+	APlayerController* playerController = Cast<APlayerController>(GetController());
+
 }
 
 // Called every frame
@@ -53,6 +55,8 @@ void ACarPawn::Tick(float DeltaTime)
 
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
+	Server_UpdateTransform(GetActorLocation(), GetActorRotation());
+
 }
 
 // Called to bind functionality to input
@@ -81,36 +85,21 @@ void ACarPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
-bool ACarPawn::CanPlayerEnterCar()
+bool ACarPawn::CanPlayerEnterCar(AMetaStudiosCharacter* targetCharacter)
 {
-	// 플레이어와 우주선 사이의 간격
-	APlayerController* playerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	if (!playerController) return false;
+	if (targetCharacter == nullptr)	return false;
 
-	APawn* CarPawn = playerController->GetPawn();
-	if (!CarPawn) return false;
-
-	float distance = GetDistanceTo(CarPawn);
+	float distance = GetDistanceTo(targetCharacter);
 	return distance <= 1000.0f;
 }
 
 void ACarPawn::ExitCar()
 {
-	APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-
-	if (characterController && player)
+	if (IsLocallyControlled())
 	{
-		FVector carLoc = GetActorLocation();
-		FRotator carRot = GetActorRotation();
-
-		FVector offset = carRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
-		FVector playerSpawnLocation = carLoc + offset;
-
-		player->SetActorLocation(playerSpawnLocation);
-		player->SetActorRelativeRotation(carRot);
-		characterController->Possess(player);
-		player->GetMesh()->SetVisibility(true);
+		Server_ExitCar();
 	}
+
 }
 
 void ACarPawn::OnMyActionMove(const FInputActionValue& value)
@@ -127,6 +116,72 @@ void ACarPawn::OnMyActionLook(const FInputActionValue& value)
 
 	AddControllerPitchInput(-v.Y * 0.5f);
 	AddControllerYawInput(v.X * 0.5f);
+}
+
+void ACarPawn::ResetEnhancedInputSetting(APlayerController* pc)
+{
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+
+}
+
+void ACarPawn::Server_UpdateTransform_Implementation(FVector newLocation, FRotator newRotation)
+{
+	SetActorLocationAndRotation(newLocation, newRotation);
+}
+
+void ACarPawn::Server_ExitCar_Implementation()
+{
+	if (HasAuthority())
+	{
+		//APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+		if (player)
+		{
+			FVector carLoc = GetActorLocation();
+			FRotator carRot = GetActorRotation();
+
+			FVector offset = carRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
+			FVector playerSpawnLocation = carLoc + offset;
+
+			player->SetActorLocation(playerSpawnLocation);
+			player->SetActorRelativeRotation(carRot);
+
+			GetController()->Possess(player);
+			UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn Player"));
+			//player->GetMesh()->SetVisibility(true);
+		}
+
+	}
+	NetMulticast_ExitCar();
+
+}
+
+void ACarPawn::NetMulticast_ExitCar_Implementation()
+{
+	if (player)
+	{
+		FVector carLoc = GetActorLocation();
+		FRotator carRot = GetActorRotation();
+
+		FVector offset = carRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
+		FVector playerSpawnLocation = carLoc + offset;
+
+		player->SetActorLocation(playerSpawnLocation);
+		player->SetActorRelativeRotation(carRot);
+
+		//characterController->Possess(player);
+		player->GetMesh()->SetVisibility(true);
+
+		player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+	}
+
 }
 
 
