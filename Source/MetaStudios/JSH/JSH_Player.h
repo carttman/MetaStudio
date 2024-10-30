@@ -303,7 +303,7 @@ public:
 	UPROPERTY()
 	float ZoomFOV = 0;
 	UPROPERTY()
-	float ZoomSpeed = 0.5f; 
+	float ZoomSpeed = 0.3f; 
 	UPROPERTY()
 	float MinFOV = 120.0f;
 	UPROPERTY()

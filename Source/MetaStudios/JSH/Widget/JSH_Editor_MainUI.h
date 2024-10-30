@@ -25,6 +25,9 @@ public:
 	class UUserWidget* WBP_01;
 
 	UPROPERTY(meta=(BindWidget))
+	class UUserWidget* WBP_02;
+
+	UPROPERTY(meta=(BindWidget))
 	class UImage* Window_Left;
 
 	
