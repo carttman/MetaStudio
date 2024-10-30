@@ -38,7 +38,16 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USceneComponent* DefaultScene;
+	class UStaticMeshComponent* SpaceshipMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* SpaceshipSkeletalMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USpringArmComponent* SpringArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UCameraComponent* CameraComp;
 
 	bool CanPlayerEnter(AMetaStudiosCharacter* targetCharacter);
 
@@ -55,6 +64,9 @@ public:
 	AMetaStudiosCharacter* player;
 
 	void OnMyActionMove(const FInputActionValue& value);
+
+
+
 	void OnMyActionLook(const FInputActionValue& value);
 
 	float speed = 500.0f;
@@ -73,13 +85,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 500.0f;
 
-	UPROPERTY(VisibleAnywhere)
-	class USkeletalMeshComponent* SpaceshipMesh;
 
-	UPROPERTY(VisibleAnywhere)
-	class USpringArmComponent* SpringArm;
-
-	UPROPERTY(VisibleAnywhere)
-	class UCameraComponent* CameraComp;
 
 };

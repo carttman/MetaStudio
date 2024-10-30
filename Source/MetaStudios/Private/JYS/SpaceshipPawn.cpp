@@ -6,7 +6,6 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
 ASpaceshipPawn::ASpaceshipPawn()
@@ -14,14 +13,14 @@ ASpaceshipPawn::ASpaceshipPawn()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//DefaultScene = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComp"));
-	//SetRootComponent(DefaultScene);
+	SpaceshipMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpaceshipMesh"));
+	RootComponent = SpaceshipMesh;	
 	
-	SpaceshipMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SpaceshipMesh"));
-	RootComponent = SpaceshipMesh;
+	SpaceshipSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SpaceshipSkeletalMesh"));
+	SpaceshipSkeletalMesh->SetupAttachment(SpaceshipMesh);
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(SpaceshipMesh);
+	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 300.0f;
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
