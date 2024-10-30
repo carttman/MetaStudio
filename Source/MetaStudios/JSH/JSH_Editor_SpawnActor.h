@@ -10,7 +10,9 @@ class METASTUDIOS_API AJSH_Editor_SpawnActor : public AActor
 	GENERATED_BODY()
 	
 public:
-	// Static mesh component for the actor
+	UPROPERTY()
+	USceneComponent* RootScence;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UStaticMeshComponent* AssetMesh;
 

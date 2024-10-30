@@ -14,11 +14,14 @@ ASpaceshipPawn::ASpaceshipPawn()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SpaceshipMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpaceshipMesh"));
-	RootComponent = SpaceshipMesh;
+	RootComponent = SpaceshipMesh;	
+	
+	SpaceshipSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SpaceshipSkeletalMesh"));
+	SpaceshipSkeletalMesh->SetupAttachment(SpaceshipMesh);
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 300.0f;
+	SpringArm->TargetArmLength = 1000.0f;
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArm);

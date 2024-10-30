@@ -36,9 +36,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	bool CanPlayerEnterCar();
+	bool CanPlayerEnterCar(AMetaStudiosCharacter* targetCharacter);
 
 	void ExitCar();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ExitCar();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_ExitCar();
 
 	AMetaStudiosCharacter* player;
 
@@ -46,6 +52,27 @@ public:
 	void OnMyActionLook(const FInputActionValue& value);
 
 	float carSpeed = 500.0f;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* CarMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USpringArmComponent* SpringArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UCameraComponent* CameraComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USceneComponent* DefaultScene;
+
+
+	void ResetEnhancedInputSetting(class APlayerController* pc);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
+
+
 
 private:
 
@@ -55,13 +82,4 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 500.0f;
-
-	UPROPERTY(VisibleAnywhere)
-	class UStaticMeshComponent* CarMesh;
-
-	UPROPERTY(VisibleAnywhere)
-	class USpringArmComponent* SpringArm;
-
-	UPROPERTY(VisibleAnywhere)
-	class UCameraComponent* CameraComp;
 };

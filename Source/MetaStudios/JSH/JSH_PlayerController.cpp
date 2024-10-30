@@ -41,6 +41,7 @@ void AJSH_PlayerController::StartRecord()
 			FDateTime Now = FDateTime::Now();
 			FString DateTimeString = Now.ToString(TEXT("%Y-%m-%d_%H-%M-%S")); 
 			FString AutoPath = FPaths::ProjectUserDir();
+			//VideoFileName = TEXT("A");
 			VideoFileName = FString::Printf(TEXT("UE_%s"), *DateTimeString);
 
 			
@@ -53,6 +54,8 @@ void AJSH_PlayerController::StartRecord()
 			UE_LOG(LogTemp, Warning, TEXT("VideoFileName: %s"), *VideoFileName);
 			UE_LOG(LogTemp, Warning, TEXT("FilePath: %s"), *FilePath);
 			UE_LOG(LogTemp, Warning, TEXT(" ExecutablePath: %s"), * ExecutablePath);
+			UE_LOG(LogTemp, Warning, TEXT("Params: %s"), *Params);
+
 			
 			FProcHandle ProcessHandle = FPlatformProcess::CreateProc(
 				*ExecutablePath, // Executable path
@@ -82,10 +85,10 @@ void AJSH_PlayerController::StartRecord()
 		{
 			if (PH.IsValid())
 			{
-				
 				FPlatformProcess::TerminateProc(PH);
 				//FPlatformProcess::CloseProc(PH);  
-	        
+				
+				
 				UE_LOG(LogTemp, Log, TEXT("Recording stopped and FFmpeg process terminated"));
 			}
 			else
@@ -109,15 +112,30 @@ void AJSH_PlayerController::ConvertMKVToMP4()
 	{
 		FString AutoPath = FPaths::ProjectUserDir();
 		FString ExecutablePath = FString::Printf(TEXT("%sffmpeg/bin/ffmpeg.exe"), *AutoPath);
+		//FString ExecutablePath = FString::Printf(TEXT("%sffmpeg/CHJ_MetaStudios.bat"), *AutoPath);
+		
 
 		// 작업 디렉토리 설정
 		FString WorkingDirectory = FString::Printf(TEXT("%sffmpeg"), *AutoPath);
+		FString WorkingDirectory2 = FString::Printf(TEXT("%sffmpeg/"), *AutoPath);
 		UE_LOG(LogTemp, Error, TEXT("convert: %s"), *AutoPath);
+
+		
+		FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AutoPath);
+		IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*AutoPath);
+		
+		UE_LOG(LogTemp, Error, TEXT("FullPath: %s"), *FullPath);
 
 		// FString Params2 = FString::Printf(TEXT("-i \"%s/%s.mkv\" -vcodec copy -acodec copy \"%s/%s.mp4\""), *WorkingDirectory, *VideoFileName, *WorkingDirectory, *VideoFileName);
 		// 위처럼 copy하면 mp4a 문제 생김
-		FString Params2 = FString::Printf(TEXT("-i \"%s/%s.mkv\" -vcodec h264 -acodec aac -strict experimental \"%s/%s.mp4\""), *WorkingDirectory, *VideoFileName, *WorkingDirectory, *VideoFileName);
+	
+		FString Params2 = FString::Printf(TEXT("-i \"%s/ffmpeg/%s.mkv\" -vcodec h264 -acodec aac -strict experimental \"%s/ffmpeg/%s.mp4\""), *FullPath, *VideoFileName, *FullPath, *VideoFileName);
+		//FString Params2 = FString::Printf(TEXT("-i \"C:/Users/Admin/Documents/GitHub/MetaStudio/MetaStudios/ffmpeg/A.mkv\" -vcodec h264 -acodec aac -strict experimental \"C:/Users/Admin/Documents/GitHub/MetaStudio/MetaStudios/ffmpeg/A.mp4\""));
 
+
+		
+		UE_LOG(LogTemp, Error, TEXT("Params2: %s"), *Params2);
+		
 		// FFmpeg 프로세스 실행
 		FProcHandle ProcessHandle = FPlatformProcess::CreateProc(
 			*ExecutablePath,    // FFmpeg 실행 경로
@@ -126,7 +144,7 @@ void AJSH_PlayerController::ConvertMKVToMP4()
 			false,              // 콘솔 창 숨김 여부
 			false,              // 완전히 숨길지 여부
 			nullptr,            // OutProcessID
-			0,                  // 프로세스 우선순위
+			0,                  
 			*WorkingDirectory,
 			nullptr             // Pipe (필요 없으므로 nullptr)
 		);
@@ -149,5 +167,62 @@ void AJSH_PlayerController::ConvertMKVToMP4()
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "No MKV file found to convert.");
 	}
 }
+
+
+
+//
+// void AJSH_PlayerController::ConvertMKVToMP4()
+// {
+// 	if (!VideoFileName.IsEmpty())
+// 	{
+// 		FString AutoPath = FPaths::ProjectUserDir();
+// 		//FString ExecutablePath = FString::Printf(TEXT("%sffmpeg/bin/ffmpeg.exe"), *AutoPath);
+// 		FString ExecutablePath = FString::Printf(TEXT("%sffmpeg/CHJ_MetaStudios.bat"), *AutoPath);
+// 		
+//
+// 		// 작업 디렉토리 설정
+// 		FString WorkingDirectory = FString::Printf(TEXT("%sffmpeg/"), *AutoPath);
+// 		UE_LOG(LogTemp, Error, TEXT("convert: %s"), *AutoPath);
+//
+// 		// FString Params2 = FString::Printf(TEXT("-i \"%s/%s.mkv\" -vcodec copy -acodec copy \"%s/%s.mp4\""), *WorkingDirectory, *VideoFileName, *WorkingDirectory, *VideoFileName);
+// 		// 위처럼 copy하면 mp4a 문제 생김
+// 	
+// 		FString Params2 = FString::Printf(TEXT("-i \"%s%s.mkv\" -vcodec h264 -acodec aac -strict experimental \"%s%s.mp4\""), *WorkingDirectory, *VideoFileName, *WorkingDirectory, *VideoFileName);
+// 		
+//
+// 		
+// 		UE_LOG(LogTemp, Error, TEXT("Params2: %s"), *Params2);
+// 		
+// 		// FFmpeg 프로세스 실행
+// 		FProcHandle ProcessHandle = FPlatformProcess::CreateProc(
+// 			*ExecutablePath,    // FFmpeg 실행 경로
+// 			nullptr, //*Params2,            // FFmpeg 명령어 인자
+// 			true,               // 백그라운드 실행 여부
+// 			false,              // 콘솔 창 숨김 여부
+// 			false,              // 완전히 숨길지 여부
+// 			nullptr,            // OutProcessID
+// 			0,                  // 프로세스 우선순위
+// 			*WorkingDirectory,
+// 			nullptr             // Pipe (필요 없으므로 nullptr)
+// 		);
+// 		
+// 		
+// 		if (ProcessHandle.IsValid())
+// 		{
+// 			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, "Started MKV to MP4 conversion");
+// 			UE_LOG(LogTemp, Log, TEXT("MKV -> MP4 , Suc"));
+// 		}
+// 		else
+// 		{
+// 			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "Failed to start FFmpeg conversion process");
+// 			UE_LOG(LogTemp, Error, TEXT("Failed to start FFmpeg conversion process."));
+// 		}
+// 	}
+// 	else
+// 	{
+// 		UE_LOG(LogTemp, Warning, TEXT("No MKV file found to convert."));
+// 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "No MKV file found to convert.");
+// 	}
+// }
 
 #pragma endregion

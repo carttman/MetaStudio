@@ -134,12 +134,21 @@ public:
 	void NetMulticast_EnterSpaceship(class ASpaceshipPawn* SpaceshipActor);
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<APawn> SpaceshipPawnFactory;	
+	TSubclassOf<APawn> SpaceshipPawnFactory;
+	
+
 
 	APlayerController* MetaController;
 
 	//// 플레이어랑 자동차랑 컨트롤러 바꾸기
 	void EnterCar();
+
+	
+	UFUNCTION(Server, Reliable)
+	void Server_EnterCar();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_EnterCar(class ACarPawn* CarActor);
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<APawn> CarPawnFactory;

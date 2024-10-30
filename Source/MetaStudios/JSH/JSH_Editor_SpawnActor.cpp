@@ -12,15 +12,19 @@ AJSH_Editor_SpawnActor::AJSH_Editor_SpawnActor()
 {
     PrimaryActorTick.bCanEverTick = true; 
 
+    RootScence = CreateDefaultSubobject<USceneComponent>(TEXT("RootScence"));
+    RootComponent = RootScence;
+    
     AssetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Body"));
-    RootComponent = AssetMesh;
+    AssetMesh->SetupAttachment(RootComponent);
+   
 
 
-    ConstructorHelpers::FObjectFinder<UStaticMesh> TMesh(TEXT("/Script/Engine.StaticMesh'/Game/JSH/Asset/Teenieping/chachaping.chachaping'"));
-    if (TMesh.Succeeded())
-    {
-        AssetMesh->SetStaticMesh(TMesh.Object);
-    }
+    // ConstructorHelpers::FObjectFinder<UStaticMesh> TMesh(TEXT("/Script/Engine.StaticMesh'/Game/JSH/Asset/Teenieping/chachaping.chachaping'"));
+    // if (TMesh.Succeeded())
+    // {
+    //     AssetMesh->SetStaticMesh(TMesh.Object);
+    // }
 
 
     AssetMesh->OnClicked.AddDynamic(this, &AJSH_Editor_SpawnActor::OnMeshClicked);
@@ -50,7 +54,7 @@ void AJSH_Editor_SpawnActor::OnMeshClicked(UPrimitiveComponent* TouchedComponent
 
     if (bHit && HitResult.GetActor() == this)
     {
-        DrawDebugSphere(GetWorld(), HitResult.Location, 10.0f, 12, FColor::Red, false, 2.0f);
+        //DrawDebugSphere(GetWorld(), HitResult.Location, 10.0f, 12, FColor::Red, false, 2.0f);
 
         Destroy();
     }
