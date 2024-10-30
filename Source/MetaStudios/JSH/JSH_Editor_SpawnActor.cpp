@@ -54,7 +54,7 @@ void AJSH_Editor_SpawnActor::OnMeshClicked(UPrimitiveComponent* TouchedComponent
 
     if (bHit && HitResult.GetActor() == this)
     {
-        DrawDebugSphere(GetWorld(), HitResult.Location, 10.0f, 12, FColor::Red, false, 2.0f);
+        //DrawDebugSphere(GetWorld(), HitResult.Location, 10.0f, 12, FColor::Red, false, 2.0f);
 
         Destroy();
     }
