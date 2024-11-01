@@ -158,7 +158,6 @@ void AJSH_Player::BeginPlay()
 	if (JPlayerController)
 	{
 		JPlayerController->bEnableTouchEvents = false;
-		//UE_LOG(LogTemp, Error, TEXT("Succed"));
 	}
 
 	
@@ -195,6 +194,7 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AJSH_Player, Camera_b_Third_First);
 	DOREPLIFETIME(AJSH_Player, Record_b_On_Off);
 	DOREPLIFETIME(AJSH_Player, EditorMode_B);
+	DOREPLIFETIME(AJSH_Player, ClickedEditorActor);
 	
 }
 
@@ -207,6 +207,7 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			UE_LOG(LogTemp, Error, TEXT("director add mapping"));
 		}
 	}
 	
@@ -255,7 +256,11 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_Mouse_Sensitive_Up, ETriggerEvent::Started, this, &AJSH_Player::Mouse_Sensitivity);
 
 
+		// 세션 나가는
 		EnhancedInputComponent->BindAction(IA_ESC, ETriggerEvent::Started, this, &AJSH_Player::Esc);
+
+
+		EnhancedInputComponent->BindAction(IA_Del, ETriggerEvent::Started, this, &AJSH_Player::Esc);
 	}
 	else
 	{
@@ -755,6 +760,12 @@ void AJSH_Player::EditorMode()
 	
 	
 	NetMulti_EditorMode();
+
+	// if (!EditorMode_B)
+	// {
+	// 	// proto시연때 막아서
+	// 	EnableEdit();
+	// }
 }
 
 void AJSH_Player::NetMulti_EditorMode_Implementation()
@@ -782,7 +793,11 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		bUseControllerRotationYaw = true;
 		bUseControllerRotationRoll = true;
 
-		EnableEdit();
+		// proto시연때 막아서
+		if (HasAuthority())
+		{
+			EnableEdit();
+		}
 	}
 	// Editor Mode Off
 	else
@@ -914,6 +929,12 @@ void AJSH_Player::DisableEdit()
 		PlayerMainUI = nullptr;  // 포인터를 null로 설정
 		UE_LOG(LogTemp, Warning, TEXT("UI null"));
 	}
+}
+
+void AJSH_Player::CLickAndDel()
+{
+	// 클릭 하고 DelButton 눌러야 삭제 되도록
+	ClickedEditorActor = !ClickedEditorActor;
 }
 
 

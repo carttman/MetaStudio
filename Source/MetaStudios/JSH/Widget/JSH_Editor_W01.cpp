@@ -57,7 +57,6 @@ void UJSH_Editor_W01::NativeOnDragDetected(const FGeometry& InGeometry, const FP
 			OutOperation = DragDropOp;
 		}
 	}
-	
 }
 
 // void UJSH_Editor_W01::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)

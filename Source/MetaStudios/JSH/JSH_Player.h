@@ -112,6 +112,9 @@ class AJSH_Player : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_ESC;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Del;
 public:
 	AJSH_Player();
 	
@@ -272,6 +275,14 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UUserWidget* PlayerMainUI;
 
+
+	// Editor Actor Destroy
+	UFUNCTION()
+	void CLickAndDel();
+
+	UPROPERTY(Replicated)
+	bool ClickedEditorActor = false;
+
 #pragma endregion
 
 
@@ -351,4 +362,7 @@ public:
 
 	void Esc();
 #pragma endregion
+
+
+	
 };
