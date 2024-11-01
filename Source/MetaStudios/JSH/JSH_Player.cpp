@@ -164,6 +164,14 @@ void AJSH_Player::BeginPlay()
 		JPlayerController->SaveOriginCharacter();
 	}
 
+	FlyMode();
+
+	// 캐릭터 없어져서 그냥 바로 1인칭 시작
+	FollowCamera->SetActive(false);
+	RecordCamera->SetActive(true);
+	bUseControllerRotationYaw = true;
+	CameraSpawn_b_On_Off = true;
+
 	
 	// AGameModeBase* currGameMode = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
 	//
@@ -447,77 +455,78 @@ void AJSH_Player::NetMulti_StartRecording_Implementation()
 	if (!Record_b_On_Off)
 	{
 		if (!FlyMode_b_On_Off) FlyMode();
-		
-		// 3인칭 -> 1인칭 변환
-		FollowCamera->SetActive(false);
-		RecordCamera->SetActive(true);
-		bUseControllerRotationYaw = true;
-		Camera_b_Third_First = true;
-
-		// 카메라 소환
-		FallGuys_Camera->SetVisibility(true);
-		CameraSpawn_b_On_Off = true;
-		UE_LOG(LogTemp, Warning, TEXT("visible true"));
+		// @@@캐릭터 없어짐 @@@@@
+		// // 3인칭 -> 1인칭 변환
+		// FollowCamera->SetActive(false);
+		// RecordCamera->SetActive(true);
+		// bUseControllerRotationYaw = true;
+		// Camera_b_Third_First = true;
+		//
+		// // 카메라 소환
+		// FallGuys_Camera->SetVisibility(true);
+		// CameraSpawn_b_On_Off = true;
+		// UE_LOG(LogTemp, Warning, TEXT("visible true"));
 
 		FallGuys->SetCastShadow(false);
 		Record_b_On_Off = true;
 	}
 	else
 	{
-		// 1인칭 -> 3인칭 변환
-		RecordCamera->SetActive(false);
-		FollowCamera->SetActive(true);
-		// 비행 상태가 아닐때에만 Yaw를 꺼줌
-		if (!GetCharacterMovement()->IsFlying())
-		{
-			bUseControllerRotationYaw = false;
-		}
-		Camera_b_Third_First = false;
-		
-		// 카메라 제거
-		FallGuys_Camera->SetVisibility(false);
-		CameraSpawn_b_On_Off = false;
+		// @@@캐릭터 없어짐 @@@@@
+		// // 1인칭 -> 3인칭 변환
+		// RecordCamera->SetActive(false);
+		// FollowCamera->SetActive(true);
+		// // 비행 상태가 아닐때에만 Yaw를 꺼줌
+		// if (!GetCharacterMovement()->IsFlying())
+		// {
+		// 	bUseControllerRotationYaw = false;
+		// }
+		// Camera_b_Third_First = false;
+		//
+		// // 카메라 제거
+		// FallGuys_Camera->SetVisibility(false);
+		// CameraSpawn_b_On_Off = false;
 
 		FallGuys->SetCastShadow(true);
 		Record_b_On_Off = false;
 
 
-		
-		// Record Mode를 끌때에 아래로 레이 한번 쏴서 , 바닥에 가까우면 Fly 모드 종료
-		FVector Start = GetActorLocation();
-		FVector End = Start - FVector(0.f, 0.f, 1000.f);
-
-		FHitResult HitResult;
-		FCollisionQueryParams Params;
-		Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
-
-		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
-
-		if (bHit)
-		{
-			float DistanceToGround = HitResult.Distance;
-
-			
-			if (DistanceToGround < 100.0f)
-			{
-				// 거리가 바닥이랑 가까울때 나는 모드면 , FLYMODE()를 가져와서 꺼주고
-				if (FlyMode_b_On_Off)
-				{
-					FlyMode();
-				}
-				else
-				{
-					GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-				}
-			}
-			
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
-		}
-		else
-		{
-			
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
-		}
+		// @@@캐릭터 없어짐 @@@@@
+		// // Record Mode를 끌때에 아래로 레이 한번 쏴서 , 바닥에 가까우면 Fly 모드 종료
+		// FVector Start = GetActorLocation();
+		// FVector End = Start - FVector(0.f, 0.f, 1000.f);
+		//
+		// FHitResult HitResult;
+		// FCollisionQueryParams Params;
+		// Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
+		//
+		// bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+		//
+		// if (bHit)
+		// {
+		// 	float DistanceToGround = HitResult.Distance;
+		//
+		// 	
+		// 	if (DistanceToGround < 100.0f)
+		// 	{
+		// 		// 거리가 바닥이랑 가까울때 나는 모드면 , FLYMODE()를 가져와서 꺼주고
+		// 		if (FlyMode_b_On_Off)
+		// 		{
+		// 			FlyMode();
+		// 		}
+		// 		else
+		// 		{
+		// 			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		// 		}
+		// 	}
+		// 	
+		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+		// }
+		// else
+		// {
+		// 	
+		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+		// }
 	}
 }
 
@@ -530,27 +539,28 @@ void AJSH_Player::Camera_Third_First_Change()
 
 void AJSH_Player::NetMulti_Camera_Third_First_Change_Implementation()
 {
-	if (!CameraSpawn_b_On_Off)
-	{
-		// 3인칭 -> 1인칭 변환
-		FollowCamera->SetActive(false);
-		RecordCamera->SetActive(true);
-		bUseControllerRotationYaw = true;
-		CameraSpawn_b_On_Off = true;
-	}
-	else
-	{
-		// 1인칭 -> 3인칭 변환
-		RecordCamera->SetActive(false);
-		FollowCamera->SetActive(true);
-		// 비행 상태가 아닐때에만 Yaw를 꺼줌
-		if (!GetCharacterMovement()->IsFlying())
-		{
-			bUseControllerRotationYaw = false;
-		}
-		CameraSpawn_b_On_Off = false;
-	}
-	Camera_b_Third_First = !Camera_b_Third_First;
+	// @@@ 캐릭터 없어짐 @@
+	// if (!CameraSpawn_b_On_Off)
+	// {
+	// 	// 3인칭 -> 1인칭 변환
+	// 	FollowCamera->SetActive(false);
+	// 	RecordCamera->SetActive(true);
+	// 	bUseControllerRotationYaw = true;
+	// 	CameraSpawn_b_On_Off = true;
+	// }
+	// else
+	// {
+	// 	// 1인칭 -> 3인칭 변환
+	// 	RecordCamera->SetActive(false);
+	// 	FollowCamera->SetActive(true);
+	// 	// 비행 상태가 아닐때에만 Yaw를 꺼줌
+	// 	if (!GetCharacterMovement()->IsFlying())
+	// 	{
+	// 		bUseControllerRotationYaw = false;
+	// 	}
+	// 	CameraSpawn_b_On_Off = false;
+	// }
+	// Camera_b_Third_First = !Camera_b_Third_First;
 }
 
 
@@ -562,16 +572,17 @@ void AJSH_Player::CameraSpawn()
 
 void AJSH_Player::NetMulti_CameraSpawn_Implementation()
 {
-	if (!CameraSpawn_b_On_Off)
-	{
-		FallGuys_Camera->SetVisibility(true);
-	}
-	else
-	{
-		FallGuys_Camera->SetVisibility(false);
-	}
-	
-	CameraSpawn_b_On_Off = !CameraSpawn_b_On_Off;
+	// @@ 캐릭터 없어짐 @@
+	// if (!CameraSpawn_b_On_Off)
+	// {
+	// 	FallGuys_Camera->SetVisibility(true);
+	// }
+	// else
+	// {
+	// 	FallGuys_Camera->SetVisibility(false);
+	// }
+	//
+	// CameraSpawn_b_On_Off = !CameraSpawn_b_On_Off;
 }
 
 
@@ -621,15 +632,15 @@ void AJSH_Player::NetMulti_FlyMode_Implementation()
 		bUseControllerRotationYaw = true;
 		bUseControllerRotationRoll = true;
 	}
-	else
-	{
-		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-		bUseControllerRotationPitch = false;
-		bUseControllerRotationYaw = false;
-		bUseControllerRotationRoll = false;
-	}
-
-	FlyMode_b_On_Off = !FlyMode_b_On_Off;
+	// @@ 캐릭터 없어짐 @@@
+	// else
+	// {
+	// 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	// 	bUseControllerRotationPitch = false;
+	// 	bUseControllerRotationYaw = false;
+	// 	bUseControllerRotationRoll = false;
+	// }
+	// FlyMode_b_On_Off = !FlyMode_b_On_Off;
 }
 
 
@@ -641,6 +652,8 @@ void AJSH_Player::Fly_Up_Down(const FInputActionValue& Value)
 
 void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& Value)
 {
+
+	// @@ 캐릭터 없어짐 @@
 	// if (GetCharacterMovement()->IsFlying())
 	// {
 	// 	// 입력 값에서 Up/Down 액션 값 추출
@@ -656,10 +669,12 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 	// 		Fly_Off_Value = 0;
 	// 	}
 	// }
-	if (!FlyMode_b_On_Off)
-	{
-		FlyMode();	
-	}
+	// if (!FlyMode_b_On_Off)
+	// {
+	// 	FlyMode();	
+	// }
+
+	
 	if (GetCharacterMovement()->IsFlying())
 	{
 		// 입력 값에서 Up/Down 액션 값 추출
@@ -688,61 +703,45 @@ void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& 
 		Fly_Zvalue = Value.Get<float>();
 		AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
 
-		// 아래에 있는 물체와의 거리 체크
-		FVector Start = GetActorLocation();
-		FVector End = Start - FVector(0.f, 0.f, 1000.f);
+		//@@ 캐릭터 없어짐 @@@
+		// // 아래에 있는 물체와의 거리 체크
+		// FVector Start = GetActorLocation();
+		// FVector End = Start - FVector(0.f, 0.f, 1000.f);
+		
+		//@@ 캐릭터 없어짐 @@@
+		// FHitResult HitResult;
+		// FCollisionQueryParams Params;
+		// Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
+		//
+		// bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 
-		FHitResult HitResult;
-		FCollisionQueryParams Params;
-		Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
+		
 
-		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 
+
+		// @@ 캐릭터 없어짐 @@
 		// if (bHit)
 		// {
+		// 	float DistanceToGround = HitResult.Distance;
 		//
-		// 	FActorSpawnParameters SpawnParams;
-		// 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		//
-		// 	AGameModeBase* tt = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
-		// 	
-		// 	UClass* SpectatorClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/BP_Asset1.BP_Asset1_C"));
-		// 	
-		// 	AActor* SpectatorActor = GetWorld()->SpawnActorDeferred<AActor>(SpectatorClass, HitResult.GetActor()->GetActorTransform());
-		//
-		// 	
-		// 	if (SpectatorActor)
+		// 	// Editor 모드가 아닐때 or Record Mode가 아닐때 Fly Mode를 종료
+		// 	if (!EditorMode_B & !Record_b_On_Off)
 		// 	{
-		// 		APawn* SpectatorPawn = Cast<APawn>(SpectatorActor);
-		// 		if (SpectatorPawn)
+		// 		// 원하는 거리 임계값 설정
+		// 		if (DistanceToGround < 100.0f)
 		// 		{
-		// 			UGameplayStatics::FinishSpawningActor(SpectatorActor, HitResult.GetActor()->GetActorTransform());
+		// 			FlyMode(); 
 		// 		}
 		// 	}
+		// 	
+		// 	
+		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
 		// }
-		
-		if (bHit)
-		{
-			float DistanceToGround = HitResult.Distance;
-		
-			// Editor 모드가 아닐때 or Record Mode가 아닐때 Fly Mode를 종료
-			if (!EditorMode_B & !Record_b_On_Off)
-			{
-				// 원하는 거리 임계값 설정
-				if (DistanceToGround < 100.0f)
-				{
-					FlyMode(); 
-				}
-			}
-			
-			
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
-		}
-		else
-		{
-			
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
-		}
+		// else
+		// {
+		// 	
+		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+		// }
 	}
 
 }
@@ -784,12 +783,14 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		
 		// FlyMode를 제어하는 bool 값 (Editor Mode 일때 항상 날아다니 도록)
 		EditorMode_B = true;
-		
-		// 3인칭 -> 1인칭 변환
-		FollowCamera->SetActive(false);
-		RecordCamera->SetActive(true);
-		bUseControllerRotationYaw = true;
-		Camera_b_Third_First = true;
+
+
+		// @@@캐릭터 없어짐 @@@@@
+		// // 3인칭 -> 1인칭 변환
+		// FollowCamera->SetActive(false);
+		// RecordCamera->SetActive(true);
+		// bUseControllerRotationYaw = true;
+		// Camera_b_Third_First = true;
 
 		// E를 누르지 않아도 임시 Fly Mode 
 		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
@@ -811,17 +812,18 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		
 		// FlyMode를 제어하는 bool 값 (Editor Mode 일때 항상 날아다니 도록)
 		EditorMode_B = false;
-		
-		// 1인칭 -> 3인칭 변환
-		RecordCamera->SetActive(false);
-		FollowCamera->SetActive(true);
-		// 비행 상태가 아닐때에만 Yaw를 꺼줌
-		if (!GetCharacterMovement()->IsFlying())
-		{
-			bUseControllerRotationYaw = false;
-			bUseControllerRotationPitch = false;
-			bUseControllerRotationRoll = false;
-		}
+
+		// @@@캐릭터 없어짐 @@@@@
+		// // 1인칭 -> 3인칭 변환
+		// RecordCamera->SetActive(false);
+		// FollowCamera->SetActive(true);
+		// // 비행 상태가 아닐때에만 Yaw를 꺼줌
+		// if (!GetCharacterMovement()->IsFlying())
+		// {
+		// 	bUseControllerRotationYaw = false;
+		// 	bUseControllerRotationPitch = false;
+		// 	bUseControllerRotationRoll = false;
+		// }
 		Camera_b_Third_First = false;
 
 
@@ -829,42 +831,43 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		JPlayerController->Editor_SpawnActor = nullptr;
 
 
+		// @@@캐릭터 없어짐 @@@@@
 		// Fly Mode를 끌때에 아래로 레이 한번 쏴서 , Fly 모드 종료
-		FVector Start = GetActorLocation();
-		FVector End = Start - FVector(0.f, 0.f, 1000.f);
-
-		FHitResult HitResult;
-		FCollisionQueryParams Params;
-		Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
-
-		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
-
-		if (bHit)
-		{
-			float DistanceToGround = HitResult.Distance;
-
-			
-			if (DistanceToGround < 100.0f)
-			{
-				// 거리가 바닥이랑 가까울때 나는 모드면 , FLYMODE()를 가져와서 꺼주고
-				if (FlyMode_b_On_Off)
-				{
-					FlyMode();
-				}
-				// Fly Mode가 아닌데 바닥이랑 가까우면 요렇게 꺼줌
-				else
-				{
-					GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-				}
-			}
-			
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
-		}
-		else
-		{
-			
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
-		}
+		// FVector Start = GetActorLocation();
+		// FVector End = Start - FVector(0.f, 0.f, 1000.f);
+		//
+		// FHitResult HitResult;
+		// FCollisionQueryParams Params;
+		// Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
+		//
+		// bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+		//
+		// if (bHit)
+		// {
+		// 	float DistanceToGround = HitResult.Distance;
+		//
+		// 	
+		// 	if (DistanceToGround < 100.0f)
+		// 	{
+		// 		// 거리가 바닥이랑 가까울때 나는 모드면 , FLYMODE()를 가져와서 꺼주고
+		// 		if (FlyMode_b_On_Off)
+		// 		{
+		// 			FlyMode();
+		// 		}
+		// 		// Fly Mode가 아닌데 바닥이랑 가까우면 요렇게 꺼줌
+		// 		else
+		// 		{
+		// 			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		// 		}
+		// 	}
+		// 	
+		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
+		// }
+		// else
+		// {
+		// 	
+		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+		// }
 	}
 }
 
@@ -955,9 +958,10 @@ void AJSH_Player::Camera_Zoom_In()
 {
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
 	// if (Bool_ZoomMode && !EditorMode_B)
-	
+
+	// @@ 캐릭터 없어짐 @@
 	// Recording 중이 아니라면 실행 하지 않음
-	if (!Record_b_On_Off) return;
+	//if (!Record_b_On_Off) return;
 
 	if (!EditorMode_B)
 	{
@@ -979,9 +983,10 @@ void AJSH_Player::Camera_Zoom_Out()
 {
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
 	// if (Bool_ZoomMode && !EditorMode_B)
-	
+
+	// @@ 캐릭터 없어짐 @@
 	// Recording 중이 아니라면 실행 하지 않음
-	if (!Record_b_On_Off) return;
+	// if (!Record_b_On_Off) return;
 	
 	if (!EditorMode_B)
 	{
@@ -1009,11 +1014,11 @@ void AJSH_Player::Camera_Zoom_Default()
 
 void AJSH_Player::CameraRight()
 {
+	// @@ 캐릭터 없어짐 @@
 	// 1인칭이 아니라면 실행 하지 않음
-	if (!RecordCamera->IsActive()) return;
-
+	//if (!RecordCamera->IsActive()) return;
 	// Recording 중이 아니라면 실행 하지 않음
-	if (!Record_b_On_Off) return;
+	//if (!Record_b_On_Off) return;
 	
 	CurrentAngl += RotateSpeed;
 	
@@ -1029,11 +1034,11 @@ void AJSH_Player::CameraRight()
 
 void AJSH_Player::CameraLeft()
 {
+	// @@ 캐릭터 없어짐 @@
 	// 1인칭이 아니라면 실행 하지 않음
-	if (!RecordCamera->IsActive()) return;
-
+	// if (!RecordCamera->IsActive()) return;
 	// Recording 중이 아니라면 실행 하지 않음
-	if (!Record_b_On_Off) return;
+	// if (!Record_b_On_Off) return;
 	
 	CurrentAngl -= RotateSpeed;
 	
@@ -1049,11 +1054,11 @@ void AJSH_Player::CameraLeft()
 
 void AJSH_Player::CameraDefault()
 {
-	// 1인칭이 아니라면 실행 하지 않음
-	if (!RecordCamera->IsActive()) return;
-
-	// Recording 중이 아니라면 실행 하지 않음
-	if (!Record_b_On_Off) return;
+	// @@ 캐릭터 없어짐 @@
+	// // 1인칭이 아니라면 실행 하지 않음
+	// if (!RecordCamera->IsActive()) return;
+	// // Recording 중이 아니라면 실행 하지 않음
+	// if (!Record_b_On_Off) return;
 	
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
