@@ -110,6 +110,8 @@ AJSH_Player::AJSH_Player()
 		FallGuys->SetRelativeLocationAndRotation(FVector(20, 0, -12), FRotator(0, -90, 0));
 		FallGuys->SetRelativeScale3D(FVector(0.5, 0.5, 0.5));
 		FallGuys->SetCastShadow(true);
+		
+		//FallGuys->SetVisibility(false);
 	}
 	
 
@@ -121,6 +123,8 @@ AJSH_Player::AJSH_Player()
 		FallGuys_Camera->SetSkeletalMesh(TMesh2.Object);
 		FallGuys_Camera->SetRelativeLocationAndRotation(FVector(-12477.217394, 3931.275206, 24551.795870), FRotator(1.727941, 0.148925, 9.851076));
 		FallGuys_Camera->SetRelativeScale3D(FVector(100, 100, 100));
+
+		FallGuys->SetVisibility(false);
 	}
 
 	
@@ -128,6 +132,29 @@ AJSH_Player::AJSH_Player()
 	GetCharacterMovement()->BrakingDecelerationFlying = BrakingDecelerationFlying_C;
 
 	FirebaseComponent = CreateDefaultSubobject<UFirebaseComponent>(TEXT("FirebaseComponent"));
+
+
+
+	Root_Camera01 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Root_Camera01"));
+	Root_Camera01->SetupAttachment(RootComponent);
+
+	Camera02 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera02"));
+	Camera02->SetupAttachment(Root_Camera01);
+
+	Camera03 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera03"));
+	Camera03->SetupAttachment(Root_Camera01);
+
+	Camera04 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera04"));
+	Camera04->SetupAttachment(Root_Camera01);
+
+	Camera05 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera05"));
+	Camera05->SetupAttachment(Root_Camera01);
+
+	Camera06 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera06"));
+	Camera06->SetupAttachment(Root_Camera01);
+
+	Camera07 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera07"));
+	Camera07->SetupAttachment(Root_Camera01);
 }
 #pragma endregion
 
@@ -149,10 +176,7 @@ void AJSH_Player::BeginPlay()
 	// Record 함수를 끌고 오기 위한 GameInstance 
 	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
 	CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
-
-	// 카메라 처음에는 안 보이게
-	FallGuys_Camera->SetVisibility(false);
-
+	
 
 	// 플레이어 컨트롤러
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
