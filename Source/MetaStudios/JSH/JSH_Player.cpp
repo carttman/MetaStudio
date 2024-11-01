@@ -154,10 +154,14 @@ void AJSH_Player::BeginPlay()
 	FallGuys_Camera->SetVisibility(false);
 
 
+	// 플레이어 컨트롤러
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 	if (JPlayerController)
 	{
 		JPlayerController->bEnableTouchEvents = false;
+
+		// 플레이어 컨트롤러에 Director 저장
+		JPlayerController->SaveOriginCharacter();
 	}
 
 	
@@ -819,6 +823,10 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 			bUseControllerRotationRoll = false;
 		}
 		Camera_b_Third_First = false;
+
+
+		// Editor 모드 종료 시 저장된 EditorSpwanAcotr Name 삭제
+		JPlayerController->Editor_SpawnActor = nullptr;
 
 
 		// Fly Mode를 끌때에 아래로 레이 한번 쏴서 , Fly 모드 종료

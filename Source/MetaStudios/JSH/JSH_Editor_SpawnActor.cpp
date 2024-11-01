@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/PrimitiveComponent.h"
 #include "DrawDebugHelpers.h"
+#include "JSH_PlayerController.h"
 #include "Engine/EngineTypes.h" 
 #include "Kismet/KismetSystemLibrary.h"  
 
@@ -34,6 +35,16 @@ AJSH_Editor_SpawnActor::AJSH_Editor_SpawnActor()
 void AJSH_Editor_SpawnActor::BeginPlay()
 {
     Super::BeginPlay();
+
+    // 플레이어 컨트롤러
+    JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+    if (JPlayerController)
+    {
+        JPlayerController->bEnableTouchEvents = false;
+
+        // 플레이어 컨트롤러에 Director 저장
+        JPlayerController->SaveOriginCharacter();
+    }
 }
 
 // Called every frame
@@ -45,17 +56,36 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
 
 void AJSH_Editor_SpawnActor::OnMeshClicked(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
 {
-    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (!PlayerController) return;
+    // APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    // if (!PlayerController) return;
+    //
+    //
+    // FHitResult HitResult;
+    // bool bHit = PlayerController->GetHitResultUnderCursorByChannel(static_cast<ETraceTypeQuery>(ECC_Visibility), true, HitResult);
+
+    if (!JPlayerController) return;
     
     FHitResult HitResult;
-    bool bHit = PlayerController->GetHitResultUnderCursorByChannel(static_cast<ETraceTypeQuery>(ECC_Visibility), true, HitResult);
+    bool bHit = JPlayerController->GetHitResultUnderCursorByChannel(static_cast<ETraceTypeQuery>(ECC_Visibility), true, HitResult);
+
+    
+    // 클릭 했을때 자신의 정보를 PlayerController에 저장
+    JPlayerController->SaveEditorActor(this);
 
 
-    if (bHit && HitResult.GetActor() == this)
+    // 한번 클릭시 자기 자신 삭제
+    // if (bHit && HitResult.GetActor() == this)
+    // {
+    //     DrawDebugSphere(GetWorld(), HitResult.Location, 10.0f, 12, FColor::Green, false, 2.0f);
+    //
+    //     Destroy();
+    // }
+}
+
+void AJSH_Editor_SpawnActor::Destroy_This()
+{
+    if (JPlayerController->GetName() == this->GetName())
     {
-        //DrawDebugSphere(GetWorld(), HitResult.Location, 10.0f, 12, FColor::Red, false, 2.0f);
-
-        Destroy();
+        Destroy();    
     }
 }
