@@ -62,10 +62,8 @@ void AJSH_PlayerController::Destroy_EditorActor()
 
 void AJSH_PlayerController::NetMulti_Destroy_SaveEditorActor_Implementation()
 {
-	if (OriginPlayer->Bool_EditorActorDestroy == true)
-	{
-		Editor_SpawnActor->Destroy();
-	}
+	Editor_SpawnActor->Destroy();
+	
 	OriginPlayer->Bool_EditorActorDestroy = false;
 }
 
