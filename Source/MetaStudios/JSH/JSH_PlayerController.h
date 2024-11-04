@@ -54,6 +54,12 @@ public:
 
 	UPROPERTY()
 	class AJSH_Editor_SpawnActor* Editor_SpawnActor;
+
+	UFUNCTION()
+	void Destroy_EditorActor();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Destroy_SaveEditorActor();
+	
 #pragma endregion
 
 

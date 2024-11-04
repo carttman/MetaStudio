@@ -12,12 +12,14 @@ void AJSH_PlayerController::SaveOriginCharacter()
 	if (HasAuthority())
 	{
 		NetMulti_SaveOriginCharacter();
+		UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller222"));
 	}
 }
 
 void AJSH_PlayerController::NetMulti_SaveOriginCharacter_Implementation()
 {
 	OriginPlayer = Cast<AJSH_Player>(GetPawn());
+	UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller3333: %s"), *OriginPlayer->GetName());
 }
 
 
@@ -40,6 +42,9 @@ void AJSH_PlayerController::SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor
 		NetMulti_SaveEditorActor_Implementation(ClickedActor);
 	}
 }
+
+
+
 void AJSH_PlayerController::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor* ClickedActor)
 {
 	Editor_SpawnActor = ClickedActor;
@@ -47,9 +52,23 @@ void AJSH_PlayerController::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_
 	FString tempname = 	ClickedActor->GetName();
 
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *tempname);
-
-	Editor_SpawnActor->Destroy();
 }
+
+
+void AJSH_PlayerController::Destroy_EditorActor()
+{
+	NetMulti_Destroy_SaveEditorActor();
+}
+
+void AJSH_PlayerController::NetMulti_Destroy_SaveEditorActor_Implementation()
+{
+	if (OriginPlayer->Bool_EditorActorDestroy == true)
+	{
+		Editor_SpawnActor->Destroy();
+	}
+	OriginPlayer->Bool_EditorActorDestroy = false;
+}
+
 
 #pragma endregion
 

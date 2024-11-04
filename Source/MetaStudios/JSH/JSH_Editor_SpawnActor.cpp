@@ -42,9 +42,11 @@ void AJSH_Editor_SpawnActor::BeginPlay()
     {
         JPlayerController->bEnableTouchEvents = false;
 
-        // 플레이어 컨트롤러에 Director 저장
-        JPlayerController->SaveOriginCharacter();
+        // // 플레이어 컨트롤러에 Director 저장
+        // JPlayerController->SaveOriginCharacter();
     }
+
+    OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
 }
 
 // Called every frame
@@ -70,7 +72,8 @@ void AJSH_Editor_SpawnActor::OnMeshClicked(UPrimitiveComponent* TouchedComponent
 
     
     // 클릭 했을때 자신의 정보를 PlayerController에 저장
-    JPlayerController->SaveEditorActor(this);
+    // JPlayerController->SaveEditorActor(this);
+    OriginPlayer->SaveEditorActor(this);
 
 
     // 한번 클릭시 자기 자신 삭제
@@ -84,8 +87,8 @@ void AJSH_Editor_SpawnActor::OnMeshClicked(UPrimitiveComponent* TouchedComponent
 
 void AJSH_Editor_SpawnActor::Destroy_This()
 {
-    if (JPlayerController->GetName() == this->GetName())
-    {
-        Destroy();    
-    }
+    // if (JPlayerController->GetName() == this->GetName())
+    // {
+    //     Destroy();    
+    // }
 }

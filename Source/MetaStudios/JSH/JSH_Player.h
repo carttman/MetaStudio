@@ -297,8 +297,32 @@ public:
 	UPROPERTY(Replicated)
 	bool ClickedEditorActor = false;
 
+	// EditorActor를 클릭하면 그곳에서 자기 정보를 SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor) 여기로 전달 후 저장
+	UFUNCTION()
+	void SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
+
+	UPROPERTY()
+	class AJSH_Editor_SpawnActor* Editor_SpawnActor;
+
 #pragma endregion
 
+
+#pragma region Editor_Gizmo
+
+	// Dell 버튼 누르면 Actor 삭제
+	UFUNCTION()
+	void EditorAcotorDestroy();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_EditorAcotorDestroy();
+	UPROPERTY(Replicated)
+	bool Bool_EditorActorDestroy = false;
+	
+#pragma endregion
+
+
+	
 
 #pragma region MainPlatform
 

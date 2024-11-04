@@ -38,4 +38,9 @@ public:
 
 	UFUNCTION()
 	void Destroy_This();
+
+
+	// Director에 자신의 정보를 저장하기 위해서
+	UPROPERTY()
+	class AJSH_Player* OriginPlayer;
 };

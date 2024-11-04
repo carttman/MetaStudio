@@ -177,15 +177,17 @@ void AJSH_Player::BeginPlay()
 	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
 	CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
 	
-
+	UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller00000"));
 	// 플레이어 컨트롤러
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 	if (JPlayerController)
 	{
 		JPlayerController->bEnableTouchEvents = false;
-
+		
+		UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller1111"));
 		// 플레이어 컨트롤러에 Director 저장
 		JPlayerController->SaveOriginCharacter();
+		
 	}
 
 	FlyMode();
@@ -231,6 +233,7 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AJSH_Player, Record_b_On_Off);
 	DOREPLIFETIME(AJSH_Player, EditorMode_B);
 	DOREPLIFETIME(AJSH_Player, ClickedEditorActor);
+	DOREPLIFETIME(AJSH_Player, Bool_EditorActorDestroy);
 	
 }
 
@@ -296,7 +299,7 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_ESC, ETriggerEvent::Started, this, &AJSH_Player::Esc);
 
 
-		EnhancedInputComponent->BindAction(IA_Del, ETriggerEvent::Started, this, &AJSH_Player::Esc);
+		EnhancedInputComponent->BindAction(IA_Del, ETriggerEvent::Started, this, &AJSH_Player::EditorAcotorDestroy);
 	}
 	else
 	{
@@ -852,8 +855,8 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 
 
 		// Editor 모드 종료 시 저장된 EditorSpwanAcotr Name 삭제
-		JPlayerController->Editor_SpawnActor = nullptr;
-
+		// JPlayerController->Editor_SpawnActor = nullptr;
+		Editor_SpawnActor = nullptr; // 에디터 모드가 아닐떄 삭제 못하게
 
 		// @@@캐릭터 없어짐 @@@@@
 		// Fly Mode를 끌때에 아래로 레이 한번 쏴서 , Fly 모드 종료
@@ -962,6 +965,7 @@ void AJSH_Player::DisableEdit()
 	{
 		PlayerMainUI->RemoveFromParent();
 		PlayerMainUI = nullptr;  // 포인터를 null로 설정
+		Editor_SpawnActor = nullptr; // 에디터 모드가 아닐떄 삭제 못하게
 		UE_LOG(LogTemp, Warning, TEXT("UI null"));
 	}
 }
@@ -973,8 +977,48 @@ void AJSH_Player::CLickAndDel()
 }
 
 
-#pragma endregion
+// EditorActor를 클릭하면 그곳에서 자기 정보를 SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor) 여기로 전달 후 저장
+void AJSH_Player::SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor)
+{
+
+	NetMulti_SaveEditorActor_Implementation(ClickedActor);
+}
+
+void AJSH_Player::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor* ClickedActor)
+{
+	Editor_SpawnActor = ClickedActor;
 	
+	FString tempname = 	ClickedActor->GetName();
+
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *tempname);
+}
+
+
+void AJSH_Player::EditorAcotorDestroy()
+{
+	NetMulti_EditorAcotorDestroy();
+}
+
+void AJSH_Player::NetMulti_EditorAcotorDestroy_Implementation()
+{
+	if (Editor_SpawnActor != nullptr)
+	{
+		Editor_SpawnActor->Destroy();
+	}
+}
+
+#pragma endregion
+
+
+#pragma region Editor_Gizmo
+
+
+
+
+#pragma endregion
+
+
+
 
 #pragma region Camera Control
 
