@@ -70,6 +70,9 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	FPSCamera->SetupAttachment(FPSCameraSpringArm);
 	FPSCamera->bUsePawnControlRotation = false;
 
+
+
+
 }
 
 void AMetaStudiosCharacter::Tick(float DeltaTime)
@@ -78,6 +81,7 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 
 
 	ManageBooster(DeltaTime);
+
 }
 
 void AMetaStudiosCharacter::PossessedBy(AController* NewController)
@@ -90,7 +94,10 @@ void AMetaStudiosCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	spaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory ));
+	carActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
 
+	
 
 }
 
@@ -323,6 +330,12 @@ void AMetaStudiosCharacter::NetMulticast_ChangeCameraMode_Implementation()
 //////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
 void AMetaStudiosCharacter::EnterSpaceship()
 {
+	float spaceshipDist = GetDistanceTo(spaceshipActor);
+	float carDist = GetDistanceTo(carActor);
+
+	if (carDist < spaceshipDist)
+		return;
+
 	if (IsLocallyControlled())
 	{
 		Server_EnterSpaceship();
@@ -370,6 +383,12 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 /// 자동차랑 플레이어랑 컨트롤러 바꾸기
 void AMetaStudiosCharacter::EnterCar()
 {
+
+	float spaceshipDist = GetDistanceTo(spaceshipActor);
+	float carDist = GetDistanceTo(carActor);
+
+	if( carDist >= spaceshipDist )
+	return;
 
 	if (IsLocallyControlled())
 	{

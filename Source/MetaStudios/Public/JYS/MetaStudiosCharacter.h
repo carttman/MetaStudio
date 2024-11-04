@@ -135,8 +135,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<APawn> SpaceshipPawnFactory;
-	
-
 
 	APlayerController* MetaController;
 
@@ -156,7 +154,11 @@ public:
 	// bool°ª ¸ÖÆ¼
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY(EditAnywhere)
+	class ACarPawn* carActor;
 
+	UPROPERTY(EditAnywhere)
+	class ASpaceshipPawn* spaceshipActor;
 
 
 protected:
@@ -184,6 +186,9 @@ protected:
 	AActor* targetObject;
 
 	// int32 itemCount = 0;
+
+	UPROPERTY(EditDefaultsOnly , Category = Pistol)
+	float GrabDistance = 300;
 
 
 private:
