@@ -6,6 +6,11 @@
 #include "Camera/CameraComponent.h"
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
+
+
 
 // Sets default values
 ACarPawn::ACarPawn()
@@ -20,12 +25,28 @@ ACarPawn::ACarPawn()
 	CarMesh->SetupAttachment(DefaultScene);
 
 	
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(CarMesh);
-	SpringArm->TargetArmLength = 300.0f;
-	
-	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
-	CameraComp->SetupAttachment(SpringArm);
+	//SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	//SpringArm->SetupAttachment(CarMesh);
+	//SpringArm->TargetArmLength = 300.0f;
+	//
+	//CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
+	//CameraComp->SetupAttachment(RootComponent);
+
+	ThrusterComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ThrusterComponent"));
+	ThrusterComponent->SetupAttachment(CarMesh);
+	ThrusterComponent->Deactivate();	
+	ThrusterComponent2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ThrusterComponent2"));
+	ThrusterComponent2->SetupAttachment(CarMesh);
+	ThrusterComponent2->Deactivate();
+
+
+	////////////이펙트 추가/////////////
+
+	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> ThrusterEffectAsset(TEXT("/Game/RocketThrusterExhaustFX/FX/NS_RocketExhaust_Afterburn_Jet.NS_RocketExhaust_Afterburn_Jet"));
+	//if (ThrusterEffectAsset.Succeeded())
+	//{
+	//	ThrusterFXSystem = ThrusterEffectAsset.Object;
+	//}
 }
 
 // Called when the game starts or when spawned
@@ -48,9 +69,10 @@ void ACarPawn::Tick(float DeltaTime)
 	direction.Normalize();
 
 	AddMovementInput(direction);
+
+
 	direction = FVector::ZeroVector;
 	Server_UpdateTransform(GetActorLocation(), GetActorRotation());
-
 }
 
 // Called to bind functionality to input
@@ -103,16 +125,48 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();
 	direction.X = v.X;
-	direction.Y = v.Y;
+	//direction.Y = v.Y;
+	direction.Y = 0.0f;
 	direction.Normalize();
+
+	ApplyRoll(v.Y);
+
+	// 이동하고 싶다.
+		// 회전 방향으로 이동하고싶다.
+		// 1. ControlRotation 을 이용해서 Transform을 만들고
+	FTransform ttt = FTransform(GetControlRotation());
+	direction = ttt.TransformVector(direction);
+	direction.Z = 0;
+	direction.Normalize();
+	//// 2. TransformDirection기능 이용해서 방향을 만들어서
+	//// 3. 그 방향으로 이동
+	AddMovementInput(direction);
+	direction = FVector::ZeroVector;
+
+
+	//ThrusterComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ThrusterFXSystem, GetActorLocation());
+
+	if (ThrusterComponent)
+	{
+		ThrusterComponent->Activate();
+	}
+	if (ThrusterComponent2)
+	{
+		ThrusterComponent2->Activate();
+	}
+
+	
 }
 
 void ACarPawn::OnMyActionLook(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();
-
-	AddControllerPitchInput(-v.Y * 0.5f);
-	AddControllerYawInput(v.X * 0.5f);
+	//AddControllerPitchInput(-v.Y * 0.5f);
+	//AddControllerRollInput(v.X * 0.5f);
+	if(v.X != 0.0f )
+	{
+		//ApplyRoll(v.X * 0.5f);
+	}
 }
 
 void ACarPawn::ResetEnhancedInputSetting(APlayerController* pc)
@@ -133,6 +187,26 @@ void ACarPawn::ResetEnhancedInputSetting(APlayerController* pc)
 
 }
 
+void ACarPawn::ApplyRoll(float RollInput)
+{
+	// Get the current rotation of the mesh
+	FRotator CurrentRotation =  GetControlRotation();// CarMesh->GetRelativeRotation();
+
+	// Calculate the roll amount
+	float RollAmount = RollInput * 45.0f; // Adjust the multiplier for sensitivity
+	float YawAmount = RollInput * 45.0f;	
+
+	// Interpolate towards the new roll value	
+	CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, YawAmount, GetWorld()->GetDeltaSeconds(), 2.0f);
+	CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, RollAmount, GetWorld()->GetDeltaSeconds(), 3.0f);
+
+	
+	// Apply the modified rotation back to the mesh
+	//CarMesh->SetRelativeRotation(CurrentRotation);
+	//SetActorRotation(CurrentRotation);
+	GetController()->SetControlRotation(CurrentRotation);
+}
+
 void ACarPawn::Server_UpdateTransform_Implementation(FVector newLocation, FRotator newRotation)
 {
 	SetActorLocationAndRotation(newLocation, newRotation);
@@ -148,7 +222,7 @@ void ACarPawn::Server_ExitCar_Implementation()
 			FVector carLoc = GetActorLocation();
 			FRotator carRot = GetActorRotation();
 
-			FVector offset = carRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
+			FVector offset = carRot.RotateVector(FVector(200.0f, 100.0f, 0.0f));
 			FVector playerSpawnLocation = carLoc + offset;
 
 			player->SetActorLocation(playerSpawnLocation);
