@@ -18,7 +18,7 @@ AJSH_Editor_SpawnActor::AJSH_Editor_SpawnActor()
     
     AssetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Body"));
     AssetMesh->SetupAttachment(RootComponent);
-   
+    AssetMesh->SetRenderCustomDepth(false);
 
 
     // ConstructorHelpers::FObjectFinder<UStaticMesh> TMesh(TEXT("/Script/Engine.StaticMesh'/Game/JSH/Asset/Teenieping/chachaping.chachaping'"));
@@ -50,6 +50,22 @@ void AJSH_Editor_SpawnActor::BeginPlay()
 void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+
+    // 클릭 되었을 때에 아웃라인 생기도록 + 안 쪽 기즈모 클릭을 위한 노콜리젼 처리
+    if (OriginPlayer)
+    {
+        if (OriginPlayer->Editor_SpawnActor == this)
+        {
+            AssetMesh->SetRenderCustomDepth(true);
+            AssetMesh->SetCollisionProfileName(TEXT("NoCollision"));
+        }
+        else
+        {
+            AssetMesh->SetRenderCustomDepth(false);
+            AssetMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+        }  
+    }
 }
 
 
@@ -74,6 +90,7 @@ void AJSH_Editor_SpawnActor::OnMeshClicked(UPrimitiveComponent* TouchedComponent
     UE_LOG(LogTemp, Error, TEXT("Click"));
     // 클릭 했을때 자신의 정보를 Player에 저장
     OriginPlayer->SaveEditorActor(this);
+    
 
     UE_LOG(LogTemp, Error, TEXT("Click"));
     // 한번 클릭시 자기 자신 삭제

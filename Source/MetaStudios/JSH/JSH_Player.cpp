@@ -965,7 +965,6 @@ void AJSH_Player::DisableEdit()
 	{
 		PlayerMainUI->RemoveFromParent();
 		PlayerMainUI = nullptr;  // 포인터를 null로 설정
-		Editor_SpawnActor = nullptr; // 에디터 모드가 아닐떄 삭제 못하게
 		UE_LOG(LogTemp, Warning, TEXT("UI null"));
 	}
 }
@@ -1016,8 +1015,6 @@ void AJSH_Player::NetMulti_EditorAcotorDestroy_Implementation()
 
 
 #pragma endregion
-
-
 
 
 #pragma region Camera Control
