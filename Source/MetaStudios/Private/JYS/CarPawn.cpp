@@ -42,12 +42,6 @@ void ACarPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//if (!MovementDirection.IsZero())
-	//{
-	//	const FVector newLocation = GetActorLocation() + (MovementDirection * DeltaTime * MovementSpeed);
-	//	SetActorLocation(newLocation);
-	//}
-
 	FTransform trans = FTransform(this->GetControlRotation());
 	direction = trans.TransformVector(direction);
 	direction.Z = 0;
@@ -68,9 +62,12 @@ void ACarPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
-			Subsystem->ClearAllMappings();
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			if (IsLocallyControlled())
+			{
+				// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
+				Subsystem->ClearAllMappings();
+				Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			}
 		}
 	}
 	
@@ -124,9 +121,13 @@ void ACarPawn::ResetEnhancedInputSetting(APlayerController* pc)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
-			Subsystem->ClearAllMappings();
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			if (IsLocallyControlled())
+			{
+				// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
+				Subsystem->ClearAllMappings();
+				Subsystem->AddMappingContext(DefaultMappingContext, 0);
+
+			}
 		}
 	}
 

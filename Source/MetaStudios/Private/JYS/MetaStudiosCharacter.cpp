@@ -70,6 +70,9 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	FPSCamera->SetupAttachment(FPSCameraSpringArm);
 	FPSCamera->bUsePawnControlRotation = false;
 
+
+
+
 }
 
 void AMetaStudiosCharacter::Tick(float DeltaTime)
@@ -78,6 +81,7 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 
 
 	ManageBooster(DeltaTime);
+
 }
 
 void AMetaStudiosCharacter::PossessedBy(AController* NewController)
@@ -90,7 +94,10 @@ void AMetaStudiosCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	spaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory ));
+	carActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
 
+	
 
 }
 
@@ -105,9 +112,13 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
-			Subsystem->ClearAllMappings();
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			if (IsLocallyControlled())
+			{
+				// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
+				Subsystem->ClearAllMappings();
+				Subsystem->AddMappingContext(DefaultMappingContext, 0);
+
+			}
 		}
 	}
 
@@ -160,10 +171,13 @@ void AMetaStudiosCharacter::ResetEnhancedInputSetting(APlayerController* PlayerC
 
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetWorld()->GetFirstPlayerController()->GetLocalPlayer()))
 		{
-			// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
-			Subsystem->ClearAllMappings();
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent"));
+			if (IsLocallyControlled())
+			{
+				// 매핑이 위로 쌓이기 떄문에 키가 겹쳐서 안될 수 있음 그래서 매핑콘테스트를 클리어해주고 AddMappingContext 해줘야함
+				Subsystem->ClearAllMappings();
+				Subsystem->AddMappingContext(DefaultMappingContext, 0);
+
+			}
 		}
 		else
 		{
@@ -316,6 +330,12 @@ void AMetaStudiosCharacter::NetMulticast_ChangeCameraMode_Implementation()
 //////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
 void AMetaStudiosCharacter::EnterSpaceship()
 {
+	float spaceshipDist = GetDistanceTo(spaceshipActor);
+	float carDist = GetDistanceTo(carActor);
+
+	if (carDist < spaceshipDist)
+		return;
+
 	if (IsLocallyControlled())
 	{
 		Server_EnterSpaceship();
@@ -363,6 +383,12 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 /// 자동차랑 플레이어랑 컨트롤러 바꾸기
 void AMetaStudiosCharacter::EnterCar()
 {
+
+	float spaceshipDist = GetDistanceTo(spaceshipActor);
+	float carDist = GetDistanceTo(carActor);
+
+	if( carDist >= spaceshipDist )
+	return;
 
 	if (IsLocallyControlled())
 	{
