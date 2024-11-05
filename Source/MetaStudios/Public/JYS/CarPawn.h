@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "MetaStudiosCharacter.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h"
 #include "CarPawn.generated.h"
 
 UCLASS()
@@ -57,11 +59,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* CarMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USpringArmComponent* SpringArm;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//class USpringArmComponent* SpringArm;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UCameraComponent* CameraComp;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//class UCameraComponent* CameraComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USceneComponent* DefaultScene;
@@ -72,7 +74,16 @@ public:
 	UFUNCTION(Server, Unreliable)
 	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
 
+	///////////////////¿Ã∆Â∆Æ √ﬂ∞°//////////////
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UNiagaraComponent* ThrusterComponent;	
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UNiagaraComponent* ThrusterComponent2;
 
+	//UPROPERTY(EditAnywhere, Category = "Effects")
+	//class UNiagaraSystem* ThrusterFXSystem;
+
+	void ApplyRoll(float RollInput);
 
 private:
 
@@ -82,4 +93,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 500.0f;
+
+
+
 };
