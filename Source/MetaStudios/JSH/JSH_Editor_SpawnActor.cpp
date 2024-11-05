@@ -6,6 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "JSH_PlayerController.h"
 #include "Engine/EngineTypes.h" 
+#include "GameFramework/GameModeBase.h"
 #include "Kismet/KismetSystemLibrary.h"  
 
 // Constructor: Set default values
@@ -90,7 +91,7 @@ void AJSH_Editor_SpawnActor::OnMeshClicked(UPrimitiveComponent* TouchedComponent
     UE_LOG(LogTemp, Error, TEXT("Click"));
     // 클릭 했을때 자신의 정보를 Player에 저장
     OriginPlayer->SaveEditorActor(this);
-    
+    GizmoSpawn();
 
     UE_LOG(LogTemp, Error, TEXT("Click"));
     // 한번 클릭시 자기 자신 삭제
@@ -108,4 +109,37 @@ void AJSH_Editor_SpawnActor::Destroy_This()
     // {
     //     Destroy();    
     // }
+}
+
+void AJSH_Editor_SpawnActor::GizmoSpawn()
+{
+    // 1. 현재 Actor 위치 가져오기
+    FTransform ThisTransform;
+    ThisTransform = this->GetActorTransform();
+
+    
+    // 2. 기즈모를 ThisTransform 위치에 스폰하기
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	
+    AGameModeBase* tt = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
+	
+	
+    // 3. 블루프린트 클래스 로드 -> 스폰
+    UClass* GizmoClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/Gizmo/BP_Gizmo_Scale.BP_Gizmo_Scale_C"));
+    
+    if (GizmoClass)
+    {
+        AActor* GizmoActor = GetWorld()->SpawnActorDeferred<AActor>(GizmoClass, ThisTransform);
+
+        // 원랜 켜야하는데 beginplay에서 해주고 있어서 일단 주석 처리
+        //AJSH_PlayerController* PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+
+        //AActor* Gizmo = Cast<APawn>(GizmoActor);
+        if (GizmoActor)
+        {
+            UGameplayStatics::FinishSpawningActor(GizmoActor, ThisTransform);
+        }
+    }
+
 }
