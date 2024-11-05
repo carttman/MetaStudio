@@ -70,4 +70,27 @@ void AJSH_Scale_GizmoX::OnMeshClicked(UPrimitiveComponent* TouchedComponent, FKe
 	Selected->SetVisibility(true);
 	Origin->SetVisibility(false);
 }
+
+void AJSH_Scale_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
+{
+	Super::NotifyActorOnClicked(ButtonPressed);
+	UE_LOG(LogTemp, Error, TEXT("Norify_Click"));
+}
+
+
+void AJSH_Scale_GizmoX::NotifyActorBeginCursorOver()
+{
+	Super::NotifyActorBeginCursorOver();
+
+	Selected->SetVisibility(true);
+	Origin->SetVisibility(false);
+}
+
+void AJSH_Scale_GizmoX::NotifyActorEndCursorOver()
+{
+	Super::NotifyActorEndCursorOver();
+
+	Selected->SetVisibility(false);
+	Origin->SetVisibility(true);
+}
 	

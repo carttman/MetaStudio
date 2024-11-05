@@ -36,7 +36,16 @@ public:
 	UFUNCTION()
 	void OnMeshClicked(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
 
+
+	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
+	
 	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
+	
+	UFUNCTION()
+	virtual void NotifyActorBeginCursorOver();
+	UFUNCTION()
+	virtual void NotifyActorEndCursorOver();
+	
 	
 };
