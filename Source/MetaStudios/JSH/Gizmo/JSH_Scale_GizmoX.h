@@ -33,10 +33,6 @@ public:
 	
 	
 public:
-	UFUNCTION()
-	void OnMeshClicked(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
-
-
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 	
 	UPROPERTY()
@@ -47,5 +43,6 @@ public:
 	UFUNCTION()
 	virtual void NotifyActorEndCursorOver();
 	
-	
+	// UPROPERTY()
+	// AActor* GizmoActor;
 };

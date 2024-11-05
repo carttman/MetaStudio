@@ -37,9 +37,6 @@ AJSH_Scale_GizmoX::AJSH_Scale_GizmoX()
 		//Origin->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 		//Origin->SetRelativeScale3D(FVector(0.5, 0.5, 0.5));
 	}
-
-	Origin->OnClicked.AddDynamic(this, &AJSH_Scale_GizmoX::OnMeshClicked);
-	Selected->OnClicked.AddDynamic(this, &AJSH_Scale_GizmoX::OnMeshClicked);
 }
 
 // Called when the game starts or when spawned
@@ -62,15 +59,6 @@ void AJSH_Scale_GizmoX::Tick(float DeltaTime)
 }
 
 
-void AJSH_Scale_GizmoX::OnMeshClicked(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
-{
-	UE_LOG(LogTemp, Error, TEXT("SCale_Click"));
-
-
-	Selected->SetVisibility(true);
-	Origin->SetVisibility(false);
-}
-
 void AJSH_Scale_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 {
 	Super::NotifyActorOnClicked(ButtonPressed);
@@ -78,6 +66,8 @@ void AJSH_Scale_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 }
 
 
+
+// 오버랩 색상 변경
 void AJSH_Scale_GizmoX::NotifyActorBeginCursorOver()
 {
 	Super::NotifyActorBeginCursorOver();
@@ -85,7 +75,6 @@ void AJSH_Scale_GizmoX::NotifyActorBeginCursorOver()
 	Selected->SetVisibility(true);
 	Origin->SetVisibility(false);
 }
-
 void AJSH_Scale_GizmoX::NotifyActorEndCursorOver()
 {
 	Super::NotifyActorEndCursorOver();

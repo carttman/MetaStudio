@@ -113,6 +113,9 @@ void AJSH_Editor_SpawnActor::Destroy_This()
 
 void AJSH_Editor_SpawnActor::GizmoSpawn()
 {
+    //if (GizmoActor = !nullptr);
+
+    
     // 1. 현재 Actor 위치 가져오기
     FTransform ThisTransform;
     ThisTransform = this->GetActorTransform();
