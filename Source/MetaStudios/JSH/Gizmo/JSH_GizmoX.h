@@ -23,4 +23,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+public:
+
+	UFUNCTION()
+	void Teleport_to_EditorActor(FRotator TelRotator);
+
 };

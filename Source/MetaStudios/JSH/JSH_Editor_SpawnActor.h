@@ -34,11 +34,7 @@ public:
 
 	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
-
-
-	UFUNCTION()
-	void Destroy_This();
-
+	
 
 	// Director에 자신의 정보를 저장하기 위해서
 	UPROPERTY()
@@ -47,4 +43,12 @@ public:
 
 	UFUNCTION()
 	void GizmoSpawn();
+
+	FTransform ThisTransform;
+	
+	AActor* GizmoActor = nullptr;
+
+
+	UFUNCTION()
+	void DestroyThis();
 };

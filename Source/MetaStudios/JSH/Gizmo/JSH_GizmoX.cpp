@@ -25,3 +25,10 @@ void AJSH_GizmoX::Tick(float DeltaTime)
 
 }
 
+void AJSH_GizmoX::Teleport_to_EditorActor(FRotator TelRotator)
+{
+	
+}
+
+
+

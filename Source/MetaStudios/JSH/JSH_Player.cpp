@@ -1002,7 +1002,7 @@ void AJSH_Player::NetMulti_EditorAcotorDestroy_Implementation()
 {
 	if (Editor_SpawnActor != nullptr)
 	{
-		Editor_SpawnActor->Destroy();
+		Editor_SpawnActor->DestroyThis();
 	}
 }
 

@@ -65,6 +65,10 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
         {
             AssetMesh->SetRenderCustomDepth(false);
             AssetMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+            if (GizmoActor != nullptr)
+            {
+                GizmoActor->Destroy();
+            }
         }  
     }
 }
@@ -94,30 +98,12 @@ void AJSH_Editor_SpawnActor::OnMeshClicked(UPrimitiveComponent* TouchedComponent
     GizmoSpawn();
 
     UE_LOG(LogTemp, Error, TEXT("Click"));
-    // 한번 클릭시 자기 자신 삭제
-    // if (bHit && HitResult.GetActor() == this)
-    // {
-    //     DrawDebugSphere(GetWorld(), HitResult.Location, 10.0f, 12, FColor::Green, false, 2.0f);
-    //
-    //     Destroy();
-    // }
 }
 
-void AJSH_Editor_SpawnActor::Destroy_This()
-{
-    // if (JPlayerController->GetName() == this->GetName())
-    // {
-    //     Destroy();    
-    // }
-}
 
 void AJSH_Editor_SpawnActor::GizmoSpawn()
 {
-    //if (GizmoActor = !nullptr);
-
-    
     // 1. 현재 Actor 위치 가져오기
-    FTransform ThisTransform;
     ThisTransform = this->GetActorTransform();
 
     
@@ -133,7 +119,7 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
     
     if (GizmoClass)
     {
-        AActor* GizmoActor = GetWorld()->SpawnActorDeferred<AActor>(GizmoClass, ThisTransform);
+        GizmoActor = GetWorld()->SpawnActorDeferred<AActor>(GizmoClass, ThisTransform);
 
         // 원랜 켜야하는데 beginplay에서 해주고 있어서 일단 주석 처리
         //AJSH_PlayerController* PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
@@ -144,5 +130,13 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
             UGameplayStatics::FinishSpawningActor(GizmoActor, ThisTransform);
         }
     }
+}
 
+void AJSH_Editor_SpawnActor::DestroyThis()
+{
+    this->Destroy();
+    if (GizmoActor)
+    {
+        GizmoActor->Destroy();
+    }
 }
