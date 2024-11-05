@@ -1183,8 +1183,18 @@ void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 
 void AJSH_Player::Esc()
 {
-	UE_LOG(LogTemp, Error, TEXT("ESC"));
-	CHJ_Instance->ExitSession();
+	// Editor 모드일때 ESC 누르면 선택 없어지는거
+	if (EditorMode_B == true)
+	{
+		Editor_SpawnActor = nullptr;
+	}
+	// Editor 모드아닐때 ESC 방 나가기
+	else
+	{
+		// 종료하겠습니까 위젯 하나 뛰어줘야할듯
+		CHJ_Instance->ExitSession();
+		UE_LOG(LogTemp, Error, TEXT("ESC"));
+	}
 }
 
 #pragma endregion

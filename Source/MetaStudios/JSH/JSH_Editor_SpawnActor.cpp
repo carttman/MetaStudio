@@ -65,7 +65,7 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
         {
             AssetMesh->SetRenderCustomDepth(false);
             AssetMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
-            if (GizmoActor != nullptr)
+            if (GizmoActor && GizmoActor != nullptr)
             {
                 GizmoActor->Destroy();
             }
@@ -82,6 +82,13 @@ void AJSH_Editor_SpawnActor::OnMeshClicked(UPrimitiveComponent* TouchedComponent
     //
     // FHitResult HitResult;
     // bool bHit = PlayerController->GetHitResultUnderCursorByChannel(static_cast<ETraceTypeQuery>(ECC_Visibility), true, HitResult);
+
+
+}
+
+void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
+{
+    Super::NotifyActorOnClicked(ButtonPressed);
 
     if (!JPlayerController) return;
     
