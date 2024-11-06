@@ -10,7 +10,8 @@ UCLASS()
 class METASTUDIOS_API AJSH_GizmoX : public AActor
 {
 	GENERATED_BODY()
-	
+
+
 public:	
 	// Sets default values for this actor's properties
 	AJSH_GizmoX();
@@ -25,7 +26,5 @@ public:
 
 public:
 
-	UFUNCTION()
-	void Teleport_to_EditorActor(FRotator TelRotator);
 
 };

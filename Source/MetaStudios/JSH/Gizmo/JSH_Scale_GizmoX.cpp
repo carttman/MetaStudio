@@ -43,7 +43,7 @@ AJSH_Scale_GizmoX::AJSH_Scale_GizmoX()
 void AJSH_Scale_GizmoX::BeginPlay()
 {
 	Super::BeginPlay();
-
+	UE_LOG(LogTemp, Error, TEXT("Component 2222"));
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 	if (JPlayerController)
 	{

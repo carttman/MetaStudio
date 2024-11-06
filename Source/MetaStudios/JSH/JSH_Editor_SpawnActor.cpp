@@ -122,7 +122,7 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
 	
 	
     // 3. 블루프린트 클래스 로드 -> 스폰
-    UClass* GizmoClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/Gizmo/BP_Gizmo_Scale.BP_Gizmo_Scale_C"));
+    UClass* GizmoClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/Gizmo/BP_Gizmo.BP_Gizmo_C"));
     
     if (GizmoClass)
     {
@@ -134,6 +134,7 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
         //AActor* Gizmo = Cast<APawn>(GizmoActor);
         if (GizmoActor)
         {
+            UE_LOG(LogTemp, Error, TEXT("Component 111111"));
             UGameplayStatics::FinishSpawningActor(GizmoActor, ThisTransform);
         }
     }

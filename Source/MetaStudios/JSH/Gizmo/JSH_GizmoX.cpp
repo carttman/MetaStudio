@@ -3,12 +3,15 @@
 
 #include "../../JSH/Gizmo/JSH_GizmoX.h"
 
+#include "JSH_Scale_GizmoX.h"
+
 // Sets default values
 AJSH_GizmoX::AJSH_GizmoX()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	
 }
 
 // Called when the game starts or when spawned
@@ -25,10 +28,7 @@ void AJSH_GizmoX::Tick(float DeltaTime)
 
 }
 
-void AJSH_GizmoX::Teleport_to_EditorActor(FRotator TelRotator)
-{
-	
-}
+
 
 
 

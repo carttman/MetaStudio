@@ -15,6 +15,7 @@ AJSH_Scale_Gizmo::AJSH_Scale_Gizmo()
 void AJSH_Scale_Gizmo::BeginPlay()
 {
 	Super::BeginPlay();
+
 	
 }
 
