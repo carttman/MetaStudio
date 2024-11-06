@@ -84,6 +84,10 @@ public:
 	//class UNiagaraSystem* ThrusterFXSystem;
 
 	void ApplyRoll(float RollInput);
+	void ApplyRollBack();
+
+	void ActivateThruster(bool bActive);
+
 
 private:
 
@@ -93,6 +97,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 500.0f;
+
+	bool MoveStop = true;
+	bool ActiveThruster = true;
 
 
 
