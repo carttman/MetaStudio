@@ -9,6 +9,7 @@
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 
 
@@ -34,12 +35,8 @@ ACarPawn::ACarPawn()
 
 	ThrusterComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ThrusterComponent"));
 	ThrusterComponent->SetupAttachment(CarMesh);
-	//ThrusterComponent->Deactivate();	
 	ThrusterComponent2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ThrusterComponent2"));
 	ThrusterComponent2->SetupAttachment(CarMesh);
-	//ThrusterComponent2->Deactivate();
-
-
 
 }
 
@@ -48,7 +45,6 @@ void ACarPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//APlayerController* playerController = Cast<APlayerController>(GetController());
 	ActivateThruster(false);	
 }
 
@@ -56,22 +52,11 @@ void ACarPawn::BeginPlay()
 void ACarPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	/*
-	FTransform trans = FTransform(this->GetControlRotation());
-	direction = trans.TransformVector(direction);
-	direction.Z = 0;
-	direction.Normalize();
 
-	AddMovementInput(direction);
-
-
-	direction = FVector::ZeroVector;
-	*/
-
+	ActivateThruster(!MoveStop);
 	if (MoveStop == true)
 	{
-		ApplyRollBack();
-		ActivateThruster(false);
+		ApplyRollBack();		
 	}
 
 	Server_UpdateTransform(GetActorLocation(), GetActorRotation());
@@ -107,6 +92,14 @@ void ACarPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+void ACarPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACarPawn, MoveStop);
+
+}
+
 bool ACarPawn::CanPlayerEnterCar(AMetaStudiosCharacter* targetCharacter)
 {
 	if (targetCharacter == nullptr)	return false;
@@ -121,22 +114,20 @@ void ACarPawn::ExitCar()
 	{
 		Server_ExitCar();
 	}
-
 }
 
 void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();		
-	if( v.X <= 0.0f )
+	if( v.X <= 0.0f && MoveStop == false)
 	{			
-		MoveStop = true;
+		//MoveStop = true;
+		Server_OnMyActionMove(true);
 		return;
 	}
 	
-	MoveStop = false;
+	//MoveStop = false;
 	direction.X = v.X;
-	//direction.Y = v.Y;
-	//direction.Y = 0.0f;
 	direction.Normalize();	
 	
 	if (direction.X != 0.0f)
@@ -148,31 +139,29 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 		ApplyRollBack();
 	}
 
-	//// 이동하고 싶다.
-	//	// 회전 방향으로 이동하고싶다.
-	//	// 1. ControlRotation 을 이용해서 Transform을 만들고
 	FTransform ttt = FTransform(GetControlRotation());
 	direction = ttt.TransformVector(direction);
 	direction.Z = 0;
 	direction.Normalize();
-	////// 2. TransformDirection기능 이용해서 방향을 만들어서
-	////// 3. 그 방향으로 이동
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
-
-	ActivateThruster(true);
 	
+	//ActivateThruster(true);
+	Server_OnMyActionMove(false);
+}
+
+void ACarPawn::Server_OnMyActionMove_Implementation(bool bMove)
+{
+	MoveStop = bMove;
 }
 
 void ACarPawn::OnMyActionLook(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();
-	//AddControllerPitchInput(-v.Y * 0.5f);
-	//AddControllerRollInput(v.X * 0.5f);
-	if(v.X != 0.0f )
-	{
-		//ApplyRoll(v.X * 0.5f);
-	}
+	//if(v.X != 0.0f )
+	//{
+	//	//ApplyRoll(v.X * 0.5f);
+	//}
 }
 
 void ACarPawn::ResetEnhancedInputSetting(APlayerController* pc)
@@ -195,59 +184,33 @@ void ACarPawn::ResetEnhancedInputSetting(APlayerController* pc)
 
 void ACarPawn::ApplyRoll(float RollInput)
 {
-	// Get the current rotation of the mesh
-	FRotator CurrentRotation =  GetControlRotation();// CarMesh->GetRelativeRotation();
+	FRotator CurrentRotation =  GetControlRotation();
 
-	// Calculate the roll amount
-	float RollAmount = RollInput * 45.0f; // Adjust the multiplier for sensitivity
+	float RollAmount = RollInput * 45.0f; 
 	float YawAmount = RollInput * 45.0f;	
 
-	// Interpolate towards the new roll value	
-	//CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, YawAmount, GetWorld()->GetDeltaSeconds(), 2.0f);
 	CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, RollAmount, GetWorld()->GetDeltaSeconds(), 3.0f);
-	// P = P0 + vt
 
 	float YawCur = CurrentRotation.Yaw;
 	
+	// P = P0 + vt
 	CurrentRotation.Yaw = YawCur + 50.0f * RollInput * GetWorld()->DeltaTimeSeconds;
 
-	
-	// Apply the modified rotation back to the mesh
-	//CarMesh->SetRelativeRotation(CurrentRotation);
-	//SetActorRotation(CurrentRotation);
 	GetController()->SetControlRotation(CurrentRotation);
-
-
-
-
 }
 
 void ACarPawn::ApplyRollBack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ApplyRollBack"));
-	// Get the current rotation of the mesh
-	FRotator CurrentRotation = GetControlRotation();// CarMesh->GetRelativeRotation();
+	FRotator CurrentRotation = GetControlRotation();
 
-	// Calculate the roll amount
 	float RollAmount = CurrentRotation.Roll;
-	float YawAmount = CurrentRotation.Yaw;
+	//float YawAmount = CurrentRotation.Yaw;
 
-	if( RollAmount == 0.0f && YawAmount == 0.0f )	return;
+	if( RollAmount == 0.0f /*&& YawAmount == 0.0f*/ )	return;
 
-	UE_LOG(LogTemp, Warning, TEXT("ApplyRollBack R :%f : Y : %f"), RollAmount, YawAmount);
-	// Interpolate towards the new roll value	
-	CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, 0.0f, GetWorld()->GetDeltaSeconds(), 2.0f);
+	//CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, 0.0f, GetWorld()->GetDeltaSeconds(), 2.0f);
 	CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, 0.0f, GetWorld()->GetDeltaSeconds(), 3.0f);
-	// P = P0 + vt
 
-	//float YawCur = CurrentRotation.Yaw;
-
-	//CurrentRotation.Yaw = YawCur + 50.0f * RollInput * GetWorld()->DeltaTimeSeconds;
-
-
-	// Apply the modified rotation back to the mesh
-	//CarMesh->SetRelativeRotation(CurrentRotation);
-	//SetActorRotation(CurrentRotation);
 	GetController()->SetControlRotation(CurrentRotation);
 }
 
@@ -290,7 +253,6 @@ void ACarPawn::Server_ExitCar_Implementation()
 {
 	if (HasAuthority())
 	{
-		//APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 		if (player)
 		{
 			FVector carLoc = GetActorLocation();
@@ -304,7 +266,6 @@ void ACarPawn::Server_ExitCar_Implementation()
 
 			GetController()->Possess(player);
 			UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn Player"));
-			//player->GetMesh()->SetVisibility(true);
 		}
 
 	}

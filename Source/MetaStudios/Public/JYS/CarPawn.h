@@ -38,6 +38,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// bool°ª ¸ÖÆ¼
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+
 	bool CanPlayerEnterCar(AMetaStudiosCharacter* targetCharacter);
 
 	void ExitCar();
@@ -50,8 +54,14 @@ public:
 
 	AMetaStudiosCharacter* player;
 
-	void OnMyActionMove(const FInputActionValue& value);
 	void OnMyActionLook(const FInputActionValue& value);
+
+	void OnMyActionMove(const FInputActionValue& value);
+	UFUNCTION(Server, Reliable)
+	void Server_OnMyActionMove(bool bMove);
+	//UFUNCTION(NetMulticast, Reliable)
+	//void NetMulticast_OnMyActionMove(const FInputActionValue& value);
+
 
 	float carSpeed = 500.0f;
 
@@ -88,8 +98,10 @@ public:
 
 	void ActivateThruster(bool bActive);
 
+	UPROPERTY(Replicated)
+	bool MoveStop = true;
 
-private:
+	bool ActiveThruster = true;
 
 	FVector MovementDirection;
 
@@ -98,8 +110,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 500.0f;
 
-	bool MoveStop = true;
-	bool ActiveThruster = true;
+
 
 
 
