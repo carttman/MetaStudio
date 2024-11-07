@@ -327,10 +327,23 @@ public:
 
 	UFUNCTION()
 	void Gizmo_Click();
+
+	UFUNCTION()
+	void Gizmo_Click_End();
 	
 	FVector2D MousePosition;
 	FVector Mouse_WorldLocation;
 	FVector Mouse_WorldDirection;
+
+
+	// FVector Start_Mouse_WorldLocation;
+	// FVector End_Mouse_WorldLocation;
+
+	float Start_Mouse_WorldLocation;
+	float End_Mouse_WorldLocation;
+	float gizmogo;
+	
+	bool firstclick = false;
 	
 #pragma endregion
 

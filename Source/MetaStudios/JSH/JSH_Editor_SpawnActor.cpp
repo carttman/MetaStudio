@@ -7,7 +7,6 @@
 #include "JSH_PlayerController.h"
 #include "Engine/EngineTypes.h" 
 #include "GameFramework/GameModeBase.h"
-#include "Kismet/KismetSystemLibrary.h"  
 
 // Constructor: Set default values
 AJSH_Editor_SpawnActor::AJSH_Editor_SpawnActor()
@@ -71,6 +70,17 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
             }
         }  
     }
+
+    if (GizmoActor && GizmoActor != nullptr)
+    {
+        FVector dd = GizmoActor->GetActorLocation();
+        FVector d2 = this->GetActorLocation();
+        if (dd != d2)
+        {
+            GizmoActor->SetActorTransform(this->GetActorTransform()); 
+        }
+    }
+    
 }
 
 
