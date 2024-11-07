@@ -129,6 +129,10 @@ class AJSH_Player : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Del;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Gizmo_Click;
 public:
 	AJSH_Player();
 	
@@ -318,11 +322,19 @@ public:
 	void NetMulti_EditorAcotorDestroy();
 	UPROPERTY(Replicated)
 	bool Bool_EditorActorDestroy = false;
+
+
+
+	UFUNCTION()
+	void Gizmo_Click();
+	
+	FVector2D MousePosition;
+	FVector Mouse_WorldLocation;
+	FVector Mouse_WorldDirection;
 	
 #pragma endregion
 
 
-	
 
 #pragma region MainPlatform
 

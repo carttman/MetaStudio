@@ -300,6 +300,11 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 
 		EnhancedInputComponent->BindAction(IA_Del, ETriggerEvent::Started, this, &AJSH_Player::EditorAcotorDestroy);
+
+
+		// Gizmo Click
+		EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Triggered, this, &AJSH_Player::Gizmo_Click);
+		//EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Completed, this, &AJSH_Player::Gizmo_Click);
 	}
 	else
 	{
@@ -820,10 +825,10 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		// Camera_b_Third_First = true;
 
 		// E를 누르지 않아도 임시 Fly Mode 
-		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		bUseControllerRotationPitch = true;
-		bUseControllerRotationYaw = true;
-		bUseControllerRotationRoll = true;
+		// GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		// bUseControllerRotationPitch = true;
+		// bUseControllerRotationYaw = true;
+		// bUseControllerRotationRoll = true;
 
 		// proto시연때 막아서
 		if (HasAuthority())
@@ -915,14 +920,21 @@ void AJSH_Player::EnableEdit()
 	
 	if (JPlayerController)
 	{
+		JPlayerController->SetIgnoreLookInput(true);
+		
 		// 마우스 커서 보이게 설정
 		JPlayerController->bShowMouseCursor = true;
 		JPlayerController->bEnableClickEvents = true;
 		JPlayerController->bEnableMouseOverEvents = true;
 		
 		// 마우스를 UI와 게임에서 사용할 수 있도록 설정
-		JPlayerController->SetInputMode(FInputModeGameAndUI());
-		GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::LockAlways);
+		// JPlayerController->SetInputMode(FInputModeGameAndUI());
+		// GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::LockAlways);
+		
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+		InputMode.SetHideCursorDuringCapture(false);
+		JPlayerController->SetInputMode(InputMode);
 	}
 
 	if (IsLocallyControlled() && !PlayerMainUI)
@@ -993,6 +1005,13 @@ void AJSH_Player::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor
 }
 
 
+
+#pragma endregion
+
+
+#pragma region Editor_Gizmo
+
+
 void AJSH_Player::EditorAcotorDestroy()
 {
 	NetMulti_EditorAcotorDestroy();
@@ -1006,12 +1025,38 @@ void AJSH_Player::NetMulti_EditorAcotorDestroy_Implementation()
 	}
 }
 
-#pragma endregion
 
 
-#pragma region Editor_Gizmo
+void AJSH_Player::Gizmo_Click()
+{
+	if (!EditorMode_B) return;
 
-
+	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
+	{
+		JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
+	}
+	// 처음 마우스 위치 저장
+	UE_LOG(LogTemp, Error, TEXT("2d %s"), *MousePosition.ToString());
+	UE_LOG(LogTemp, Error, TEXT("3d %s"), *Mouse_WorldLocation.ToString());
+	 
+	FVector Start = Mouse_WorldLocation;
+	FVector End =  (Mouse_WorldDirection * 10000.0f) + Mouse_WorldLocation;
+	
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
+	
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+	
+	if (bHit)
+	{
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
+	}
+	else
+	{
+		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
+	}
+}
 
 
 #pragma endregion
