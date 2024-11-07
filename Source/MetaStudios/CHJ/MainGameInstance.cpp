@@ -112,7 +112,7 @@ void UMainGameInstance::OnMyCreateSessionComplete(FName SessionName , bool bWasS
 		}
 		else // 촬영장 맵으로
 		{
-			GetWorld()->ServerTravel(TEXT("/Game/Maps/FilmRoomMainMap?listen"));
+			GetWorld()->ServerTravel(TEXT("/Game/SYM/Openworld_sym?listen"));
 		}
 	}
 	else
