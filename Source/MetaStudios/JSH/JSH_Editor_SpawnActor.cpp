@@ -80,7 +80,6 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
             GizmoActor->SetActorTransform(this->GetActorTransform()); 
         }
     }
-    
 }
 
 
