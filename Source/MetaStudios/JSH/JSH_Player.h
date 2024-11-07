@@ -336,14 +336,32 @@ public:
 	FVector Mouse_WorldDirection;
 
 
-	// FVector Start_Mouse_WorldLocation;
-	// FVector End_Mouse_WorldLocation;
-
 	float Start_Mouse_WorldLocation;
 	float End_Mouse_WorldLocation;
 	float gizmogo;
 	
 	bool firstclick = false;
+
+
+	FVector StartActor_Location;
+
+	
+	FVector StartMouselocation;
+	FVector End_Location;
+
+	FVector StartGizmoLocation;
+	// FVector Start_Mouse_WorldLocation;
+	// FVector End_Mouse_WorldLocation;
+	
+
+	
+	FVector Startlocation;
+
+	bool Clicked = false;
+
+
+	FVector2D Start2d;
+	FVector2D end2d;
 	
 #pragma endregion
 

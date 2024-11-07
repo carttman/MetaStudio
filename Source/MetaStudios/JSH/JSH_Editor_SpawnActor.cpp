@@ -70,7 +70,7 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
             }
         }  
     }
-
+    
     if (GizmoActor && GizmoActor != nullptr)
     {
         FVector dd = GizmoActor->GetActorLocation();

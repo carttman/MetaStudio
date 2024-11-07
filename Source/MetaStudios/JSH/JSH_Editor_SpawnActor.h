@@ -48,7 +48,8 @@ public:
 	
 	AActor* GizmoActor = nullptr;
 
-
+	
+	
 	UFUNCTION()
 	void DestroyThis();
 };

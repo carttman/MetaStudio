@@ -34,6 +34,27 @@ public:
 	
 public:
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
+	virtual void NotifyActorOnReleased(FKey ButtonReleased);
+
+	
+	FVector2D MousePosition;
+	FVector Mouse_WorldLocation;
+	FVector Mouse_WorldDirection;
+
+	float Start_Mouse_WorldLocation;
+	float End_Mouse_WorldLocation;
+	float gizmogo;
+	
+	bool firstclick = false;
+
+
+	FVector StartActor_Location;
+
+	
+	FVector StartMouselocation;
+	FVector End_Location;
+
+	FVector StartGizmoLocation;
 	
 	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
@@ -45,4 +66,6 @@ public:
 	
 	// UPROPERTY()
 	// AActor* GizmoActor;
+
+	bool Clicked = false;
 };
