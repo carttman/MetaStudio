@@ -19,7 +19,13 @@ class METASTUDIOS_API ASpaceshipPawn : public APawn
 	UInputAction* SpaceshipMove;	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* SpaceshipLook;
+	UInputAction* SpaceshipLook;	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SpaceshipMoveUp;	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SpaceshipMoveDown;
 
 public:
 	// Sets default values for this pawn's properties
@@ -75,6 +81,10 @@ public:
 	UFUNCTION(Server, Unreliable)
 	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
 
+	void OnMoveUp(const FInputActionValue& value);
+	void OnMoveDown(const FInputActionValue& value);
+
+	float DescentSpeed = 5.0f;
 
 private:
 	
@@ -85,6 +95,25 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 500.0f;
 
+	////////////라인트레이스를 쏴서 일정 거리 이하가 됐을 때 착지 애니메이션 실행 및 자동 착지/////////////////////
+	UPROPERTY(EditAnywhere)
+	float landingTriggerDistance = 500.0f;
 
+	UFUNCTION()
+	void CheckLanding();
 
+	UPROPERTY()
+	bool bIsLanding = false;
+
+	UPROPERTY()
+	bool bIsFlying = false;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* LandingAnimation;
+
+	//UPROPERTY(EditAnywhere)
+	//float landingGravityScale = 0.3f;
+
+	//UPROPERTY(EditAnywhere)
+	//float landingSlowdownHeight = 300.0f
 };

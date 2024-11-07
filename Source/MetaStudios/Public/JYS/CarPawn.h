@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "MetaStudiosCharacter.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h"
 #include "CarPawn.generated.h"
 
 UCLASS()
@@ -36,6 +38,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// bool값 멀티
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+
 	bool CanPlayerEnterCar(AMetaStudiosCharacter* targetCharacter);
 
 	void ExitCar();
@@ -48,8 +54,14 @@ public:
 
 	AMetaStudiosCharacter* player;
 
-	void OnMyActionMove(const FInputActionValue& value);
 	void OnMyActionLook(const FInputActionValue& value);
+
+	void OnMyActionMove(const FInputActionValue& value);
+	UFUNCTION(Server, Reliable)
+	void Server_OnMyActionMove(bool bMove);
+	//UFUNCTION(NetMulticast, Reliable)
+	//void NetMulticast_OnMyActionMove(const FInputActionValue& value);
+
 
 	float carSpeed = 500.0f;
 
@@ -57,11 +69,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* CarMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USpringArmComponent* SpringArm;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//class USpringArmComponent* SpringArm;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UCameraComponent* CameraComp;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//class UCameraComponent* CameraComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USceneComponent* DefaultScene;
@@ -72,9 +84,24 @@ public:
 	UFUNCTION(Server, Unreliable)
 	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
 
+	///////////////////이펙트 추가//////////////
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UNiagaraComponent* ThrusterComponent;	
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UNiagaraComponent* ThrusterComponent2;
 
+	//UPROPERTY(EditAnywhere, Category = "Effects")
+	//class UNiagaraSystem* ThrusterFXSystem;
 
-private:
+	void ApplyRoll(float RollInput);
+	void ApplyRollBack();
+
+	void ActivateThruster(bool bActive);
+
+	UPROPERTY(Replicated)
+	bool MoveStop = true;
+
+	bool ActiveThruster = true;
 
 	FVector MovementDirection;
 
@@ -82,4 +109,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 500.0f;
+
+
+
+
+
 };
