@@ -29,7 +29,7 @@ void UFilmRoomLobbyWidget::NativeConstruct()
 	MENU_Button_GoCreateRoom->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::MENU_OnClickGoCreateRoom);
 
 	CR_Button_GoMenu->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::OnClickGoMenu);
-	FS_Button_GoMenu->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::ExitMenu);
+	//FS_Button_GoMenu->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::ExitMenu);
 
 	CR_Button_CreateRoom->OnClicked.AddDynamic(this , &UFilmRoomLobbyWidget::CR_OnClickCreateRoom);
 
