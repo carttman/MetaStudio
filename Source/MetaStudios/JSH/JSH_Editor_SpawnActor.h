@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Gizmo/JSH_Gizmo.h"
 #include "JSH_Editor_SpawnActor.generated.h"
 
 // 순환참조 문제로, Include 말고
@@ -48,7 +49,8 @@ public:
 	
 	AActor* GizmoActor = nullptr;
 
-	
+	UPROPERTY()
+	AJSH_Gizmo* OriginGizmo;
 	
 	UFUNCTION()
 	void DestroyThis();

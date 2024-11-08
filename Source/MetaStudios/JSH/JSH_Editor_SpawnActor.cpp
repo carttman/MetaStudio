@@ -136,7 +136,9 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
     if (GizmoClass)
     {
         GizmoActor = GetWorld()->SpawnActorDeferred<AActor>(GizmoClass, ThisTransform);
-
+        
+        OriginGizmo = Cast<AJSH_Gizmo>(GizmoActor);
+        
         // 원랜 켜야하는데 beginplay에서 해주고 있어서 일단 주석 처리
         //AJSH_PlayerController* PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 

@@ -8,7 +8,7 @@
 
 
 class AJSH_PlayerController;
-
+class AJSH_Player;
 
 UCLASS()
 class METASTUDIOS_API AJSH_Translate_GizmoX : public AActor
@@ -83,4 +83,15 @@ public:
 
 	UPROPERTY()
 	UMaterial* RedMaterial;
+
+
+	UPROPERTY()
+	AJSH_Player* OriginPlayer;
+
+	bool SelectedGizmo = false;
+
+
+	void EndClick();
+
+	void HandleMouseReleaseOutsideActor();
 };

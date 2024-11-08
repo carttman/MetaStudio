@@ -218,6 +218,11 @@ void AJSH_Player::BeginPlay()
 void AJSH_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// if (Clicked)
+	// {
+	// 	Gizmo_Click();
+	// }
 }
 
 
@@ -1026,48 +1031,11 @@ void AJSH_Player::NetMulti_EditorAcotorDestroy_Implementation()
 
 void AJSH_Player::Gizmo_Click()
 {
-	
 }
 
 void AJSH_Player::Gizmo_Click_End()
 {
-	// FVector Start = Mouse_WorldLocation;
-	// FVector End =  (Mouse_WorldDirection * 10000.0f) + Mouse_WorldLocation;
-	//
-	// FHitResult HitResult;
-	// FCollisionQueryParams Params;
-	// Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
-	//
-	// bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
-	// //bool bHit = GetWorld()->linetrace(HitResult, Start, End, ECC_Visibility, Params);
-	// if (bHit)
-	// {
-	// 	DrawDebugLine(GetWorld(), Start, End, FColor::Yellow, false, 1, 0, 0.3);
-	// 	End_Location = HitResult.Location;
-	// 	//gizmogo = (Start_Mouse_WorldLocation - End_Mouse_WorldLocation) * -1;
-	// }
-	//
-	//
-	// if (Editor_SpawnActor != nullptr)
-	// {
-	// 	//FVector CurrentLocation = Editor_SpawnActor->GetActorLocation();
-	// 	FVector NewLocation = FVector(End_Location.X - StartActor_Location.X, Startlocation.Y, Startlocation.Z);
-	// 	Editor_SpawnActor->SetActorLocation(NewLocation);
-	// }
-
-	
-	// firstclick = false;
-	//
-	// gizmogo = (Start_Mouse_WorldLocation - End_Mouse_WorldLocation) * -1;
-	//
-	// UE_LOG(LogTemp, Error, TEXT("end_mouse %f"), gizmogo);
-	//
-	// if (Editor_SpawnActor != nullptr)
-	// {
-	// 	FVector CurrentLocation = Editor_SpawnActor->GetActorLocation();
-	// 	FVector NewLocation = FVector(CurrentLocation.X + gizmogo, CurrentLocation.Y, CurrentLocation.Z);
-	// 	Editor_SpawnActor->SetActorLocation(NewLocation);
-	// }
+	Clicked = false;
 }
 
 

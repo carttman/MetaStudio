@@ -357,7 +357,7 @@ public:
 	
 	FVector Startlocation;
 
-	bool Clicked = false;
+	bool Clicked = true;
 
 
 	FVector2D Start2d;

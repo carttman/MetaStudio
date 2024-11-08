@@ -8,6 +8,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/EngineTypes.h" 
+#include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
 
 // Sets default values
@@ -72,6 +73,8 @@ void AJSH_Translate_GizmoX::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Begin_ScaleX"));
 	}
 
+	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+
 	
 }
 
@@ -83,25 +86,31 @@ void AJSH_Translate_GizmoX::Tick(float DeltaTime)
 	if (Clicked)
 	{
 		NotifyActorOnClicked();
+
+
+		if (JPlayerController->WasInputKeyJustReleased(EKeys::LeftMouseButton)) 
+		{
+			HandleMouseReleaseOutsideActor();
+		}
 	}
+	//
+	// if (Clicked == true && OriginPlayer->Clicked == false)
+	// {
+	// 	EndClick();
+	// }
 }
 
 
 void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 {
 	Super::NotifyActorOnClicked(ButtonPressed);
-	
-	
-	UE_LOG(LogTemp, Error, TEXT("Norify_Click"));
 	// 마우스 2D -> 3D Vector 변환
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
 	{
 		JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
 	}
 	
-	
-	// UE_LOG(LogTemp, Error, TEXT("2d %s"), *MousePosition.ToString());
-	// UE_LOG(LogTemp, Error, TEXT("3d %s"), *Mouse_WorldLocation.ToString());
+
 	FVector Start = Mouse_WorldLocation;
 	FVector End =  (Mouse_WorldDirection * 10000.0f) + Mouse_WorldLocation;
 	
@@ -110,9 +119,7 @@ void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 	//Params.AddIgnoredActor(this);
 	
 	
-	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
-	//bool bHit = GetWorld()->linetrace(HitResult, Start, End, ECC_Visibility, Params);
 	if (bHit)
 	{
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
@@ -129,11 +136,12 @@ void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 			// Start_Mouse_WorldLocation = HitResult.Location.X;
 			
 			StartMouselocation = HitResult.ImpactPoint;
-			StartGizmoLocation = this->GetActorLocation();
+			StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
 			StartActor_Location = StartMouselocation - StartGizmoLocation;
 			float GapX = StartMouselocation.X - StartGizmoLocation.X;
 			UE_LOG(LogTemp, Error, TEXT("point %s"), *HitResult.ImpactPoint.ToString());
 			UE_LOG(LogTemp, Error, TEXT("gizmo %s"), *StartGizmoLocation.ToString());
+			SelectedGizmo = true;
 		}
 		else
 		{
@@ -141,7 +149,8 @@ void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 			FVector see = StartMouselocation - End_Location;
 			
 			FVector NewLocation = FVector(End_Location.X - StartActor_Location.X, StartGizmoLocation.Y, StartGizmoLocation.Z);
-			this->SetActorLocation(NewLocation);
+			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
+			
 			
 			
 			firstclick = false;
@@ -160,6 +169,8 @@ void AJSH_Translate_GizmoX::NotifyActorOnReleased(FKey ButtonReleased)
 	Super::NotifyActorOnReleased(ButtonReleased);
 
 	Clicked = false;
+	SelectedGizmo = false;
+	OriginColor();
 }
 
 
@@ -180,7 +191,8 @@ void AJSH_Translate_GizmoX::NotifyActorEndCursorOver()
 
 void AJSH_Translate_GizmoX::OriginColor()
 {
-
+	if (SelectedGizmo) return;
+	
 	if (RedMaterial)
 	{
 		Origin->SetMaterial(0, RedMaterial);
@@ -197,4 +209,19 @@ void AJSH_Translate_GizmoX::SelectedColor()
 	}
 	// Selected->SetVisibility(true);
 	// Origin->SetVisibility(false);
+}
+
+void AJSH_Translate_GizmoX::EndClick()
+{
+	Clicked = false;
+	SelectedGizmo = false;
+	OriginColor();
+}
+
+
+void AJSH_Translate_GizmoX::HandleMouseReleaseOutsideActor()
+{
+	Clicked = false;
+	SelectedGizmo = false;
+	OriginColor();
 }
