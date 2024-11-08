@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "JSH_Scale_Gizmo.generated.h"
 
+
 UCLASS()
 class METASTUDIOS_API AJSH_Scale_Gizmo : public AActor
 {

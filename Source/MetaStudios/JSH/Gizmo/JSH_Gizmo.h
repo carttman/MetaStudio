@@ -14,6 +14,18 @@ class METASTUDIOS_API AJSH_Gizmo : public AActor
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	USceneComponent* RootScence;
+
+	// Translate
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UChildActorComponent* Translate_Box;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UChildActorComponent* Translate_X;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UChildActorComponent* Translate_Y;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UChildActorComponent* Translate_Z;
+	
+	// Sclae
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Scale_Box;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -34,5 +46,11 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void ScaleMode();
+
+	UFUNCTION()
+	void TranslateMode();
 
 };
