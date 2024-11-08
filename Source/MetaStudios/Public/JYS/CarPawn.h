@@ -108,7 +108,7 @@ public:
 	FVector direction;
 
 	UPROPERTY(EditAnywhere)
-	float MovementSpeed = 500.0f;
+	float MovementSpeed = 1000.0f;
 
 
 
