@@ -218,7 +218,7 @@ void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, downTraceStart, downTraceEnd, ECC_Visibility))
 	{
 		// 바닥에 닿았다면, 바닥의 높이를 기준으로 수직 위치 설정
-		desiredHeight = FMath::Max(hitResult.Location.Z + 10.0f, currentLocation.Z); // 약간의 여유를 두기 위해 10 유닛 추가
+		desiredHeight = FMath::Max(hitResult.Location.Z + 10.0f, currentLocation.Z); // 약간의 여유를 두기 위해 10 추가
 	}
 
 	// 새로운 위치 설정
@@ -250,12 +250,22 @@ void ASpaceshipPawn::CheckLanding()
 		{
 			currentLocation.Z -= 500.0f * GetWorld()->GetDeltaSeconds();
 			//currentLocation.Z = FMath::FInterpTo(currentLocation.Z, targetZ, GetWorld()->GetDeltaSeconds(), 5.0f);
+
+			UE_LOG(LogTemp, Warning, TEXT("ppppppppppppppppp"))
+
+			/////////////////Animation/////////////////
+			/*if (SpaceshipSkeletalMesh && legAnim)
+			{
+				SpaceshipSkeletalMesh->PlayAnimation(legAnim, false);
+			}*/
+
+
 		}
 
 		if (FVector::Dist(currentLocation, hitResult.Location) < 10.0f)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("kkkkkkkkkk"));
-			currentLocation.Z = targetZ;
+			currentLocation.Z = targetZ; 
 		}
 		SetActorLocation(currentLocation);
 	}

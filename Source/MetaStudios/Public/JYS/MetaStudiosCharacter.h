@@ -83,7 +83,7 @@ public:
 	void ToggleBoosting();
 	
 	UFUNCTION(Server, Reliable)
-	void Server_ToggleBoosting();
+	void Server_ToggleBoosting(bool bMove);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_ToggleBoosting();
@@ -160,6 +160,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	class ASpaceshipPawn* spaceshipActor;
 
+	///////////////////¿Ã∆Â∆Æ √ﬂ∞°//////////////
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UNiagaraComponent* BoosterFXComponent;	
+
+	void ActivateBooster(bool bActive);
+	
+	UPROPERTY(Replicated)
+	bool MoveStop = true;
+
+	bool activeBooster = true;
 
 protected:
 

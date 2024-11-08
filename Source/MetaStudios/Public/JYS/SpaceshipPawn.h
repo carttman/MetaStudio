@@ -86,6 +86,10 @@ public:
 
 	float DescentSpeed = 5.0f;
 
+	/////////////////Animation///////////////////////////////
+	UPROPERTY(EditAnywhere)
+	class UAnimSequence* legAnim;
+
 private:
 	
 	FVector MovementDirection;
@@ -107,9 +111,6 @@ private:
 
 	UPROPERTY()
 	bool bIsFlying = false;
-
-	UPROPERTY(EditAnywhere)
-	UAnimMontage* LandingAnimation;
 
 	//UPROPERTY(EditAnywhere)
 	//float landingGravityScale = 0.3f;
