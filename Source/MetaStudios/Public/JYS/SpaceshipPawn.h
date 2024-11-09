@@ -43,6 +43,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// bool값 멀티
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* SpaceshipMesh;
 
@@ -54,6 +58,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCameraComponent* CameraComp;
+
+	UPROPERTY()
+	class USpaceshipAnimInstance* Anim;
 
 	bool CanPlayerEnter(AMetaStudiosCharacter* targetCharacter);
 
@@ -71,12 +78,9 @@ public:
 
 	void OnMyActionMove(const FInputActionValue& value);
 
-
-
 	void OnMyActionLook(const FInputActionValue& value);
 
 	float speed = 500.0f;
-
 
 	UFUNCTION(Server, Unreliable)
 	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
@@ -86,9 +90,31 @@ public:
 
 	float DescentSpeed = 5.0f;
 
-	/////////////////Animation///////////////////////////////
+	/////////////////Animation//////////////////////////////
+	
+
 	UPROPERTY(EditAnywhere)
-	class UAnimSequence* legAnim;
+	class UAnimSequence* doorAnim;
+
+	UPROPERTY(EditAnywhere)
+	float LandingDistance = 500.0f;
+
+	bool bCantMove = false;
+
+	bool bLanded = true;
+
+	////////////////Effect//////////////
+	void StartFlyEffect();
+
+	//UPROPERTY(EditAnywhere, Category = "Effects")
+	//class UNiagaraComponent* startFlyFXComponent;
+
+	//void ActivateStartFly(bool bActive);
+
+	//UPROPERTY(Replicated)
+	//bool MoveStop = true;
+
+	//bool activeStartFly = true;
 
 private:
 	
@@ -103,18 +129,29 @@ private:
 	UPROPERTY(EditAnywhere)
 	float landingTriggerDistance = 500.0f;
 
+	// 지면에 닿았다면 착륙 상태로 변환하고 LegDown애니메이션을 실행
 	UFUNCTION()
-	void CheckLanding();
+	bool CheckLanding();
 
-	UPROPERTY()
-	bool bIsLanding = false;
+	UFUNCTION(Server, Reliable)
+	void Server_PlayAnimMontage(class UAnimMontage* montageToPlay, float playRate = 1.0f, FName startSection = NAME_None);
 
-	UPROPERTY()
-	bool bIsFlying = false;
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_PlayAnimMontage(class UAnimMontage* montageToPlay, float playRate = 1.0f, FName startSection = NAME_None);
 
-	//UPROPERTY(EditAnywhere)
-	//float landingGravityScale = 0.3f;
+	UFUNCTION()
+	void MoveUpAnim();
 
-	//UPROPERTY(EditAnywhere)
-	//float landingSlowdownHeight = 300.0f
+	UFUNCTION(Server, Reliable)
+	void Server_CloseDoorMontageSetting();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_CloseDoorMontageSetting();
+
+
+	//UPROPERTY()
+	//bool bIsLanding = false;
+
+	//UPROPERTY()
+	//bool bIsFlying = false;
 };
