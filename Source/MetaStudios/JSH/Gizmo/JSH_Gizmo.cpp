@@ -126,6 +126,10 @@ void AJSH_Gizmo::BeginPlay()
 	}
 
 	InitialScale = GetActorScale3D();
+
+
+
+	
 }
 
 // Called every frame
@@ -141,7 +145,7 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 		{
 			float DistanceToPlayer = FVector::Distance(GetActorLocation(), PlayerPawn->GetActorLocation());
 			float ClampedDistance = FMath::Clamp(DistanceToPlayer, MinDistance, MaxDistance);
-			float ScaleFactor = FMath::GetMappedRangeValueClamped(FVector2D(MinDistance, MaxDistance), FVector2D(0.1f, 6.0f), ClampedDistance);
+			float ScaleFactor = FMath::GetMappedRangeValueClamped(FVector2D(MinDistance, MaxDistance), FVector2D(0.5f, 6.0f), ClampedDistance);
 	
 			Translate_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
 			// Translate_X->SetRelativeScale3D(InitialScale * ScaleFactor);
@@ -206,68 +210,6 @@ void AJSH_Gizmo::ScaleMode()
 void AJSH_Gizmo::NotifyActorOnClicked(FKey ButtonPressed)
 {
 	Super::NotifyActorOnClicked(ButtonPressed);
-	
-	// UE_LOG(LogTemp, Error, TEXT("bbbb"));
-	//
-	//
-	// // 마우스 2D -> 3D Vector 변환
-	// if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
-	// {
-	// 	JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
-	// }
-	//
-	//
-	// // UE_LOG(LogTemp, Error, TEXT("2d %s"), *MousePosition.ToString());
-	// // UE_LOG(LogTemp, Error, TEXT("3d %s"), *Mouse_WorldLocation.ToString());
-	// FVector Start = Mouse_WorldLocation;
-	// FVector End =  (Mouse_WorldDirection * 10000.0f) + Mouse_WorldLocation;
-	//
-	// FHitResult HitResult;
-	// FCollisionQueryParams Params;
-	// //Params.AddIgnoredActor(this);
-	//
-	//
-	//
-	// bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
-	// //bool bHit = GetWorld()->linetrace(HitResult, Start, End, ECC_Visibility, Params);
-	// if (bHit)
-	// {
-	// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
-	// 	
-	// 	if (!firstclick && Clicked == false)
-	// 	{
-	// 		if (!Clicked)
-	// 		{
-	// 			Clicked = true;
-	// 		}
-	// 		
-	// 		firstclick = true;
-	// 		// 처음 마우스 위치 저장
-	// 		// Start_Mouse_WorldLocation = HitResult.Location.X;
-	// 		
-	// 		StartMouselocation = HitResult.ImpactPoint;
-	// 		StartGizmoLocation = this->GetActorLocation();
-	// 		StartActor_Location = StartMouselocation - StartGizmoLocation;
-	// 		float GapX = StartMouselocation.X - StartGizmoLocation.X;
-	// 		UE_LOG(LogTemp, Error, TEXT("point %s"), *HitResult.ImpactPoint.ToString());
-	// 		UE_LOG(LogTemp, Error, TEXT("gizmo %s"), *StartGizmoLocation.ToString());
-	// 	}
-	// 	else
-	// 	{
-	// 		End_Location = HitResult.ImpactPoint;
-	// 		FVector see = StartMouselocation - End_Location;
-	// 		
-	// 		FVector NewLocation = FVector(End_Location.X - StartActor_Location.X, StartGizmoLocation.Y, StartGizmoLocation.Z);
-	// 		this->SetActorLocation(NewLocation);
-	// 		
-	// 		
-	// 		firstclick = false;
-	// 	}
-	// }
-	// else
-	// {
-	// 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
-	// }
 }
 
 
@@ -275,8 +217,6 @@ void AJSH_Gizmo::NotifyActorOnClicked(FKey ButtonPressed)
 void AJSH_Gizmo::NotifyActorOnReleased(FKey ButtonReleased)
 {
 	Super::NotifyActorOnReleased(ButtonReleased);
-
-	Clicked = false;
 }
 
 void AJSH_Gizmo::OriginColor()

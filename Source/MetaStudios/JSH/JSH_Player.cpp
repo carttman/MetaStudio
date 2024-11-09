@@ -1043,10 +1043,24 @@ void AJSH_Player::Gizmo_Click_End()
 }
 
 
+
+// ////////// 각자 Gimo에서 BeginPlay 떄에 함수 호출해서 Player에 자신의 정보 저장 ///////////////////
+// void AJSH_Player::Save_Gizmo_TX(AJSH_Translate_GizmoX* Gizmo_TX)
+// {
+// 	Saved_Gizmo_TX = Gizmo_TX;
+// }
+//
+// void AJSH_Player::Save_Gizmo_TY(AJSH_Translate_GizmoY* Gizmo_TY)
+// {
+// 	Saved_Gizmo_TY = Gizmo_TY;
+// }
+
 #pragma endregion
 
 
 #pragma region Camera Control
+
+
 
 void AJSH_Player::Camera_Zoom_In()
 {

@@ -60,7 +60,10 @@ void AJSH_Translate_GizmoY::BeginPlay()
 	}
 
 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-
+	// if (OriginPlayer)
+	// {
+	// 	OriginPlayer->Save_Gizmo_TY(this);
+	// }
 	
 }
 
@@ -69,6 +72,27 @@ void AJSH_Translate_GizmoY::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// if (OriginPlayer->Editor_SpawnActor->GizmoX_ON)
+	// {
+	// 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
+	// }
+	// else if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON)
+	// {
+	// 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
+	// }
+	// else
+	// {
+	// 	Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	// }
+
+	
+	// Editor Mode 마우스 우클릭 시 초기화
+	if (OriginPlayer->DisableEdit_b)
+	{
+		HandleMouseReleaseOutsideActor();
+	}
+
+	
 	if (Clicked)
 	{
 		NotifyActorOnClicked();
@@ -79,6 +103,9 @@ void AJSH_Translate_GizmoY::Tick(float DeltaTime)
 			HandleMouseReleaseOutsideActor();
 		}
 	}
+
+
+	
 }
 
 
@@ -95,7 +122,7 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 	{
 		OriginPlayer->Editor_SpawnActor->GizmoY_ON = true;
 	}
-	
+	UE_LOG(LogTemp, Error, TEXT("y1"));
 	if (OriginPlayer != nullptr)
 	{
 		// 두 개체의 현재 위치
@@ -122,20 +149,25 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 	
 	// FHitResult HitResult;
 	// FCollisionQueryParams Params;
-	Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
+	//Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
+	// AActor* dd = Cast<AActor>(OriginPlayer->Saved_Gizmo_TX);
+	// Params.AddIgnoredActor(dd);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 	if (bHit)
 	{
+		// 다른 축과 겹쳐졌을때 else랑 같이 들어오는 오류가 있씀 
+		if (HitResult.GetActor() != this) return;
+	
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
-		
+		UE_LOG(LogTemp, Error, TEXT("y2"));
 		if (!firstclick && Clicked == false)
 		{
 			if (!Clicked)
 			{
 				Clicked = true;
 			}
-			
+			UE_LOG(LogTemp, Error, TEXT("y3"));
 			firstclick = true;
 			// 처음 마우스 위치 저장
 			// Start_Mouse_WorldLocation = HitResult.Location.Y;
@@ -144,8 +176,8 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 			StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
 			StartActor_Location = StartMouselocation - StartGizmoLocation;
 			//float GapY = StartMouselocation.Y - StartGizmoLocation.Y;
-			UE_LOG(LogTemp, Error, TEXT("point %s"), *HitResult.ImpactPoint.ToString());
-			UE_LOG(LogTemp, Error, TEXT("gizmo %s"), *StartGizmoLocation.ToString());
+			//UE_LOG(LogTemp, Error, TEXT("point %s"), *HitResult.ImpactPoint.ToString());
+			//UE_LOG(LogTemp, Error, TEXT("gizmo %s"), *StartGizmoLocation.ToString());
 			SelectedGizmo = true;
 		}
 		else
@@ -161,10 +193,12 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 	}
 	else
 	{
+		UE_LOG(LogTemp, Error, TEXT("y4"));
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
 		End_Location = End;
 		NewLocation = FVector(StartGizmoLocation.X, End_Location.Y - StartActor_Location.Y, StartGizmoLocation.Z);
 		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
+		firstclick = false;
 	}
 }
 
@@ -191,6 +225,7 @@ void AJSH_Translate_GizmoY::NotifyActorBeginCursorOver()
 	SelectedColor();
 	CursorOveringGizmo = true;
 }
+
 void AJSH_Translate_GizmoY::NotifyActorEndCursorOver()
 {
 	Super::NotifyActorEndCursorOver();
@@ -223,13 +258,6 @@ void AJSH_Translate_GizmoY::SelectedColor()
 	}
 	// Selected->SetVisibility(true);
 	// Origin->SetVisibility(false);
-}
-
-void AJSH_Translate_GizmoY::EndClick()
-{
-	Clicked = false;
-	SelectedGizmo = false;
-	OriginColor();
 }
 
 

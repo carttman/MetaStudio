@@ -60,7 +60,10 @@ void AJSH_Translate_GizmoX::BeginPlay()
 	}
 
 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-
+	// if (OriginPlayer)
+	// {
+	// 	OriginPlayer->Save_Gizmo_TX(this);
+	// }
 	
 }
 
@@ -68,6 +71,25 @@ void AJSH_Translate_GizmoX::BeginPlay()
 void AJSH_Translate_GizmoX::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	// if (OriginPlayer->Editor_SpawnActor->GizmoY_ON)
+	// {
+	// 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
+	// }
+	// else if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON)
+	// {
+	// 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
+	// }
+	// else
+	// {
+	// 	Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	// }
+
+	// Editor Mode 마우스 우클릭 시 초기화
+	if (OriginPlayer->DisableEdit_b)
+	{
+		HandleMouseReleaseOutsideActor();
+	}
 	
 	if (Clicked)
 	{
@@ -84,10 +106,10 @@ void AJSH_Translate_GizmoX::Tick(float DeltaTime)
 
 void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 {
+	Super::NotifyActorOnClicked(ButtonPressed);
+	
 	if (!CursorOveringGizmo) return;
 	
-	Super::NotifyActorOnClicked(ButtonPressed);
-
 	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
 	if (!OriginPlayer->Editor_SpawnActor->GizmoX_ON)
@@ -108,7 +130,6 @@ void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 			Lay_Distance = 4000.0f;
 		}
 	}
-
 	
 	// 마우스 2D -> 3D Vector 변환
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
@@ -121,11 +142,17 @@ void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 	
 	// FHitResult HitResult;
 	// FCollisionQueryParams Params;
-	Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
+	//Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
+	// AActor* dd = Cast<AActor>(OriginPlayer->Saved_Gizmo_TY);
+	// Params.AddIgnoredActor(dd);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 	if (bHit)
 	{
+		// 다른 축과 겹쳐졌을때 else랑 같이 들어오는 오류가 있씀 
+		if (HitResult.GetActor() != this) return;
+
+
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
 		
 		if (!firstclick && Clicked == false)
@@ -164,6 +191,7 @@ void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 		End_Location = End;
 		NewLocation = FVector(End_Location.X - StartActor_Location.X, StartGizmoLocation.Y, StartGizmoLocation.Z);
 		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
+		firstclick = false;
 	}
 }
 

@@ -8,6 +8,8 @@
 #include "JSH_Player.generated.h"
 
 
+class AJSH_Translate_GizmoY;
+class AJSH_Translate_GizmoX;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -365,6 +367,19 @@ public:
 
 	FVector2D Start2d;
 	FVector2D end2d;
+
+
+	// // 각자 Gimo에서 BeginPlay 떄에 함수 호출해서 Player에 자신의 정보 저장
+	// UFUNCTION()
+	// void Save_Gizmo_TX(AJSH_Translate_GizmoX* Gizmo_TX);
+	// UPROPERTY()
+	// AJSH_Translate_GizmoX* Saved_Gizmo_TX;
+	//
+	// UFUNCTION()
+	// void Save_Gizmo_TY(AJSH_Translate_GizmoY* Gizmo_TY);
+	// UPROPERTY()
+	// AJSH_Translate_GizmoY* Saved_Gizmo_TY;
+
 	
 #pragma endregion
 

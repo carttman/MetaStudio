@@ -103,7 +103,6 @@ public:
 	bool SelectedGizmo = false;
 
 
-	void EndClick();
 
 	void HandleMouseReleaseOutsideActor();
 

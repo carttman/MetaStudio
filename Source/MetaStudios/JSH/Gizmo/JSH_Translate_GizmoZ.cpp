@@ -64,6 +64,14 @@ void AJSH_Translate_GizmoZ::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	// Editor Mode 마우스 우클릭 시 초기화
+	if (OriginPlayer->DisableEdit_b)
+	{
+		HandleMouseReleaseOutsideActor();
+	}
+
+	
 	if (Clicked)
 	{
 		
@@ -89,7 +97,7 @@ void AJSH_Translate_GizmoZ::NotifyActorOnClicked(FKey ButtonPressed)
 	{
 		OriginPlayer->Editor_SpawnActor->GizmoZ_ON = true;
 	}
-	
+	UE_LOG(LogTemp, Error, TEXT("z1"));
 	if (OriginPlayer != nullptr)
 	{
 		// 두 개체의 현재 위치
@@ -121,15 +129,20 @@ void AJSH_Translate_GizmoZ::NotifyActorOnClicked(FKey ButtonPressed)
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 	if (bHit)
 	{
+		// 다른 축과 겹쳐졌을때 else랑 같이 들어오는 오류가 있씀 
+		if (HitResult.GetActor() != this) return;
+
+		
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
 		
 		if (!firstclick && Clicked == false)
 		{
+			UE_LOG(LogTemp, Error, TEXT("z2"));
 			if (!Clicked)
 			{
 				Clicked = true;
 			}
-			
+			UE_LOG(LogTemp, Error, TEXT("z3"));
 			firstclick = true;
 			// 처음 마우스 위치 저장
 			// Start_Mouse_WorldLocation = HitResult.Location.Y;
@@ -155,10 +168,12 @@ void AJSH_Translate_GizmoZ::NotifyActorOnClicked(FKey ButtonPressed)
 	}
 	else
 	{
+		UE_LOG(LogTemp, Error, TEXT("z4"));
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
 		End_Location = End;
 		NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y,End_Location.Z - StartActor_Location.Z);
 		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
+		firstclick = false;
 	}
 }
 
