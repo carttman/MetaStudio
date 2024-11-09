@@ -37,10 +37,23 @@ public:
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 	virtual void NotifyActorOnReleased(FKey ButtonReleased);
 
+
 	
 	FVector2D MousePosition;
 	FVector Mouse_WorldLocation;
 	FVector Mouse_WorldDirection;
+
+
+	FVector Start;
+	FVector End;
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	FVector NewLocation;
+
+	FVector NoHit_End_Location = End;
+
+
+	float Lay_Distance = 0.0f;
 
 	float Start_Mouse_WorldLocation;
 	float End_Mouse_WorldLocation;
@@ -94,5 +107,6 @@ public:
 
 	void HandleMouseReleaseOutsideActor();
 
+	bool CursorOveringGizmo = false;
 
 };
