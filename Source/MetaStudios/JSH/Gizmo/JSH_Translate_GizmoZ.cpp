@@ -66,9 +66,9 @@ void AJSH_Translate_GizmoZ::Tick(float DeltaTime)
 
 	if (Clicked)
 	{
+		
 		NotifyActorOnClicked();
-
-
+		
 		if (JPlayerController->WasInputKeyJustReleased(EKeys::LeftMouseButton)) 
 		{
 			HandleMouseReleaseOutsideActor();
@@ -79,82 +79,99 @@ void AJSH_Translate_GizmoZ::Tick(float DeltaTime)
 
 void AJSH_Translate_GizmoZ::NotifyActorOnClicked(FKey ButtonPressed)
 {
+	if (!CursorOveringGizmo) return;
+	
 	Super::NotifyActorOnClicked(ButtonPressed);
+	
+	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON) return;
+	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
+	if (!OriginPlayer->Editor_SpawnActor->GizmoZ_ON)
+	{
+		OriginPlayer->Editor_SpawnActor->GizmoZ_ON = true;
+	}
+	
+	if (OriginPlayer != nullptr)
+	{
+		// 두 개체의 현재 위치
+		FVector GizmoLocation = GetActorLocation();
+		FVector PlayerLocation = OriginPlayer->GetActorLocation();
+
+		// 두 개체 사이의 거리 계산
+		Lay_Distance = FVector::Dist(GizmoLocation, PlayerLocation);
+		if (Lay_Distance >= 4000.0f)
+		{
+			Lay_Distance = 4000.0f;
+		}
+	}
+
+	
 	// 마우스 2D -> 3D Vector 변환
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
 	{
 		JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
 	}
 	
+	Start = Mouse_WorldLocation;
+	End =  (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
 	
-	FVector Start = Mouse_WorldLocation;
-	FVector End =  (Mouse_WorldDirection * 10000.0f) + Mouse_WorldLocation;
-	
-	FHitResult HitResult;
-	FCollisionQueryParams Params;
-	//Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
-	
+	// FHitResult HitResult;
+	// FCollisionQueryParams Params;
+	Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 	if (bHit)
 	{
-		if (HitResult.GetActor() == this)
-		{
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
+		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
 		
-			if (!firstclick && Clicked == false)
+		if (!firstclick && Clicked == false)
+		{
+			if (!Clicked)
 			{
-				if (!Clicked)
-				{
-					Clicked = true;
-				}
-			
-				firstclick = true;
-				// 처음 마우스 위치 저장
-				// Start_Mouse_WorldLocation = HitResult.Location.X;
-			
-				StartMouselocation = HitResult.ImpactPoint;
-				StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
-				StartActor_Location = StartMouselocation - StartGizmoLocation;
-			
-				UE_LOG(LogTemp, Error, TEXT("point %s"), *HitResult.ImpactPoint.ToString());
-				UE_LOG(LogTemp, Error, TEXT("gizmo %s"), *StartGizmoLocation.ToString());
-				SelectedGizmo = true;
+				Clicked = true;
 			}
-			else
-			{
-				End_Location = HitResult.ImpactPoint;
 			
+			firstclick = true;
+			// 처음 마우스 위치 저장
+			// Start_Mouse_WorldLocation = HitResult.Location.Y;
 			
-				FVector NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y, End_Location.Z - StartActor_Location.Z);
-				OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
-			
-				firstclick = false;
-			}
+			StartMouselocation = HitResult.ImpactPoint;
+			StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
+			StartActor_Location = StartMouselocation - StartGizmoLocation;
+			//float GapY = StartMouselocation.Y - StartGizmoLocation.Y;
+			UE_LOG(LogTemp, Error, TEXT("point %s"), *HitResult.ImpactPoint.ToString());
+			UE_LOG(LogTemp, Error, TEXT("gizmo %s"), *StartGizmoLocation.ToString());
+			SelectedGizmo = true;
 		}
 		else
 		{
-			HandleMouseReleaseOutsideActor();
+			End_Location = HitResult.ImpactPoint;
+			//FVector see = StartMouselocation - End_Location;
+			
+			NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y,End_Location.Z - StartActor_Location.Z);
+			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
+			
+			firstclick = false;
 		}
 	}
 	else
 	{
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
-
-		HandleMouseReleaseOutsideActor();
+		End_Location = End;
+		NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y,End_Location.Z - StartActor_Location.Z);
+		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
 	}
 }
 
 
 
-void AJSH_Translate_GizmoZ::NotifyActorOnReleased(FKey ButtonReleased)
-{
-	Super::NotifyActorOnReleased(ButtonReleased);
-
-	Clicked = false;
-	SelectedGizmo = false;
-	OriginColor();
-}
+// void AJSH_Translate_GizmoZ::NotifyActorOnReleased(FKey ButtonReleased)
+// {
+// 	Super::NotifyActorOnReleased(ButtonReleased);
+//
+// 	// Clicked = false;
+// 	// SelectedGizmo = false;
+// 	OriginColor();
+// }
 
 
 // 오버랩 색상 변경
@@ -162,13 +179,22 @@ void AJSH_Translate_GizmoZ::NotifyActorBeginCursorOver()
 {
 	Super::NotifyActorBeginCursorOver();
 
+
+	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON) return;
+	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
+	
 	SelectedColor();
+	CursorOveringGizmo = true;
 }
 void AJSH_Translate_GizmoZ::NotifyActorEndCursorOver()
 {
 	Super::NotifyActorEndCursorOver();
 
-	OriginColor();
+	if (!Clicked)
+	{
+		OriginColor();
+	}
+	// HandleMouseReleaseOutsideActor();
 }
 
 
@@ -206,5 +232,7 @@ void AJSH_Translate_GizmoZ::HandleMouseReleaseOutsideActor()
 {
 	Clicked = false;
 	SelectedGizmo = false;
+	CursorOveringGizmo = false;
+	OriginPlayer->Editor_SpawnActor->GizmoZ_ON = false;
 	OriginColor();
 }

@@ -36,7 +36,7 @@ public:
 	
 public:
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
-	virtual void NotifyActorOnReleased(FKey ButtonReleased);
+	// virtual void NotifyActorOnReleased(FKey ButtonReleased);
 
 	
 	FVector2D MousePosition;

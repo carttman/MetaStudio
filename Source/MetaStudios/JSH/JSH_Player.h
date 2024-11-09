@@ -310,6 +310,9 @@ public:
 	UPROPERTY()
 	class AJSH_Editor_SpawnActor* Editor_SpawnActor;
 
+	UPROPERTY(replicated)
+	bool DisableEdit_b = false;
+
 #pragma endregion
 
 

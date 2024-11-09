@@ -88,6 +88,13 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 	
 	Super::NotifyActorOnClicked(ButtonPressed);
 	
+
+	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON) return;
+	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
+	if (!OriginPlayer->Editor_SpawnActor->GizmoY_ON)
+	{
+		OriginPlayer->Editor_SpawnActor->GizmoY_ON = true;
+	}
 	
 	if (OriginPlayer != nullptr)
 	{
@@ -97,6 +104,10 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 
 		// 두 개체 사이의 거리 계산
 		Lay_Distance = FVector::Dist(GizmoLocation, PlayerLocation);
+		if (Lay_Distance >= 4000.0f)
+		{
+			Lay_Distance = 4000.0f;
+		}
 	}
 
 	
@@ -111,7 +122,7 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 	
 	// FHitResult HitResult;
 	// FCollisionQueryParams Params;
-	//Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
+	Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 	if (bHit)
@@ -159,14 +170,14 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 
 
 
-void AJSH_Translate_GizmoY::NotifyActorOnReleased(FKey ButtonReleased)
-{
-	Super::NotifyActorOnReleased(ButtonReleased);
-
-	// Clicked = false;
-	// SelectedGizmo = false;
-	OriginColor();
-}
+// void AJSH_Translate_GizmoY::NotifyActorOnReleased(FKey ButtonReleased)
+// {
+// 	Super::NotifyActorOnReleased(ButtonReleased);
+//
+// 	// Clicked = false;
+// 	// SelectedGizmo = false;
+// 	OriginColor();
+// }
 
 
 // 오버랩 색상 변경
@@ -174,6 +185,9 @@ void AJSH_Translate_GizmoY::NotifyActorBeginCursorOver()
 {
 	Super::NotifyActorBeginCursorOver();
 
+	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON) return;
+	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
+	
 	SelectedColor();
 	CursorOveringGizmo = true;
 }
@@ -224,5 +238,6 @@ void AJSH_Translate_GizmoY::HandleMouseReleaseOutsideActor()
 	Clicked = false;
 	SelectedGizmo = false;
 	CursorOveringGizmo = false;
+	OriginPlayer->Editor_SpawnActor->GizmoY_ON = false;
 	OriginColor();
 }

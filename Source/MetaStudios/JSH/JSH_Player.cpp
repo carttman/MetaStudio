@@ -238,7 +238,7 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AJSH_Player, EditorMode_B);
 	DOREPLIFETIME(AJSH_Player, ClickedEditorActor);
 	DOREPLIFETIME(AJSH_Player, Bool_EditorActorDestroy);
-	
+	DOREPLIFETIME(AJSH_Player, DisableEdit_b);
 }
 
 
@@ -910,6 +910,8 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 
 void AJSH_Player::EnableEdit()
 {
+	DisableEdit_b = false;
+	
 	// 마우스 우클릭을 안 하고 있으면 , ZoomMode를 Flase로
 	Bool_ZoomMode = false;
 	UE_LOG(LogTemp, Error, TEXT("false"));
@@ -956,6 +958,8 @@ void AJSH_Player::EnableEdit()
 
 void AJSH_Player::DisableEdit()
 {
+	DisableEdit_b = true;
+	
 	// 마우스 우클릭 하고 있으면, ZoomMode를 True로
 	if (!Bool_ZoomMode)
 	{
