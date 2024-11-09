@@ -4,17 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "JSH_Translate_GizmoX.generated.h"
+#include "JSH_Translate_GizmoZ.generated.h"
 
 
 class AJSH_PlayerController;
 class AJSH_Player;
 
+
 UCLASS()
-class METASTUDIOS_API AJSH_Translate_GizmoX : public AActor
+class METASTUDIOS_API AJSH_Translate_GizmoZ : public AActor
 {
 	GENERATED_BODY()
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Origin;
 	
@@ -23,7 +24,7 @@ class METASTUDIOS_API AJSH_Translate_GizmoX : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AJSH_Translate_GizmoX();
+	AJSH_Translate_GizmoZ();
 
 protected:
 	// Called when the game starts or when spawned
@@ -82,7 +83,7 @@ public:
 	UMaterial* YellowMaterial;
 
 	UPROPERTY()
-	UMaterial* RedMaterial;
+	UMaterial* BlueMaterial;
 
 
 	UPROPERTY()
@@ -94,6 +95,4 @@ public:
 	void EndClick();
 
 	void HandleMouseReleaseOutsideActor();
-
-	bool CursorOveringGizmo = false;
 };

@@ -19,6 +19,8 @@ public:
 	USceneComponent* RootScence;
 
 	// Translate
+	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	// USceneComponent* Translate_RootScence;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Translate_Box;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -104,6 +106,15 @@ public:
 
 	UPROPERTY()
 	UMaterial* RedMaterial;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scaling")
+	float MinDistance = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scaling")
+	float MaxDistance = 4000.0f;
+
+	FVector InitialScale;
 
 
 };

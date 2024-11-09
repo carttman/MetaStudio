@@ -17,12 +17,18 @@ AJSH_Gizmo::AJSH_Gizmo()
 
 	
 	/// Translate
+
+	// Translate_RootScence = CreateDefaultSubobject<USceneComponent>(TEXT("Translate_RootScence"));
+	// Translate_RootScence->SetupAttachment(RootScence);
+	
 	Translate_Box = CreateDefaultSubobject<UChildActorComponent>(TEXT("Translate_Box"));
 	Translate_Box->SetupAttachment(RootScence);
 	UClass* TranslateBoxClass = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Translate_Box/BP_TranslateBox.BP_TranslateBox_C"));
 	if (TranslateBoxClass)
 	{
 		Translate_Box->SetChildActorClass(TranslateBoxClass);
+		Translate_Box->SetRelativeLocationAndRotation(FVector(0, 0, 0), FRotator(0, 0, 0));
+		Translate_Box->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
 	}
 
 	
@@ -119,7 +125,7 @@ void AJSH_Gizmo::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Begin_ScaleX"));
 	}
 
-
+	InitialScale = GetActorScale3D();
 }
 
 // Called every frame
@@ -127,6 +133,25 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
+	if (JPlayerController)
+	{
+		APawn* PlayerPawn = JPlayerController->GetPawn();
+		if (PlayerPawn)
+		{
+			float DistanceToPlayer = FVector::Distance(GetActorLocation(), PlayerPawn->GetActorLocation());
+			float ClampedDistance = FMath::Clamp(DistanceToPlayer, MinDistance, MaxDistance);
+			float ScaleFactor = FMath::GetMappedRangeValueClamped(FVector2D(MinDistance, MaxDistance), FVector2D(0.1f, 6.0f), ClampedDistance);
+	
+			Translate_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
+			// Translate_X->SetRelativeScale3D(InitialScale * ScaleFactor);
+			// Translate_Y->SetRelativeScale3D(InitialScale * ScaleFactor);
+			// Translate_Z->SetRelativeScale3D(InitialScale * ScaleFactor);
+			
+			//SetActorScale3D(InitialScale * ScaleFactor);
+	
+		}
+	}
 	
 	if (Clicked)
 	{

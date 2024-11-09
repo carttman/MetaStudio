@@ -4,14 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "JSH_Translate_GizmoX.generated.h"
-
+#include "JSH_Translate_GizmoY.generated.h"
 
 class AJSH_PlayerController;
 class AJSH_Player;
 
 UCLASS()
-class METASTUDIOS_API AJSH_Translate_GizmoX : public AActor
+class METASTUDIOS_API AJSH_Translate_GizmoY : public AActor
 {
 	GENERATED_BODY()
 
@@ -23,7 +22,7 @@ class METASTUDIOS_API AJSH_Translate_GizmoX : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AJSH_Translate_GizmoX();
+	AJSH_Translate_GizmoY();
 
 protected:
 	// Called when the game starts or when spawned
@@ -82,7 +81,7 @@ public:
 	UMaterial* YellowMaterial;
 
 	UPROPERTY()
-	UMaterial* RedMaterial;
+	UMaterial* GreenMaterial;
 
 
 	UPROPERTY()
@@ -95,5 +94,5 @@ public:
 
 	void HandleMouseReleaseOutsideActor();
 
-	bool CursorOveringGizmo = false;
+
 };

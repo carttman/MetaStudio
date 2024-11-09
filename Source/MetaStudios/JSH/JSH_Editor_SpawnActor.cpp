@@ -61,7 +61,7 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
             AssetMesh->SetCollisionProfileName(TEXT("NoCollision"));
         }
         else
-        {
+           {
             AssetMesh->SetRenderCustomDepth(false);
             AssetMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
             if (GizmoActor && GizmoActor != nullptr)

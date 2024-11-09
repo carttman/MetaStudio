@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../../JSH/Gizmo/JSH_Translate_GizmoX.h"
+#include "../JSH/Gizmo/JSH_Translate_GizmoZ.h"
 #include "MetaStudios/JSH/JSH_PlayerController.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
@@ -12,7 +12,7 @@
 
 
 // Sets default values
-AJSH_Translate_GizmoX::AJSH_Translate_GizmoX()
+AJSH_Translate_GizmoZ::AJSH_Translate_GizmoZ()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -27,7 +27,7 @@ AJSH_Translate_GizmoX::AJSH_Translate_GizmoX()
 	}
 	
 	
-	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Red.MM_Gizmo_Red'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Blue.MM_Gizmo_Blue'"));
 	if (OriginMaterial.Succeeded())
 	{
 		Origin->SetMaterial(0, OriginMaterial.Object);
@@ -40,32 +40,27 @@ AJSH_Translate_GizmoX::AJSH_Translate_GizmoX()
 		YellowMaterial = YellowMaterialLoader.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UMaterial> RedMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Red.MM_Gizmo_Red'"));
-	if (RedMaterialLoader.Succeeded())
+	ConstructorHelpers::FObjectFinder<UMaterial> BlueMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Blue.MM_Gizmo_Blue'"));
+	if (BlueMaterialLoader.Succeeded())
 	{
-		RedMaterial = RedMaterialLoader.Object;
+		BlueMaterial = BlueMaterialLoader.Object;
 	}
 }
 
 // Called when the game starts or when spawned
-void AJSH_Translate_GizmoX::BeginPlay()
+void AJSH_Translate_GizmoZ::BeginPlay()
 {
 	Super::BeginPlay();
 	UE_LOG(LogTemp, Error, TEXT("Component 2222"));
 	
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	if (JPlayerController)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Begin_ScaleX"));
-	}
-
 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
 
 	
 }
 
 // Called every frame
-void AJSH_Translate_GizmoX::Tick(float DeltaTime)
+void AJSH_Translate_GizmoZ::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -79,19 +74,11 @@ void AJSH_Translate_GizmoX::Tick(float DeltaTime)
 			HandleMouseReleaseOutsideActor();
 		}
 	}
-	//
-	// if (Clicked == true && OriginPlayer->Clicked == false)
-	// {
-	// 	EndClick();
-	// }
 }
 
 
-void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
+void AJSH_Translate_GizmoZ::NotifyActorOnClicked(FKey ButtonPressed)
 {
-	if (!CursorOveringGizmo) return;
-
-	
 	Super::NotifyActorOnClicked(ButtonPressed);
 	// 마우스 2D -> 3D Vector 변환
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
@@ -99,7 +86,7 @@ void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 		JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
 	}
 	
-
+	
 	FVector Start = Mouse_WorldLocation;
 	FVector End =  (Mouse_WorldDirection * 10000.0f) + Mouse_WorldLocation;
 	
@@ -111,10 +98,10 @@ void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 	if (bHit)
 	{
-		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
-
 		if (HitResult.GetActor() == this)
 		{
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
+		
 			if (!firstclick && Clicked == false)
 			{
 				if (!Clicked)
@@ -129,7 +116,7 @@ void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 				StartMouselocation = HitResult.ImpactPoint;
 				StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
 				StartActor_Location = StartMouselocation - StartGizmoLocation;
-				float GapX = StartMouselocation.X - StartGizmoLocation.X;
+			
 				UE_LOG(LogTemp, Error, TEXT("point %s"), *HitResult.ImpactPoint.ToString());
 				UE_LOG(LogTemp, Error, TEXT("gizmo %s"), *StartGizmoLocation.ToString());
 				SelectedGizmo = true;
@@ -137,29 +124,30 @@ void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 			else
 			{
 				End_Location = HitResult.ImpactPoint;
-				FVector see = StartMouselocation - End_Location;
 			
-				FVector NewLocation = FVector(End_Location.X - StartActor_Location.X, StartGizmoLocation.Y, StartGizmoLocation.Z);
+			
+				FVector NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y, End_Location.Z - StartActor_Location.Z);
 				OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
 			
 				firstclick = false;
 			}
 		}
-		else if (Clicked == true)
+		else
 		{
 			HandleMouseReleaseOutsideActor();
 		}
 	}
 	else
 	{
-		FVector HitLocation = End;
-		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
+		//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
+
+		HandleMouseReleaseOutsideActor();
 	}
 }
 
 
 
-void AJSH_Translate_GizmoX::NotifyActorOnReleased(FKey ButtonReleased)
+void AJSH_Translate_GizmoZ::NotifyActorOnReleased(FKey ButtonReleased)
 {
 	Super::NotifyActorOnReleased(ButtonReleased);
 
@@ -170,35 +158,33 @@ void AJSH_Translate_GizmoX::NotifyActorOnReleased(FKey ButtonReleased)
 
 
 // 오버랩 색상 변경
-void AJSH_Translate_GizmoX::NotifyActorBeginCursorOver()
+void AJSH_Translate_GizmoZ::NotifyActorBeginCursorOver()
 {
 	Super::NotifyActorBeginCursorOver();
 
 	SelectedColor();
-	CursorOveringGizmo = true;
 }
-void AJSH_Translate_GizmoX::NotifyActorEndCursorOver()
+void AJSH_Translate_GizmoZ::NotifyActorEndCursorOver()
 {
 	Super::NotifyActorEndCursorOver();
 
-	//OriginColor();
-	HandleMouseReleaseOutsideActor();
+	OriginColor();
 }
 
 
-void AJSH_Translate_GizmoX::OriginColor()
+void AJSH_Translate_GizmoZ::OriginColor()
 {
 	if (SelectedGizmo) return;
 	
-	if (RedMaterial)
+	if (BlueMaterial)
 	{
-		Origin->SetMaterial(0, RedMaterial);
+		Origin->SetMaterial(0, BlueMaterial);
 	}
 	// Selected->SetVisibility(false);
 	// Origin->SetVisibility(true);
 }
 
-void AJSH_Translate_GizmoX::SelectedColor()
+void AJSH_Translate_GizmoZ::SelectedColor()
 {
 	if (YellowMaterial)
 	{
@@ -208,7 +194,7 @@ void AJSH_Translate_GizmoX::SelectedColor()
 	// Origin->SetVisibility(false);
 }
 
-void AJSH_Translate_GizmoX::EndClick()
+void AJSH_Translate_GizmoZ::EndClick()
 {
 	Clicked = false;
 	SelectedGizmo = false;
@@ -216,10 +202,9 @@ void AJSH_Translate_GizmoX::EndClick()
 }
 
 
-void AJSH_Translate_GizmoX::HandleMouseReleaseOutsideActor()
+void AJSH_Translate_GizmoZ::HandleMouseReleaseOutsideActor()
 {
 	Clicked = false;
 	SelectedGizmo = false;
-	CursorOveringGizmo = false;
 	OriginColor();
 }
