@@ -8,6 +8,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Animation/AnimInstance.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "JYS/SpaceshipAnimInstance.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ASpaceshipPawn::ASpaceshipPawn()
@@ -16,8 +19,8 @@ ASpaceshipPawn::ASpaceshipPawn()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SpaceshipMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpaceshipMesh"));
-	RootComponent = SpaceshipMesh;	
-	
+	RootComponent = SpaceshipMesh;
+
 	SpaceshipSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SpaceshipSkeletalMesh"));
 	SpaceshipSkeletalMesh->SetupAttachment(SpaceshipMesh);
 
@@ -27,6 +30,9 @@ ASpaceshipPawn::ASpaceshipPawn()
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArm);
+
+	/*startFlyFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("startFlyEffectComponent"));
+	startFlyFXComponent->SetupAttachment(SpaceshipSkeletalMesh);*/
 }
 
 // Called when the game starts or when spawned
@@ -35,6 +41,12 @@ void ASpaceshipPawn::BeginPlay()
 	Super::BeginPlay();
 
 	APlayerController* playerController = Cast<APlayerController>(GetController());
+	Anim = Cast<USpaceshipAnimInstance>(SpaceshipSkeletalMesh->GetAnimInstance());
+	if (Anim)
+	{
+		Anim->SetLegUpMontagePlayRate();
+	}
+	// ActivateStartFly(false);
 }
 
 
@@ -42,7 +54,6 @@ void ASpaceshipPawn::BeginPlay()
 void ASpaceshipPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 
 	if (!IsLocallyControlled())	return;
 	FTransform trans = FTransform(this->GetControlRotation());
@@ -58,7 +69,7 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 	currentRotation.Pitch = 0.0f;
 	SetActorRotation(currentRotation);
 
-
+	// ActivateStartFly(!MoveStop);
 }
 
 // Called to bind functionality to input
@@ -91,6 +102,13 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	}
 }
 
+void ASpaceshipPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+}
+
 bool ASpaceshipPawn::CanPlayerEnter(AMetaStudiosCharacter* targetCharacter)
 {
 	// 플레이어와 우주선 사이의 간격
@@ -111,7 +129,6 @@ void ASpaceshipPawn::ExitSpaceship()
 
 void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 {
-
 	if (HasAuthority())
 	{
 		//APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
@@ -181,7 +198,6 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 	direction.Y = v.Y;
 	direction.Z = v.Y;
 	direction.Normalize();
-
 }
 
 void ASpaceshipPawn::OnMyActionLook(const FInputActionValue& value)
@@ -190,89 +206,186 @@ void ASpaceshipPawn::OnMyActionLook(const FInputActionValue& value)
 
 	AddControllerPitchInput(-v.Y);
 	AddControllerYawInput(v.X);
-
 }
 
 void ASpaceshipPawn::OnMoveUp(const FInputActionValue& value)
 {
-	FVector currentLocation = GetActorLocation();
-	// 수직 상승
+	if (bCantMove)	return;
+	UE_LOG(LogTemp, Warning, TEXT("OnMoveUP"))
+		FVector currentLocation = GetActorLocation();
+	// 수직 하강
 	currentLocation.Z += MovementSpeed * GetWorld()->GetDeltaSeconds();
+	SetActorLocation(currentLocation);
 
+	if (bLanded)
+	{
+		bLanded = false;
+		MoveUpAnim();
+	}
+
+	StartFlyEffect();
 	SetActorLocation(currentLocation);
 }
 
 void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
 {
+	if (bCantMove)	return;
+	// 이미 착지중이거나 지면에 닿았으면 움직이지 않고 return;
+	if (bLanded || CheckLanding()) return;
+
 	FVector currentLocation = GetActorLocation();
 	// 수직 하강
 	currentLocation.Z -= MovementSpeed * GetWorld()->GetDeltaSeconds();
 	SetActorLocation(currentLocation);
-	FHitResult hitResult;
-	FVector downTraceStart = currentLocation;
-	FVector downTraceEnd = downTraceStart - FVector(0, 0, 100); // 아래 방향으로 100 유닛 트레이스
 
-	float desiredHeight = currentLocation.Z + (MovementSpeed * GetWorld()->GetDeltaSeconds());
 
-	// 라인 트레이스를 사용하여 바닥에 닿았는지 확인
-	if (GetWorld()->LineTraceSingleByChannel(hitResult, downTraceStart, downTraceEnd, ECC_Visibility))
-	{
-		// 바닥에 닿았다면, 바닥의 높이를 기준으로 수직 위치 설정
-		desiredHeight = FMath::Max(hitResult.Location.Z + 10.0f, currentLocation.Z); // 약간의 여유를 두기 위해 10 추가
-	}
-
-	// 새로운 위치 설정
-	currentLocation.Z = desiredHeight;
-	CheckLanding();
-	
 }
 
-
-////////////라인트레이스를 쏴서 일정 거리 이하가 됐을 때 착지 애니메이션 실행 및 자동 착지/////////////////////
-
-void ASpaceshipPawn::CheckLanding()
+void ASpaceshipPawn::StartFlyEffect()
 {
 	FVector start = GetActorLocation();
-	FVector end = start - FVector(0, 0, 500.0f);
+	FVector end = start - FVector(0, 0, 1000.0f);
 
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
-	////////////////////500.0f 이하는 속도가 출어든다///////////////////////
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
 	{
-		DrawDebugLine(GetWorld(), start, end, FColor::Magenta, false, 1.0f, 0, 5.0f);
+		DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 1.0f, 0, 5.0f);
 		float targetZ = hitResult.Location.Z;
 		FVector currentLocation = GetActorLocation();
 
 		float distanceToGround = FVector::Dist(currentLocation, hitResult.Location);
-		if (distanceToGround < 500.0f)
+
+		if (distanceToGround > 0.0f)
 		{
-			currentLocation.Z -= 500.0f * GetWorld()->GetDeltaSeconds();
-			//currentLocation.Z = FMath::FInterpTo(currentLocation.Z, targetZ, GetWorld()->GetDeltaSeconds(), 5.0f);
+			currentLocation.Z += 500.0f * GetWorld()->GetDeltaSeconds();
 
-			UE_LOG(LogTemp, Warning, TEXT("ppppppppppppppppp"))
-
-			/////////////////Animation/////////////////
-			/*if (SpaceshipSkeletalMesh && legAnim)
-			{
-				SpaceshipSkeletalMesh->PlayAnimation(legAnim, false);
-			}*/
-
-
+			/////////////////우주선 출발할 때 이펙트/////////////////
+			//ActivateStartFly(true);
 		}
 
-		if (FVector::Dist(currentLocation, hitResult.Location) < 10.0f)
+		if (FVector::Dist(currentLocation, hitResult.Location) > 10.0f)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("kkkkkkkkkk"));
-			currentLocation.Z = targetZ; 
+			currentLocation.Z = targetZ;
 		}
 		SetActorLocation(currentLocation);
 	}
+
+}
+
+//void ASpaceshipPawn::ActivateStartFly(bool bActive)
+//{
+//	if (activeStartFly == bActive)	return;
+//	activeStartFly = bActive;
+//
+//	if (startFlyFXComponent)
+//	{
+//		if (bActive)
+//		{
+//			startFlyFXComponent->Activate();
+//		}
+//		else
+//		{
+//			startFlyFXComponent->Deactivate();
+//		}
+//	}
+//}
+
+////////////라인트레이스를 쏴서 일정 거리 이하가 됐을 때 착지 애니메이션 실행/////////////////////
+
+bool ASpaceshipPawn::CheckLanding()
+{
+	UE_LOG(LogTemp, Warning, TEXT("checkLanding"))
+
+	if (!IsLocallyControlled())	return false;
+	FVector start = GetActorLocation();
+	FVector end = start - FVector(0, 0, LandingDistance);
+
+	FHitResult hitResult;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
+
+	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
+	{
+		DrawDebugLine(GetWorld(), start, end, FColor::Magenta, false, 1.0f, 0, 20.0f);
+
+		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.Location);
+
+		if (distanceToGround < LandingDistance && SpaceshipSkeletalMesh && Anim)
+		{
+			bCantMove = true;
+			bLanded = true;
+
+			Server_PlayAnimMontage(Anim->legDownMontage);
+			FTimerHandle handle;
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				Server_PlayAnimMontage(Anim->openDoorMontage);
+				}, 2, false);
+			return true;
+		}
+	}
+	return false;
+}
+
+void ASpaceshipPawn::Server_PlayAnimMontage_Implementation(UAnimMontage* montageToPlay, float playRate /*= 1.0f*/, FName startSection /*= NAME_None*/)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Server_PlayAnimMontage_Implementation"));
+
+	NetMulticast_PlayAnimMontage(montageToPlay, playRate, startSection);
+}
+
+void ASpaceshipPawn::NetMulticast_PlayAnimMontage_Implementation(UAnimMontage* montageToPlay, float playRate /*= 1.0f*/, FName startSection /*= NAME_None*/)
+{
+	if (montageToPlay)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *montageToPlay->GetName());
+	}
+	if (SpaceshipSkeletalMesh && Anim)
+	{
+		Anim->Montage_Play(montageToPlay, playRate, EMontagePlayReturnType::MontageLength);
+		Anim->Montage_JumpToSection(startSection);
+		UE_LOG(LogTemp, Warning, TEXT("Landing Animation Played on All Clients"));
+	}
+	else
+	{
+		FString output;
+		output = Anim == nullptr ? TEXT("NULL") : *Anim->GetName();
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *output);
+	}
+}
+
+void ASpaceshipPawn::MoveUpAnim()
+{
+	if (SpaceshipSkeletalMesh)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MoveUpAnim"))
+
+			if (Anim)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("legUpAnimMontage"))
+				Server_CloseDoorMontageSetting();
+				Server_PlayAnimMontage(Anim->closeDoorMontage);
+				FTimerHandle handle;
+				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+					Server_PlayAnimMontage(Anim->legUpMontage, 1, TEXT("LegUpStartSection")); 
+					}, 1, false);
+			}
+	}
+}
+
+void ASpaceshipPawn::Server_CloseDoorMontageSetting_Implementation()
+{
+	NetMulticast_CloseDoorMontageSetting();
+}
+
+void ASpaceshipPawn::NetMulticast_CloseDoorMontageSetting_Implementation()
+{
+	Anim->Montage_SetPlayRate(Anim->legUpMontage, -1);
+	Anim->Montage_SetPlayRate(Anim->closeDoorMontage, -1);
 }
 
 void ASpaceshipPawn::Server_UpdateTransform_Implementation(FVector newLocation, FRotator newRotation)
 {
 	SetActorLocationAndRotation(newLocation, newRotation);
 }
-
