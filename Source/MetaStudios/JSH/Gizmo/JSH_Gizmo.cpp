@@ -128,7 +128,7 @@ void AJSH_Gizmo::BeginPlay()
 	InitialScale = GetActorScale3D();
 
 
-	//ScaleMode();
+	ScaleMode();
 	
 }
 
