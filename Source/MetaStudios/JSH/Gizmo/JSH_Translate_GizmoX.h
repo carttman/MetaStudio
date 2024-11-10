@@ -108,4 +108,6 @@ public:
 	void HandleMouseReleaseOutsideActor();
 
 	bool CursorOveringGizmo = false;
+
+	bool Gizmo_else_loop = true;
 };

@@ -68,7 +68,6 @@ AJSH_Gizmo::AJSH_Gizmo()
 	////// Sclae /////
 	Scale_Box = CreateDefaultSubobject<UChildActorComponent>(TEXT("Scale_Box"));
 	Scale_Box->SetupAttachment(RootScence);
-	// Scale_Box->SetChildActorClass(AJSH_Scale_GizmoX::StaticClass()); 
 	UClass* BoxClass = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Scale_Box/BP_ScaleBox.BP_ScaleBox_C"));
 	if (BoxClass)
 	{
@@ -91,7 +90,7 @@ AJSH_Gizmo::AJSH_Gizmo()
 	
 	Scale_Y = CreateDefaultSubobject<UChildActorComponent>(TEXT("Scale_Y"));
 	Scale_Y->SetupAttachment(Scale_Box);
-	UClass* Scale_Y_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Scale_X/BP_ScaleGizmo_X.BP_ScaleGizmo_X_C"));
+	UClass* Scale_Y_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Scale_Y/BP_ScaleGizmo_Y.BP_ScaleGizmo_Y_C"));
 	if (Scale_Y_Class)
 	{
 		Scale_Y->SetChildActorClass(Scale_Y_Class);
@@ -125,10 +124,11 @@ void AJSH_Gizmo::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Begin_ScaleX"));
 	}
 
+	// 처음 크기
 	InitialScale = GetActorScale3D();
 
 
-
+	//ScaleMode();
 	
 }
 
@@ -148,12 +148,7 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 			float ScaleFactor = FMath::GetMappedRangeValueClamped(FVector2D(MinDistance, MaxDistance), FVector2D(0.5f, 6.0f), ClampedDistance);
 	
 			Translate_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
-			// Translate_X->SetRelativeScale3D(InitialScale * ScaleFactor);
-			// Translate_Y->SetRelativeScale3D(InitialScale * ScaleFactor);
-			// Translate_Z->SetRelativeScale3D(InitialScale * ScaleFactor);
-			
-			//SetActorScale3D(InitialScale * ScaleFactor);
-	
+			Scale_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
 		}
 	}
 	

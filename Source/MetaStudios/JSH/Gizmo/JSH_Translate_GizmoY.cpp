@@ -122,6 +122,7 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 	{
 		OriginPlayer->Editor_SpawnActor->GizmoY_ON = true;
 	}
+	
 	UE_LOG(LogTemp, Error, TEXT("y1"));
 	if (OriginPlayer != nullptr)
 	{
@@ -157,18 +158,17 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 	if (bHit)
 	{
 		// 다른 축과 겹쳐졌을때 else랑 같이 들어오는 오류가 있씀 
-		if (HitResult.GetActor() != this) return;
+		//if (HitResult.GetActor() != this) return;
 	
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
 		UE_LOG(LogTemp, Error, TEXT("y2"));
-		if (!firstclick && Clicked == false)
+		if (!firstclick && !Clicked)
 		{
-			if (!Clicked)
-			{
-				Clicked = true;
-			}
-			UE_LOG(LogTemp, Error, TEXT("y3"));
+			Clicked = true;
 			firstclick = true;
+			
+			UE_LOG(LogTemp, Error, TEXT("y3"));
+			
 			// 처음 마우스 위치 저장
 			// Start_Mouse_WorldLocation = HitResult.Location.Y;
 			
@@ -182,23 +182,25 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 		}
 		else
 		{
+			UE_LOG(LogTemp, Error, TEXT("y4"));
 			End_Location = HitResult.ImpactPoint;
 			//FVector see = StartMouselocation - End_Location;
 			
 			NewLocation = FVector(StartGizmoLocation.X, End_Location.Y - StartActor_Location.Y, StartGizmoLocation.Z);
 			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
 			
-			firstclick = false;
+			//firstclick = false;
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("y4"));
-		//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
+		UE_LOG(LogTemp, Error, TEXT("y5"));
 		End_Location = End;
+		
 		NewLocation = FVector(StartGizmoLocation.X, End_Location.Y - StartActor_Location.Y, StartGizmoLocation.Z);
 		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
-		firstclick = false;
+		//
+		// firstclick = false;
 	}
 }
 
@@ -264,6 +266,7 @@ void AJSH_Translate_GizmoY::SelectedColor()
 void AJSH_Translate_GizmoY::HandleMouseReleaseOutsideActor()
 {
 	Clicked = false;
+	firstclick = false;
 	SelectedGizmo = false;
 	CursorOveringGizmo = false;
 	OriginPlayer->Editor_SpawnActor->GizmoY_ON = false;

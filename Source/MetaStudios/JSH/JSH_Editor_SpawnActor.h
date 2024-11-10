@@ -59,4 +59,5 @@ public:
 	bool GizmoX_ON = false;
 	bool GizmoY_ON = false;
 	bool GizmoZ_ON = false;
+	
 };

@@ -849,6 +849,14 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		// FlyMode를 제어하는 bool 값 (Editor Mode 일때 항상 날아다니 도록)
 		EditorMode_B = false;
 
+		// Gizmo 강제종료 문제
+		if (Editor_SpawnActor != nullptr)
+		{
+			Editor_SpawnActor->OriginGizmo->Destroy();
+			Editor_SpawnActor = nullptr;
+		}
+		
+		
 		// @@@캐릭터 없어짐 @@@@@
 		// // 1인칭 -> 3인칭 변환
 		// RecordCamera->SetActive(false);

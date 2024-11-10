@@ -4,18 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "JSH_Translate_GizmoZ.generated.h"
-
+#include "JSH_Scale_GizmoY.generated.h"
 
 class AJSH_PlayerController;
 class AJSH_Player;
 
-
 UCLASS()
-class METASTUDIOS_API AJSH_Translate_GizmoZ : public AActor
+class METASTUDIOS_API AJSH_Scale_GizmoY : public AActor
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Origin;
 	
@@ -24,7 +22,7 @@ class METASTUDIOS_API AJSH_Translate_GizmoZ : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AJSH_Translate_GizmoZ();
+	AJSH_Scale_GizmoY();
 
 protected:
 	// Called when the game starts or when spawned
@@ -38,6 +36,7 @@ public:
 public:
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 	// virtual void NotifyActorOnReleased(FKey ButtonReleased);
+
 
 	
 	FVector2D MousePosition;
@@ -95,7 +94,7 @@ public:
 	UMaterial* YellowMaterial;
 
 	UPROPERTY()
-	UMaterial* BlueMaterial;
+	UMaterial* GreenMaterial;
 
 
 	UPROPERTY()
@@ -104,11 +103,9 @@ public:
 	bool SelectedGizmo = false;
 
 
-	void EndClick();
 
 	void HandleMouseReleaseOutsideActor();
 
 	bool CursorOveringGizmo = false;
 
-	bool DuplicateSelected = true;
 };
