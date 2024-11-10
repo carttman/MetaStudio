@@ -4,27 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "JSH_Translate_GizmoZ.generated.h"
-
+#include "JSH_Translate_GizmoBox.generated.h"
 
 class AJSH_PlayerController;
 class AJSH_Player;
 
-
 UCLASS()
-class METASTUDIOS_API AJSH_Translate_GizmoZ : public AActor
+class METASTUDIOS_API AJSH_Translate_GizmoBox : public AActor
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Origin;
-	
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
-	// UStaticMeshComponent* Selected;
+	UPROPERTY()
+	UMaterial* YellowMaterial;
+	UPROPERTY()
+	UMaterial* WhiteMaterial;
 	
 public:	
 	// Sets default values for this actor's properties
-	AJSH_Translate_GizmoZ();
+	AJSH_Translate_GizmoBox();
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,12 +32,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
-	
-public:
-	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
-	// virtual void NotifyActorOnReleased(FKey ButtonReleased);
 
+	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 	
 	FVector2D MousePosition;
 	FVector Mouse_WorldLocation;
@@ -91,13 +86,6 @@ public:
 
 	UFUNCTION()
 	void SelectedColor();
-
-	UPROPERTY()
-	UMaterial* YellowMaterial;
-
-	UPROPERTY()
-	UMaterial* BlueMaterial;
-
 
 	UPROPERTY()
 	AJSH_Player* OriginPlayer;

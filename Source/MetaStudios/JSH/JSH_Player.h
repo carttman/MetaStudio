@@ -131,10 +131,19 @@ class AJSH_Player : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Del;
-
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Gizmo_Click;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Gizmo_SelectMode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Gizmo_TranslateMode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Gizmo_ScaleMode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Gizmo_RotateMode;
+	
 public:
 	AJSH_Player();
 	
@@ -380,6 +389,21 @@ public:
 	// UPROPERTY()
 	// AJSH_Translate_GizmoY* Saved_Gizmo_TY;
 
+	
+	// Gizmo Mode
+	bool FirstGizmode = false;
+	bool Gizmo_TranslateMode = false;
+	bool Gizmo_ScaleMode = false;
+	bool Gizmo_RotateMode = false;
+
+	UFUNCTION()
+	void G_SelecteMode();
+	UFUNCTION()
+	void G_TranslateMode();
+	UFUNCTION()
+	void G_SclaeMode();
+	UFUNCTION()
+	void G_RotateMode();
 	
 #pragma endregion
 

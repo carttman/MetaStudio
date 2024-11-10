@@ -63,7 +63,18 @@ AJSH_Gizmo::AJSH_Gizmo()
 		Translate_Z->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
 	}
 
-
+	// if (OriginPlayer->Editor_SpawnActor->GizmoX_ON)
+	// {
+	// 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
+	// }
+	// else if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON)
+	// {
+	// 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
+	// }
+	// else
+	// {
+	// 	Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	// }
 
 	////// Sclae /////
 	Scale_Box = CreateDefaultSubobject<UChildActorComponent>(TEXT("Scale_Box"));
@@ -128,7 +139,7 @@ void AJSH_Gizmo::BeginPlay()
 	InitialScale = GetActorScale3D();
 
 
-	ScaleMode();
+	//ScaleMode();
 	
 }
 

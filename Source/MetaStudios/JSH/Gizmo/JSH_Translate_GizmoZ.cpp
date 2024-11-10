@@ -64,6 +64,24 @@ void AJSH_Translate_GizmoZ::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
+	if (!OriginPlayer->Gizmo_TranslateMode)
+	{
+		if (Origin->GetCollisionProfileName() != TEXT("NoCollision"))
+		{
+			Origin->SetVisibility(false);
+			Origin->SetCollisionProfileName(TEXT("NoCollision"));
+		}
+	}
+	else
+	{
+		if (Origin->GetCollisionProfileName() != TEXT("BlockAllDynamic"))
+		{
+			Origin->SetVisibility(true);
+			Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+		}
+	}
+	
 
 	// Editor Mode 마우스 우클릭 시 초기화
 	if (OriginPlayer->DisableEdit_b)
@@ -74,7 +92,6 @@ void AJSH_Translate_GizmoZ::Tick(float DeltaTime)
 	
 	if (Clicked)
 	{
-		
 		NotifyActorOnClicked();
 		
 		if (JPlayerController->WasInputKeyJustReleased(EKeys::LeftMouseButton)) 
@@ -85,112 +102,83 @@ void AJSH_Translate_GizmoZ::Tick(float DeltaTime)
 }
 
 
+
+
+
 void AJSH_Translate_GizmoZ::NotifyActorOnClicked(FKey ButtonPressed)
 {
 	if (!CursorOveringGizmo) return;
 	
 	Super::NotifyActorOnClicked(ButtonPressed);
 	
-
-	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON) return;
-	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
+	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON || OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
+	
+	// Activate Gizmo Y only if it isn't already on
 	if (!OriginPlayer->Editor_SpawnActor->GizmoZ_ON)
 	{
 		OriginPlayer->Editor_SpawnActor->GizmoZ_ON = true;
 	}
 	
-	UE_LOG(LogTemp, Error, TEXT("z1"));
+	UE_LOG(LogTemp, Error, TEXT("y1"));
 	if (OriginPlayer != nullptr)
 	{
-		// 두 개체의 현재 위치
 		FVector GizmoLocation = GetActorLocation();
 		FVector PlayerLocation = OriginPlayer->GetActorLocation();
-
-		// 두 개체 사이의 거리 계산
-		Lay_Distance = FVector::Dist(GizmoLocation, PlayerLocation);
-		if (Lay_Distance >= 4000.0f)
-		{
-			Lay_Distance = 4000.0f;
-		}
-	}
-
 	
-	// 마우스 2D -> 3D Vector 변환
+		Lay_Distance = FVector::Dist(GizmoLocation, PlayerLocation);
+		Lay_Distance = FMath::Clamp(Lay_Distance, 0.0f, 4000.0f);
+	}
+	
+	// Convert 2D mouse position to 3D world position
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
 	{
 		JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
 	}
 	
 	Start = Mouse_WorldLocation;
-	End =  (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
-	
-	// FHitResult HitResult;
-	// FCollisionQueryParams Params;
-	//Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
-	// AActor* dd = Cast<AActor>(OriginPlayer->Saved_Gizmo_TX);
-	// Params.AddIgnoredActor(dd);
+	End = (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
-	if (bHit)
-	{
-		// 다른 축과 겹쳐졌을때 else랑 같이 들어오는 오류가 있씀 
-		//if (HitResult.GetActor() != this) return;
 	
-		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
-		UE_LOG(LogTemp, Error, TEXT("z2"));
-		if (!firstclick && !Clicked)
+	// Handling for the first click
+	if (bHit && !firstclick && !Clicked)
+	{
+		Clicked = true;
+		firstclick = true;
+		
+		UE_LOG(LogTemp, Error, TEXT("y3"));
+		
+		// Store initial mouse and gizmo positions
+		StartMouselocation = HitResult.ImpactPoint;
+		StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
+		StartActor_Location = StartMouselocation - StartGizmoLocation;
+		SelectedGizmo = true;
+	}
+	
+	// Handling for subsequent frames when moving gizmo
+	if (Clicked)
+	{
+		if (bHit)
 		{
-			Clicked = true;
-			firstclick = true;
-			
-			UE_LOG(LogTemp, Error, TEXT("z3"));
-			
-			// 처음 마우스 위치 저장
-			// Start_Mouse_WorldLocation = HitResult.Location.Y;
-			
-			StartMouselocation = HitResult.ImpactPoint;
-			StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
-			StartActor_Location = StartMouselocation - StartGizmoLocation;
-			//float GapY = StartMouselocation.Y - StartGizmoLocation.Y;
-			//UE_LOG(LogTemp, Error, TEXT("point %s"), *HitResult.ImpactPoint.ToString());
-			//UE_LOG(LogTemp, Error, TEXT("gizmo %s"), *StartGizmoLocation.ToString());
-			SelectedGizmo = true;
+			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
+			UE_LOG(LogTemp, Error, TEXT("y4"));
+			End_Location = HitResult.ImpactPoint;
+			NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y, End_Location.Z - StartActor_Location.Z);
+			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
 		}
 		else
 		{
-				UE_LOG(LogTemp, Error, TEXT("z4"));
-				End_Location = HitResult.ImpactPoint;
-				NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y, End_Location.Z - StartActor_Location.Z);
-				OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
-				DuplicateSelected = false;
-			// if (DuplicateSelected)
-			// {
-			// 	UE_LOG(LogTemp, Error, TEXT("z4"));
-			// 	End_Location = HitResult.ImpactPoint;
-			// 	NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y, End_Location.Z - StartActor_Location.Z);
-			// 	OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
-			// 	DuplicateSelected = false;
-			// }
-			// else
-			// {
-			// 	UE_LOG(LogTemp, Error, TEXT("z5"));
-			// 	End_Location = End;
-			// 	NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y, End_Location.Z - StartActor_Location.Z);
-			// 	OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
-			// }
+			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
+			UE_LOG(LogTemp, Error, TEXT("y5"));
+			End_Location = End;
+			NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y, End_Location.Z - StartActor_Location.Z);
+			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("z5"));
-		End_Location = End;
-		
-		NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y, End_Location.Z - StartActor_Location.Z);
-		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
-		//
-		// firstclick = false;
-	}
 }
+
+
+
 
 
 
@@ -216,6 +204,7 @@ void AJSH_Translate_GizmoZ::NotifyActorBeginCursorOver()
 	SelectedColor();
 	CursorOveringGizmo = true;
 }
+
 void AJSH_Translate_GizmoZ::NotifyActorEndCursorOver()
 {
 	Super::NotifyActorEndCursorOver();

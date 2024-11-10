@@ -83,7 +83,9 @@ public:
 
 	bool Clicked = false;
 
-
+	int32 ConsecutiveHitCount = 0;
+	int32 ConsecutiveMissCount = 0;
+	
 	UFUNCTION()
 	void OriginColor();
 

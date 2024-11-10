@@ -63,6 +63,22 @@ void AJSH_Translate_GizmoX::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!OriginPlayer->Gizmo_TranslateMode)
+	{
+		if (Origin->GetCollisionProfileName() != TEXT("NoCollision"))
+		{
+			Origin->SetVisibility(false);
+			Origin->SetCollisionProfileName(TEXT("NoCollision"));
+		}
+	}
+	else
+	{
+		if (Origin->GetCollisionProfileName() != TEXT("BlockAllDynamic"))
+		{
+			Origin->SetVisibility(true);
+			Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+		}
+	}
 	
 	// Editor Mode 마우스 우클릭 시 초기화
 	if (OriginPlayer->DisableEdit_b)

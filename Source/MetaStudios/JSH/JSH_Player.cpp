@@ -27,7 +27,6 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/SceneComponent.h"
 #include "Engine/Engine.h"
-#include "GameFramework/GameModeBase.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpectatorPawnMovement.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
@@ -309,6 +308,13 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		// Gizmo Click
 		EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Triggered, this, &AJSH_Player::Gizmo_Click);
 		EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Completed, this, &AJSH_Player::Gizmo_Click_End);
+
+
+		// Gizmo Mode
+		EnhancedInputComponent->BindAction(IA_Gizmo_SelectMode, ETriggerEvent::Started, this, &AJSH_Player::G_SelecteMode);
+		EnhancedInputComponent->BindAction(IA_Gizmo_TranslateMode, ETriggerEvent::Started, this, &AJSH_Player::G_TranslateMode);
+		EnhancedInputComponent->BindAction(IA_Gizmo_ScaleMode, ETriggerEvent::Started, this, &AJSH_Player::G_SclaeMode);
+		EnhancedInputComponent->BindAction(IA_Gizmo_RotateMode, ETriggerEvent::Started, this, &AJSH_Player::G_RotateMode);
 	}
 	else
 	{
@@ -388,8 +394,6 @@ void AJSH_Player::NetMulti_SpectatorMode_Implementation()
 	// 2. BP_Spectator를 FollowCamera 위치에 스폰하기
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	
-	AGameModeBase* tt = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
 	
 	
 	// 3. 블루프린트 클래스 로드 -> Possess 바꿔주기 + Visible 끄기
@@ -713,6 +717,8 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 	
 	if (GetCharacterMovement()->IsFlying())
 	{
+		if (!DisableEdit_b) return;
+
 		// 입력 값에서 Up/Down 액션 값 추출
 		Fly_Zvalue = Value.Get<float>();
 		UE_LOG(LogTemp, Warning, TEXT("처음: %f"), Fly_Zvalue)
@@ -820,6 +826,20 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		// FlyMode를 제어하는 bool 값 (Editor Mode 일때 항상 날아다니 도록)
 		EditorMode_B = true;
 
+		// 기즈모 모드 임시
+		if (!FirstGizmode)
+		{
+			Gizmo_TranslateMode = true;
+			Gizmo_ScaleMode = false;
+			Gizmo_RotateMode = false;
+
+			FirstGizmode = true;
+		}
+		else
+		{
+			
+		}
+
 
 		// @@@캐릭터 없어짐 @@@@@
 		// // 3인칭 -> 1인칭 변환
@@ -918,15 +938,19 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 
 void AJSH_Player::EnableEdit()
 {
+	// Editor 모드에서 마우스를 누른 상태로 , Editor 모드를 껏을때 , 꺼지고 나서 마우스를 떼면 EnableEdit가 On되는 문제가 있어
+	// 이렇게 막아줌
+	if (!EditorMode_B) return;
+	
 	DisableEdit_b = false;
 	
 	// 마우스 우클릭을 안 하고 있으면 , ZoomMode를 Flase로
 	Bool_ZoomMode = false;
 	UE_LOG(LogTemp, Error, TEXT("false"));
 	
-	// Editor 모드에서 마우스를 누른 상태로 , Editor 모드를 껏을때 , 꺼지고 나서 마우스를 떼면 EnableEdit가 On되는 문제가 있어
-	// 이렇게 막아줌
-	if (!EditorMode_B) return;
+	// // Editor 모드에서 마우스를 누른 상태로 , Editor 모드를 껏을때 , 꺼지고 나서 마우스를 떼면 EnableEdit가 On되는 문제가 있어
+	// // 이렇게 막아줌
+	// if (!EditorMode_B) return;
 
 
 	
@@ -1051,22 +1075,50 @@ void AJSH_Player::Gizmo_Click_End()
 }
 
 
+void AJSH_Player::G_SelecteMode()
+{
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+	UE_LOG(LogTemp, Warning, TEXT("g select"));
+	Editor_SpawnActor = nullptr;
+}
 
-// ////////// 각자 Gimo에서 BeginPlay 떄에 함수 호출해서 Player에 자신의 정보 저장 ///////////////////
-// void AJSH_Player::Save_Gizmo_TX(AJSH_Translate_GizmoX* Gizmo_TX)
-// {
-// 	Saved_Gizmo_TX = Gizmo_TX;
-// }
-//
-// void AJSH_Player::Save_Gizmo_TY(AJSH_Translate_GizmoY* Gizmo_TY)
-// {
-// 	Saved_Gizmo_TY = Gizmo_TY;
-// }
+void AJSH_Player::G_TranslateMode()
+{
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+	UE_LOG(LogTemp, Warning, TEXT("g translate"));
+	Gizmo_TranslateMode = true;
+	Gizmo_RotateMode = false;
+	Gizmo_ScaleMode = false;
+}
 
+
+void AJSH_Player::G_RotateMode()
+{
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+	UE_LOG(LogTemp, Warning, TEXT("g  rotate"));
+	Gizmo_TranslateMode = false;
+	Gizmo_RotateMode = true;
+	Gizmo_ScaleMode = false;
+	
+}
+
+void AJSH_Player::G_SclaeMode()
+{
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+	UE_LOG(LogTemp, Warning, TEXT("g scale"));
+	Gizmo_TranslateMode = false;
+	Gizmo_RotateMode = false;
+	Gizmo_ScaleMode = true;
+}
 #pragma endregion
 
 
 #pragma region Camera Control
+
 
 
 
