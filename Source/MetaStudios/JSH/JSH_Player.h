@@ -40,8 +40,22 @@ class AJSH_Player : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* FallGuys_Camera;
 	
-	
 
+	// 캐릭터 -> 카메라로 기획 바뀐거
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Root_Camera01;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Camera02;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Camera03;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Camera04;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Camera05;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Camera06;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Camera07;
 
 	// Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -115,6 +129,10 @@ class AJSH_Player : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Del;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Gizmo_Click;
 public:
 	AJSH_Player();
 	
@@ -283,7 +301,70 @@ public:
 	UPROPERTY(Replicated)
 	bool ClickedEditorActor = false;
 
+	// EditorActor를 클릭하면 그곳에서 자기 정보를 SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor) 여기로 전달 후 저장
+	UFUNCTION()
+	void SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
+
+	UPROPERTY()
+	class AJSH_Editor_SpawnActor* Editor_SpawnActor;
+
 #pragma endregion
+
+
+#pragma region Editor_Gizmo
+
+	// Dell 버튼 누르면 Actor 삭제
+	UFUNCTION()
+	void EditorAcotorDestroy();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_EditorAcotorDestroy();
+	UPROPERTY(Replicated)
+	bool Bool_EditorActorDestroy = false;
+
+
+
+	UFUNCTION()
+	void Gizmo_Click();
+
+	UFUNCTION()
+	void Gizmo_Click_End();
+	
+	FVector2D MousePosition;
+	FVector Mouse_WorldLocation;
+	FVector Mouse_WorldDirection;
+
+
+	float Start_Mouse_WorldLocation;
+	float End_Mouse_WorldLocation;
+	float gizmogo;
+	
+	bool firstclick = false;
+
+
+	FVector StartActor_Location;
+
+	
+	FVector StartMouselocation;
+	FVector End_Location;
+
+	FVector StartGizmoLocation;
+	// FVector Start_Mouse_WorldLocation;
+	// FVector End_Mouse_WorldLocation;
+	
+
+	
+	FVector Startlocation;
+
+	bool Clicked = true;
+
+
+	FVector2D Start2d;
+	FVector2D end2d;
+	
+#pragma endregion
+
 
 
 #pragma region MainPlatform

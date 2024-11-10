@@ -24,6 +24,8 @@ FReply UJSH_Editor_W01::NativeOnMouseButtonDown(const FGeometry& InGeometry, con
 		LastMousePosition = InMouseEvent.GetScreenSpacePosition();
 		bIsDragging = false;
 
+		UE_LOG(LogTemp, Error, TEXT("WWWClick"));
+
 		// 드래그 감지 시작
 		FReply Reply = FReply::Handled();
 		Reply.DetectDrag(TakeWidget(), EKeys::LeftMouseButton);
@@ -40,7 +42,7 @@ void UJSH_Editor_W01::NativeOnDragDetected(const FGeometry& InGeometry, const FP
 
 	PlayerMainUI = CreateWidget<UUserWidget>(GetWorld()->GetFirstPlayerController(), UI_Editor_WBP01);
 	
-	
+	UE_LOG(LogTemp, Error, TEXT("WWW222Click"));
 	if (PlayerMainUI)
 	{
 		// Drag Drop Operation 생성
@@ -58,6 +60,7 @@ void UJSH_Editor_W01::NativeOnDragDetected(const FGeometry& InGeometry, const FP
 		}
 	}
 }
+
 
 // void UJSH_Editor_W01::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 // {

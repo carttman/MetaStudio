@@ -97,7 +97,6 @@ void ACarPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACarPawn, MoveStop);
-
 }
 
 bool ACarPawn::CanPlayerEnterCar(AMetaStudiosCharacter* targetCharacter)

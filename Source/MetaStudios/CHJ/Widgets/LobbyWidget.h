@@ -54,7 +54,7 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	class UButton* FS_Button_FindSessions;
 
-	UPROPERTY(meta=(BindWidget))
+	UPROPERTY(meta=(BindWidget), BlueprintReadWrite)
 	class UButton* FS_Button_GoMenu;
 
 	UPROPERTY(EditDefaultsOnly)

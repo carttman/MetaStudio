@@ -18,6 +18,7 @@
 #include "GameFramework/Controller.h"
 #include "JYS/SpaceshipPawn.h"
 #include "JYS/CarPawn.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -70,7 +71,8 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	FPSCamera->SetupAttachment(FPSCameraSpringArm);
 	FPSCamera->bUsePawnControlRotation = false;
 
-
+	BoosterFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent"));
+	BoosterFXComponent->SetupAttachment(GetMesh());
 
 
 }
@@ -97,7 +99,7 @@ void AMetaStudiosCharacter::BeginPlay()
 	spaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory ));
 	carActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
 
-	
+	ActivateBooster(false);
 
 }
 
@@ -167,8 +169,6 @@ void AMetaStudiosCharacter::ResetEnhancedInputSetting(APlayerController* PlayerC
 			UE_LOG(LogTemp, Error, TEXT("Player SetupPlayerInputComponent111111111111111111111111111111111111111111"));
 		}
 
-
-
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetWorld()->GetFirstPlayerController()->GetLocalPlayer()))
 		{
 			if (IsLocallyControlled())
@@ -219,7 +219,7 @@ void AMetaStudiosCharacter::NetMulticast_ManageBooster_Implementation(float Delt
 
 		FVector HoverForce = FVector(GetVelocity().X, GetVelocity().Y, BoostStrength * DeltaTime);
 		LaunchCharacter(HoverForce, true, true);
-
+		ActivateBooster(MoveStop);
 	}
 	// 만약 부스터
 	if (!bIsBoosting && !GetCharacterMovement()->IsFalling())
@@ -232,6 +232,7 @@ void AMetaStudiosCharacter::NetMulticast_ManageBooster_Implementation(float Delt
 			// 현재 부스터를 최대 부스터로 초기화
 			BoosterAmount = MaxBoosterAmount;
 		}
+		ActivateBooster(!MoveStop);
 	}
 
 	// GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("Booster Amount: %.1f"), BoosterAmount));
@@ -240,12 +241,13 @@ void AMetaStudiosCharacter::NetMulticast_ManageBooster_Implementation(float Delt
 
 void AMetaStudiosCharacter::ToggleBoosting()
 {
-	Server_ToggleBoosting();
+	Server_ToggleBoosting(true);
 }
 
-void AMetaStudiosCharacter::Server_ToggleBoosting_Implementation()
+void AMetaStudiosCharacter::Server_ToggleBoosting_Implementation(bool bMove)
 {
 	NetMulticast_ToggleBoosting();
+	MoveStop = bMove;
 }
 
 void AMetaStudiosCharacter::NetMulticast_ToggleBoosting_Implementation()
@@ -292,6 +294,23 @@ void AMetaStudiosCharacter::GravityScaleOn()
 	GetCharacterMovement()->GravityScale = GravityScaleNormal;
 }
 
+void AMetaStudiosCharacter::ActivateBooster(bool bActive)
+{
+	if (activeBooster == bActive)	return;
+	activeBooster = bActive;
+
+	if (BoosterFXComponent)
+	{
+		if (bActive)
+		{
+			BoosterFXComponent->Activate();
+		}
+		else
+		{
+			BoosterFXComponent->Deactivate();
+		}
+	}
+}
 /////////////////////Booster/////////////////////////////////////////////////////
 
 
@@ -443,6 +462,7 @@ void AMetaStudiosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(AMetaStudiosCharacter, IsTPSMode);
 
 }
+
 
 
 void AMetaStudiosCharacter::Move(const FInputActionValue& Value)

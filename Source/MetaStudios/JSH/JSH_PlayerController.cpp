@@ -3,6 +3,8 @@
 
 #include "JSH_PlayerController.h"
 
+#include "JSH_Editor_SpawnActor.h"
+#include "LocalizationDescriptor.h"
 
 
 void AJSH_PlayerController::SaveOriginCharacter()
@@ -10,11 +12,14 @@ void AJSH_PlayerController::SaveOriginCharacter()
 	if (HasAuthority())
 	{
 		NetMulti_SaveOriginCharacter();
+		UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller222"));
 	}
 }
+
 void AJSH_PlayerController::NetMulti_SaveOriginCharacter_Implementation()
 {
 	OriginPlayer = Cast<AJSH_Player>(GetPawn());
+	UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller3333: %s"), *OriginPlayer->GetName());
 }
 
 
@@ -24,6 +29,47 @@ void AJSH_PlayerController::PlayerViewOnOff()
 	// UE_LOG(LogTemp, Error, TEXT("ccccccc"));
 	// OriginPlayer->Visible_On_OFF();
 }
+
+
+
+#pragma region Editor Actor
+
+// EditorActor를 클릭하면 그곳에서 자기 정보를 SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor) 여기로 전달 후 저장
+void AJSH_PlayerController::SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor)
+{
+	if (HasAuthority())
+	{
+		NetMulti_SaveEditorActor_Implementation(ClickedActor);
+	}
+}
+
+
+
+void AJSH_PlayerController::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor* ClickedActor)
+{
+	Editor_SpawnActor = ClickedActor;
+	
+	FString tempname = 	ClickedActor->GetName();
+
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *tempname);
+}
+
+
+void AJSH_PlayerController::Destroy_EditorActor()
+{
+	NetMulti_Destroy_SaveEditorActor();
+}
+
+void AJSH_PlayerController::NetMulti_Destroy_SaveEditorActor_Implementation()
+{
+	Editor_SpawnActor->Destroy();
+	
+	OriginPlayer->Bool_EditorActorDestroy = false;
+}
+
+
+#pragma endregion
+
 
 
 #pragma region RecordSystem
@@ -170,6 +216,7 @@ void AJSH_PlayerController::ConvertMKVToMP4()
 
 
 
+
 //
 // void AJSH_PlayerController::ConvertMKVToMP4()
 // {
@@ -226,3 +273,5 @@ void AJSH_PlayerController::ConvertMKVToMP4()
 // }
 
 #pragma endregion
+
+
