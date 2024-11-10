@@ -30,7 +30,6 @@ public:
 
 
 	UFUNCTION()
-	void OnMeshClicked(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 
 	UPROPERTY()
@@ -54,4 +53,12 @@ public:
 	
 	UFUNCTION()
 	void DestroyThis();
+
+
+	// Gizmo 중복 선택 막기
+	bool GizmoX_ON = false;
+	bool GizmoY_ON = false;
+	bool GizmoZ_ON = false;
+	bool GizmoB_ON = false;
+	
 };

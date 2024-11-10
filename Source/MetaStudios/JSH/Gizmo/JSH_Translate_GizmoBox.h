@@ -4,33 +4,30 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "JSH_Translate_GizmoZ.generated.h"
+#include "JSH_Translate_GizmoBox.generated.h"
 
 
 class AJSH_PlayerController;
 class AJSH_Player;
 class AJSH_Translate_GizmoX;
 class AJSH_Translate_GizmoY;
-
+class AJSH_Translate_GizmoZ;
 
 UCLASS()
-class METASTUDIOS_API AJSH_Translate_GizmoZ : public AActor
+class METASTUDIOS_API AJSH_Translate_GizmoBox : public AActor
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Origin;
 	UPROPERTY()
 	UMaterial* YellowMaterial;
 	UPROPERTY()
-	UMaterial* BlueMaterial;
-	
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
-	// UStaticMeshComponent* Selected;
+	UMaterial* WhiteMaterial;
 	
 public:	
 	// Sets default values for this actor's properties
-	AJSH_Translate_GizmoZ();
+	AJSH_Translate_GizmoBox();
 
 protected:
 	// Called when the game starts or when spawned
@@ -39,11 +36,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
-	
-public:
+
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
-	// virtual void NotifyActorOnReleased(FKey ButtonReleased);
 	
 	UPROPERTY()
 	AJSH_Player* OriginPlayer;
