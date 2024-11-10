@@ -139,7 +139,10 @@ AJSH_Player::AJSH_Player()
 
 	Root_Camera01 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Root_Camera01"));
 	Root_Camera01->SetupAttachment(RootComponent);
-
+	Root_Camera01->SetRelativeLocation(FVector(70.f, -74.f, -265.f));
+	Root_Camera01->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	Root_Camera01->SetRelativeScale3D(FVector(1.5f, 1.5f, 1.5f));
+	
 	Camera02 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera02"));
 	Camera02->SetupAttachment(Root_Camera01);
 
@@ -1056,10 +1059,6 @@ void AJSH_Player::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor
 
 
 
-
-
-
-
 // Gizmo 정보 저장
 void AJSH_Player::Save_Gizmo_TX(AActor* Gizmo_TX)
 {
@@ -1072,6 +1071,11 @@ void AJSH_Player::Save_Gizmo_TY(AActor* Gizmo_TY)
 void AJSH_Player::Save_Gizmo_TZ(AActor* Gizmo_TZ)
 {
 	Saved_Gizmo_TZ = Cast<AJSH_Translate_GizmoZ>(Gizmo_TZ);
+}
+
+void AJSH_Player::Save_Gizmo_TB(AActor* Gizmo_TB)
+{
+	Saved_Gizmo_TB = Cast<AJSH_Translate_GizmoBox>(Gizmo_TB);
 }
 
 
@@ -1094,6 +1098,13 @@ void AJSH_Player::G_SelecteMode()
 	if (DisableEdit_b) return;
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
 	Editor_SpawnActor = nullptr;
+
+
+	Saved_Gizmo_TX->Visible_and_Collision_Off();
+	Saved_Gizmo_TY->Visible_and_Collision_Off();
+	Saved_Gizmo_TZ->Visible_and_Collision_Off();
+	Saved_Gizmo_TB->Visible_and_Collision_Off();
+	
 }
 
 void AJSH_Player::G_TranslateMode()
@@ -1104,6 +1115,11 @@ void AJSH_Player::G_TranslateMode()
 	Gizmo_TranslateMode = true;
 	Gizmo_RotateMode = false;
 	Gizmo_ScaleMode = false;
+
+	Saved_Gizmo_TX->Visible_and_Collision_On();
+	Saved_Gizmo_TY->Visible_and_Collision_On();
+	Saved_Gizmo_TZ->Visible_and_Collision_On();
+	Saved_Gizmo_TB->Visible_and_Collision_On();
 }
 
 
@@ -1115,7 +1131,11 @@ void AJSH_Player::G_RotateMode()
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = true;
 	Gizmo_ScaleMode = false;
-	
+
+	Saved_Gizmo_TX->Visible_and_Collision_Off();
+	Saved_Gizmo_TY->Visible_and_Collision_Off();
+	Saved_Gizmo_TZ->Visible_and_Collision_Off();
+	Saved_Gizmo_TB->Visible_and_Collision_Off();
 }
 
 void AJSH_Player::G_SclaeMode()
@@ -1126,6 +1146,10 @@ void AJSH_Player::G_SclaeMode()
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = false;
 	Gizmo_ScaleMode = true;
+
+	Saved_Gizmo_TX->Visible_and_Collision_Off();
+	Saved_Gizmo_TY->Visible_and_Collision_Off();
+	Saved_Gizmo_TZ->Visible_and_Collision_Off();
 }
 #pragma endregion
 

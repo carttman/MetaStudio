@@ -44,7 +44,10 @@ public:
 public:
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 	// virtual void NotifyActorOnReleased(FKey ButtonReleased);
-
+	
+	UPROPERTY()
+	AJSH_Player* OriginPlayer;
+	
 	UPROPERTY()
 	FVector2D MousePosition;
 	UPROPERTY()
@@ -94,13 +97,11 @@ public:
 	// int32 ConsecutiveHitCount = 0;
 	// int32 ConsecutiveMissCount = 0;
 
+	// 색상 관련
 	UFUNCTION()
 	void OriginColor();
 	UFUNCTION()
 	void SelectedColor();
-	
-	UPROPERTY()
-	AJSH_Player* OriginPlayer;
 
 	// 초기화 함수
 	UFUNCTION()
@@ -109,12 +110,19 @@ public:
 	// Cursor에 오버랩 되었을때 True로 바뀌는 bool값임 , 커서에 마우스 올라가 있을때에만 클릭해도 실행되도록 (왜 넣었는지 기억 안남, 없어도 될듯 싶음)
 	bool CursorOveringGizmo = false;
 
-	UFUNCTION()
-	void FindAndStoreGizmoActors(UWorld* WorldContext);
-	//TArray<class AJSH_Translate_GizmoY*> FoundGizmoActors;
-	UPROPERTY()
-	AJSH_Translate_GizmoX* Gizmo_X;
-	UPROPERTY()
-	AJSH_Translate_GizmoY* Gizmo_Y;
+	// UFUNCTION()
+	// void FindAndStoreGizmoActors(UWorld* WorldContext);
+	// //TArray<class AJSH_Translate_GizmoY*> FoundGizmoActors;
+	// UPROPERTY()
+	// AJSH_Translate_GizmoX* Gizmo_X;
+	// UPROPERTY()
+	// AJSH_Translate_GizmoY* Gizmo_Y;
+
+
 	
+	// Player쪽에서 Gizmo Mode 바꿀때 조정해줌 
+	UFUNCTION()
+	void Visible_and_Collision_On();
+	UFUNCTION()
+	void Visible_and_Collision_Off();
 };

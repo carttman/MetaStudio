@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Gizmo/JSH_Translate_GizmoBox.h"
 #include "Gizmo/JSH_Translate_GizmoZ.h"
 #include "Logging/LogMacros.h"
 #include "JSH_Player.generated.h"
@@ -365,6 +366,12 @@ public:
 	void Save_Gizmo_TZ(AActor* Gizmo_TZ);
 	UPROPERTY()
 	AJSH_Translate_GizmoZ* Saved_Gizmo_TZ;
+	UFUNCTION()
+	void Save_Gizmo_TB(AActor* Gizmo_TB);
+	UPROPERTY()
+	AJSH_Translate_GizmoBox* Saved_Gizmo_TB;
+
+	
 	
 	// Gizmo Mode
 	bool FirstGizmode = false;

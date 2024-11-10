@@ -7,6 +7,9 @@
 #include "Engine/World.h"
 #include "Components/PrimitiveComponent.h"
 #include "DrawDebugHelpers.h"
+#include "JSH_Translate_GizmoY.h"
+#include "JSH_Translate_GizmoZ.h"
+#include "JSH_Translate_GizmoBox.h"
 #include "Engine/EngineTypes.h" 
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
@@ -47,6 +50,7 @@ AJSH_Translate_GizmoX::AJSH_Translate_GizmoX()
 	}
 }
 
+
 // Called when the game starts or when spawned
 void AJSH_Translate_GizmoX::BeginPlay()
 {
@@ -60,29 +64,12 @@ void AJSH_Translate_GizmoX::BeginPlay()
 		OriginPlayer->Save_Gizmo_TX(this);
 	}
 }
-	
 
 // Called every frame
 void AJSH_Translate_GizmoX::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!OriginPlayer->Gizmo_TranslateMode)
-	{
-		if (Origin->GetCollisionProfileName() != TEXT("NoCollision"))
-		{
-			Origin->SetVisibility(false);
-			Origin->SetCollisionProfileName(TEXT("NoCollision"));
-		}
-	}
-	else
-	{
-		if (Origin->GetCollisionProfileName() != TEXT("BlockAllDynamic"))
-		{
-			Origin->SetVisibility(true);
-			Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
-		}
-	}
 	
 	// Editor Mode 마우스 우클릭 시 초기화
 	if (OriginPlayer->DisableEdit_b)
@@ -90,119 +77,113 @@ void AJSH_Translate_GizmoX::Tick(float DeltaTime)
 		HandleMouseReleaseOutsideActor();
 	}
 
-	
+	// Gizmo 클릭 시 Tick으로 NotifyActorOnClicked() 돌리기 위한 (Actor에는 Trigger처럼 못함)
 	if (Clicked)
 	{
 		NotifyActorOnClicked();
-		
+
+		// 마우스 왼쪽 클릭을 놓았을 떄에
 		if (JPlayerController->WasInputKeyJustReleased(EKeys::LeftMouseButton)) 
 		{
 			HandleMouseReleaseOutsideActor();
 		}
 	}
-	
 }
+
+
+
 
 
 void AJSH_Translate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
 {
+	Super::NotifyActorOnClicked(ButtonPressed);
+
+	// Cursor에 오버랩 되었을때 True로 바뀌는 bool값임 , 커서에 마우스 올라가 있을때에만 클릭해도 실행되도록 (왜 넣었는지 기억 안남, 없어도 될듯 싶음)
 	if (!CursorOveringGizmo) return;
 	
-	Super::NotifyActorOnClicked(ButtonPressed);
-	
-
-	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
-	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
+	//// 다른 기즈모가 실행 중 이면 , 기능 실행되지 않도록 ////
+	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON || OriginPlayer->Editor_SpawnActor->GizmoY_ON || OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
 	if (!OriginPlayer->Editor_SpawnActor->GizmoX_ON)
 	{
 		OriginPlayer->Editor_SpawnActor->GizmoX_ON = true;
 	}
+
+	// 중복을 막기 위해 사전에 생성자에서 NoCollision 해줬던거를 변경
+	//Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	
-	UE_LOG(LogTemp, Error, TEXT("X1"));
+	UE_LOG(LogTemp, Error, TEXT("x1"));
+
+	//// Gizmo와 Player간의 거리 구하기 (bHit되지 않았을때 최대 거리 point로 hitpoint 잡아야함) ////
 	if (OriginPlayer != nullptr)
 	{
-		// 두 개체의 현재 위치
 		FVector GizmoLocation = GetActorLocation();
 		FVector PlayerLocation = OriginPlayer->GetActorLocation();
-
-		// 두 개체 사이의 거리 계산
-		Lay_Distance = FVector::Dist(GizmoLocation, PlayerLocation);
-		if (Lay_Distance >= 4000.0f)
-		{
-			Lay_Distance = 4000.0f;
-		}
-	}
-
 	
-	// 마우스 2D -> 3D Vector 변환
+		Lay_Distance = FVector::Dist(GizmoLocation, PlayerLocation);
+		// 거리를 너무 늘리면, 꾹 누르고 있을때 , 너무 멀리 나아가 버림
+		Lay_Distance = FMath::Clamp(Lay_Distance, 0.0f, 4000.0f); 
+	}
+	
+	//// 마우스 2d Vector -> 3d Vector ////
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
 	{
 		JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
 	}
-	
+
+	///// Ray ////
 	Start = Mouse_WorldLocation;
-	End =  (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
-	
-	// FHitResult HitResult;
-	// FCollisionQueryParams Params;
-	//Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
-	// AActor* dd = Cast<AActor>(OriginPlayer->Saved_Gizmo_TX);
-	// Params.AddIgnoredActor(dd);
+	End = (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
+
+
+	TArray<AActor*> IgnoreGizmos;
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TY);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
+	Params.AddIgnoredActors(IgnoreGizmos);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
-	if (bHit)
-	{
-		// 다른 축과 겹쳐졌을때 else랑 같이 들어오는 오류가 있씀 
-		//if (HitResult.GetActor() != this) return;
+
 	
-		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
-		UE_LOG(LogTemp, Error, TEXT("X2"));
-		if (!firstclick && !Clicked)
+	
+	///// 처음 클릭했을때 값 저장하기 위한 함수 ////
+	if (bHit && !firstclick && !Clicked)
+	{
+		Clicked = true;
+		firstclick = true;
+		
+		UE_LOG(LogTemp, Error, TEXT("x First"));
+		
+		// Store initial mouse and gizmo positions
+		StartMouselocation = HitResult.ImpactPoint;
+		StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
+		StartActor_Location = StartMouselocation - StartGizmoLocation;
+		SelectedGizmo = true;
+	}
+
+	
+	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
+	if (Clicked)
+	{
+		// bHit 되었을 떄엔 Impact Point를 통해서 위치 이동
+		if (bHit)
 		{
-			Clicked = true;
-			firstclick = true;
-			
-			UE_LOG(LogTemp, Error, TEXT("X3"));
-			
-			// 처음 마우스 위치 저장
-			// Start_Mouse_WorldLocation = HitResult.Location.Y;
-			
-			StartMouselocation = HitResult.ImpactPoint;
-			StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
-			StartActor_Location = StartMouselocation - StartGizmoLocation;
-			//float GapY = StartMouselocation.Y - StartGizmoLocation.Y;
-			//UE_LOG(LogTemp, Error, TEXT("point %s"), *HitResult.ImpactPoint.ToString());
-			//UE_LOG(LogTemp, Error, TEXT("gizmo %s"), *StartGizmoLocation.ToString());
-			SelectedGizmo = true;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("X4"));
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
+			UE_LOG(LogTemp, Error, TEXT("x 2"));
 			End_Location = HitResult.ImpactPoint;
 			NewLocation = FVector(End_Location.X - StartActor_Location.X, StartGizmoLocation.Y, StartGizmoLocation.Z);
 			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
-
+		}
+		// bHit 되지 않았을 떄엔 Ray 끝점을 통해서 위치 이동 (위에서 구한 Player와 Gizmo 사이의 거리)
+		else
+		{
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
+			UE_LOG(LogTemp, Error, TEXT("x 3"));
+			End_Location = End;
+			NewLocation = FVector(End_Location.X - StartActor_Location.X, StartGizmoLocation.Y, StartGizmoLocation.Z);
+			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("X5"));
-		End_Location = End;
-		NewLocation = FVector(End_Location.X - StartActor_Location.X, StartGizmoLocation.Y, StartGizmoLocation.Z);
-		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
-	}
 }
-
-
-
-// void AJSH_Translate_GizmoX::NotifyActorOnReleased(FKey ButtonReleased)
-// {
-// 	Super::NotifyActorOnReleased(ButtonReleased);
-//
-// 	// Clicked = false;
-// 	// SelectedGizmo = false;
-// 	OriginColor();
-// }
 
 
 // 오버랩 색상 변경
@@ -210,8 +191,10 @@ void AJSH_Translate_GizmoX::NotifyActorBeginCursorOver()
 {
 	Super::NotifyActorBeginCursorOver();
 
+
 	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON) return;
-	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
+	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
+	if (OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
 	
 	SelectedColor();
 	CursorOveringGizmo = true;
@@ -231,14 +214,13 @@ void AJSH_Translate_GizmoX::NotifyActorEndCursorOver()
 
 void AJSH_Translate_GizmoX::OriginColor()
 {
+	// Gizmo가 클릭된 상태라면 , 마우스가 Gizmo 위에 있지 않아도 계속해서 노란색 유지하기 위해
 	if (SelectedGizmo) return;
 	
 	if (RedMaterial)
 	{
 		Origin->SetMaterial(0, RedMaterial);
 	}
-	// Selected->SetVisibility(false);
-	// Origin->SetVisibility(true);
 }
 
 void AJSH_Translate_GizmoX::SelectedColor()
@@ -247,8 +229,6 @@ void AJSH_Translate_GizmoX::SelectedColor()
 	{
 		Origin->SetMaterial(0, YellowMaterial);
 	}
-	// Selected->SetVisibility(true);
-	// Origin->SetVisibility(false);
 }
 
 
@@ -260,4 +240,20 @@ void AJSH_Translate_GizmoX::HandleMouseReleaseOutsideActor()
 	CursorOveringGizmo = false;
 	OriginPlayer->Editor_SpawnActor->GizmoX_ON = false;
 	OriginColor();
+
+	// Else문 반복 실행을 막기 위해
+	// Origin->SetCollisionProfileName(TEXT("NoCollision"));
+}
+
+
+//// Player쪽에서 Gizmo Mode 바꿀때 조정해줌  ////
+void AJSH_Translate_GizmoX::Visible_and_Collision_On()
+{
+	Origin->SetVisibility(true);
+	Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+}
+void AJSH_Translate_GizmoX::Visible_and_Collision_Off()
+{
+	Origin->SetVisibility(false);
+	Origin->SetCollisionProfileName(TEXT("NoCollision"));
 }
