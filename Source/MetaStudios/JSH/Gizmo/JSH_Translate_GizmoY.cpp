@@ -61,10 +61,10 @@ void AJSH_Translate_GizmoY::BeginPlay()
 	}
 
 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-	// if (OriginPlayer)
-	// {
-	// 	OriginPlayer->Save_Gizmo_TY(this);
-	// }
+	if (OriginPlayer)
+	{
+		OriginPlayer->Save_Gizmo_TY(this);
+	}
 	
 }
 

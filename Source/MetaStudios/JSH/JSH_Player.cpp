@@ -29,6 +29,9 @@
 #include "Engine/Engine.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpectatorPawnMovement.h"
+#include "Gizmo/JSH_Translate_GizmoX.h"
+#include "Gizmo/JSH_Translate_GizmoY.h"
+#include "Gizmo/JSH_Translate_GizmoZ.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
 #include "MetaStudios/CHJ/Component/FirebaseComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -305,9 +308,9 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_Del, ETriggerEvent::Started, this, &AJSH_Player::EditorAcotorDestroy);
 
 
-		// Gizmo Click
-		EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Triggered, this, &AJSH_Player::Gizmo_Click);
-		EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Completed, this, &AJSH_Player::Gizmo_Click_End);
+		// // Gizmo Click
+		// EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Triggered, this, &AJSH_Player::Gizmo_Click);
+		// EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Completed, this, &AJSH_Player::Gizmo_Click_End);
 
 
 		// Gizmo Mode
@@ -1052,6 +1055,26 @@ void AJSH_Player::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor
 #pragma region Editor_Gizmo
 
 
+
+
+
+
+
+// Gizmo 정보 저장
+void AJSH_Player::Save_Gizmo_TX(AActor* Gizmo_TX)
+{
+	Saved_Gizmo_TX = Cast<AJSH_Translate_GizmoX>(Gizmo_TX);
+}
+void AJSH_Player::Save_Gizmo_TY(AActor* Gizmo_TY)
+{
+	Saved_Gizmo_TY = Cast<AJSH_Translate_GizmoY>(Gizmo_TY);
+}
+void AJSH_Player::Save_Gizmo_TZ(AActor* Gizmo_TZ)
+{
+	Saved_Gizmo_TZ = Cast<AJSH_Translate_GizmoZ>(Gizmo_TZ);
+}
+
+
 void AJSH_Player::EditorAcotorDestroy()
 {
 	NetMulti_EditorAcotorDestroy();
@@ -1062,16 +1085,6 @@ void AJSH_Player::NetMulti_EditorAcotorDestroy_Implementation()
 	{
 		Editor_SpawnActor->DestroyThis();
 	}
-}
-
-
-void AJSH_Player::Gizmo_Click()
-{
-}
-
-void AJSH_Player::Gizmo_Click_End()
-{
-	Clicked = false;
 }
 
 

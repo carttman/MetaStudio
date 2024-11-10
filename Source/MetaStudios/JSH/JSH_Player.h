@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Gizmo/JSH_Translate_GizmoZ.h"
 #include "Logging/LogMacros.h"
 #include "JSH_Player.generated.h"
 
@@ -339,48 +340,11 @@ public:
 
 
 
-	UFUNCTION()
-	void Gizmo_Click();
-
-	UFUNCTION()
-	void Gizmo_Click_End();
-	
-	FVector2D MousePosition;
-	FVector Mouse_WorldLocation;
-	FVector Mouse_WorldDirection;
 
 
-	float Start_Mouse_WorldLocation;
-	float End_Mouse_WorldLocation;
-	float gizmogo;
-	
-	bool firstclick = false;
-
-
-	FVector StartActor_Location;
-
-	
-	FVector StartMouselocation;
-	FVector End_Location;
-
-	FVector StartGizmoLocation;
-	// FVector Start_Mouse_WorldLocation;
-	// FVector End_Mouse_WorldLocation;
-	
-
-	
-	FVector Startlocation;
-
-	bool Clicked = true;
-
-
-	FVector2D Start2d;
-	FVector2D end2d;
-
-
-	// // 각자 Gimo에서 BeginPlay 떄에 함수 호출해서 Player에 자신의 정보 저장
+	// 각자 Gimo에서 BeginPlay 떄에 함수 호출해서 Player에 자신의 정보 저장
 	// UFUNCTION()
-	// void Save_Gizmo_TX(AJSH_Translate_GizmoX* Gizmo_TX);
+	// void Save_Gizmo_TX(AActor* Gizmo_TX);
 	// UPROPERTY()
 	// AJSH_Translate_GizmoX* Saved_Gizmo_TX;
 	//
@@ -388,7 +352,19 @@ public:
 	// void Save_Gizmo_TY(AJSH_Translate_GizmoY* Gizmo_TY);
 	// UPROPERTY()
 	// AJSH_Translate_GizmoY* Saved_Gizmo_TY;
-
+	
+	UFUNCTION()
+	void Save_Gizmo_TX(AActor* Gizmo_TX);
+	UPROPERTY()
+	AJSH_Translate_GizmoX* Saved_Gizmo_TX;
+	UFUNCTION()
+	void Save_Gizmo_TY(AActor* Gizmo_TY);
+	UPROPERTY()
+	AJSH_Translate_GizmoY* Saved_Gizmo_TY;
+	UFUNCTION()
+	void Save_Gizmo_TZ(AActor* Gizmo_TZ);
+	UPROPERTY()
+	AJSH_Translate_GizmoZ* Saved_Gizmo_TZ;
 	
 	// Gizmo Mode
 	bool FirstGizmode = false;

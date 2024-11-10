@@ -55,6 +55,10 @@ void AJSH_Translate_GizmoX::BeginPlay()
 	
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	if (OriginPlayer)
+	{
+		OriginPlayer->Save_Gizmo_TX(this);
+	}
 }
 	
 

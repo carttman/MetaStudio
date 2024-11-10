@@ -139,7 +139,8 @@ void AJSH_Scale_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 	// FCollisionQueryParams Params;
 	//Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
 	// AActor* dd = Cast<AActor>(OriginPlayer->Saved_Gizmo_TX);
-	// Params.AddIgnoredActor(dd);
+	
+	
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 	if (bHit)
