@@ -59,9 +59,15 @@ public:
 	void OnMyActionMove(const FInputActionValue& value);
 	UFUNCTION(Server, Reliable)
 	void Server_OnMyActionMove(bool bMove);
-	//UFUNCTION(NetMulticast, Reliable)
-	//void NetMulticast_OnMyActionMove(const FInputActionValue& value);
+	void ApplyRoll(float RollInput);
+	void ApplyRollBack();
 
+	UPROPERTY(Replicated)
+	bool MoveStop = true;
+
+	
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
 
 	float carSpeed = 500.0f;
 
@@ -81,8 +87,6 @@ public:
 
 	void ResetEnhancedInputSetting(class APlayerController* pc);
 
-	UFUNCTION(Server, Unreliable)
-	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
 
 	///////////////////¿Ã∆Â∆Æ √ﬂ∞°//////////////
 	UPROPERTY(EditAnywhere, Category = "Effects")
@@ -93,13 +97,9 @@ public:
 	//UPROPERTY(EditAnywhere, Category = "Effects")
 	//class UNiagaraSystem* ThrusterFXSystem;
 
-	void ApplyRoll(float RollInput);
-	void ApplyRollBack();
 
 	void ActivateThruster(bool bActive);
 
-	UPROPERTY(Replicated)
-	bool MoveStop = true;
 
 	bool ActiveThruster = true;
 

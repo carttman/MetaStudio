@@ -191,13 +191,50 @@ void ASpaceshipPawn::ResetEnhancedInputSetting(class APlayerController* pc)
 	}
 }
 
+//////////////////////이동//////////////////////////////
 void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 {
+	//FVector2D v = value.Get<FVector2D>();
+	//direction.X = v.X;
+	//direction.Y = v.Y;
+	//direction.Z = v.Y;
+	//direction.Normalize();
+
 	FVector2D v = value.Get<FVector2D>();
+	if (v.X <= 0.0f && MoveStop == false)
+	{
+		//MoveStop = true;
+		Server_OnMyActionMoveSpaceship(true);
+		return;
+	}
+
+	//MoveStop = false;
 	direction.X = v.X;
-	direction.Y = v.Y;
-	direction.Z = v.Y;
 	direction.Normalize();
+
+	if (direction.X != 0.0f)
+	{
+		ApplyRoll(v.Y);
+	}
+	else
+	{
+		ApplyRollBack();
+	}
+
+	FTransform ttt = FTransform(GetControlRotation());
+	direction = ttt.TransformVector(direction);
+	direction.Z = 0;
+	direction.Normalize();
+	AddMovementInput(direction);
+	direction = FVector::ZeroVector;
+
+	Server_OnMyActionMoveSpaceship(false);
+}
+
+
+void ASpaceshipPawn::Server_OnMyActionMoveSpaceship_Implementation(bool bMove)
+{
+	MoveStop = bMove;
 }
 
 void ASpaceshipPawn::OnMyActionLook(const FInputActionValue& value)
@@ -241,6 +278,47 @@ void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
 
 }
 
+void ASpaceshipPawn::ApplyRoll(float RollInput)
+{
+	FRotator CurrentRotation = GetControlRotation();
+
+	float RollAmount = RollInput * 45.0f;
+	float YawAmount = RollInput * 45.0f;
+
+	CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, RollAmount, GetWorld()->GetDeltaSeconds(), 3.0f);
+
+	float YawCur = CurrentRotation.Yaw;
+
+	// P = P0 + vt
+	CurrentRotation.Yaw = YawCur + 50.0f * RollInput * GetWorld()->DeltaTimeSeconds;
+
+	GetController()->SetControlRotation(CurrentRotation);
+
+}
+
+void ASpaceshipPawn::ApplyRollBack()
+{
+	FRotator CurrentRotation = GetControlRotation();
+
+	float RollAmount = CurrentRotation.Roll;
+	//float YawAmount = CurrentRotation.Yaw;
+
+	if (RollAmount == 0.0f /*&& YawAmount == 0.0f*/)	return;
+
+	//CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, 0.0f, GetWorld()->GetDeltaSeconds(), 2.0f);
+	CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, 0.0f, GetWorld()->GetDeltaSeconds(), 3.0f);
+
+	GetController()->SetControlRotation(CurrentRotation);
+
+}
+
+void ASpaceshipPawn::Server_SpaceshipUpdateTransform_Implementation(FVector newLocation, FRotator newRotation)
+{
+	SetActorLocationAndRotation(newLocation, newRotation);
+}
+
+//////////////////이동//////////////////////////////
+
 void ASpaceshipPawn::StartFlyEffect()
 {
 	FVector start = GetActorLocation();
@@ -273,6 +351,8 @@ void ASpaceshipPawn::StartFlyEffect()
 	}
 
 }
+
+
 
 //void ASpaceshipPawn::ActivateStartFly(bool bActive)
 //{

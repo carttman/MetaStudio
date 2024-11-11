@@ -429,7 +429,7 @@ void AMetaStudiosCharacter::Server_EnterCar_Implementation()
 		else
 		{
 			CarActor->player = this;
-			if (CarActor->CanPlayerEnterCar(this))
+			if (!this && CarActor->CanPlayerEnterCar(this))
 			{
 				GetController()->Possess(CarActor);
 				UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn SpaceshipActor."));

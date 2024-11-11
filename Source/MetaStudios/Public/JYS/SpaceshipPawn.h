@@ -116,6 +116,19 @@ public:
 
 	//bool activeStartFly = true;
 
+	UFUNCTION(Server,Reliable)
+	void Server_OnMyActionMoveSpaceship(bool bMove);
+
+	void ApplyRoll(float RollInput);
+	void ApplyRollBack();
+
+	UPROPERTY(Replicated)
+	bool MoveStop = true;
+
+	
+	UFUNCTION(Server, Unreliable)
+	void Server_SpaceshipUpdateTransform(FVector newLocation, FRotator newRotation);
+
 private:
 	
 	FVector MovementDirection;
@@ -148,10 +161,4 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_CloseDoorMontageSetting();
 
-
-	//UPROPERTY()
-	//bool bIsLanding = false;
-
-	//UPROPERTY()
-	//bool bIsFlying = false;
 };
