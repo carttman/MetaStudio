@@ -59,17 +59,14 @@ public:
 	void OnMyActionMove(const FInputActionValue& value);
 	UFUNCTION(Server, Reliable)
 	void Server_OnMyActionMove(bool bMove);
+
 	void ApplyRoll(float RollInput);
 	void ApplyRollBack();
-
 	UPROPERTY(Replicated)
 	bool MoveStop = true;
 
-	
-	UFUNCTION(Server, Unreliable)
-	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
 
-	float carSpeed = 500.0f;
+	float carSpeed = 2000.0f;
 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -87,6 +84,8 @@ public:
 
 	void ResetEnhancedInputSetting(class APlayerController* pc);
 
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
 
 	///////////////////¿Ã∆Â∆Æ √ﬂ∞°//////////////
 	UPROPERTY(EditAnywhere, Category = "Effects")
@@ -96,7 +95,6 @@ public:
 
 	//UPROPERTY(EditAnywhere, Category = "Effects")
 	//class UNiagaraSystem* ThrusterFXSystem;
-
 
 	void ActivateThruster(bool bActive);
 

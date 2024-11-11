@@ -124,6 +124,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_ChangeCameraMode();
 
+	void SelectAutoMobile();
 	// 플레이어랑 우주선 컨트롤러 바꾸기
 	void EnterSpaceship();
 
@@ -238,6 +239,8 @@ private:
 	float CameraModeTime;
 
 	float CameraBlendTime = 0;
+
+	////////////Animation//////////////////
 
 
 };

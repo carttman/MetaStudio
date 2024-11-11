@@ -92,11 +92,11 @@ void AMetaStudiosCharacter::PossessedBy(AController* NewController)
 
 }
 
-void AMetaStudiosCharacter::BeginPlay() 
+void AMetaStudiosCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	spaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory ));
+	spaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
 	carActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
 
 	ActivateBooster(false);
@@ -149,8 +149,8 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(CameraMode, ETriggerEvent::Started, this, &AMetaStudiosCharacter::ChangeCameraMode);
 
 		//// 우주선에서 앉았다가 일어나기 -> 컨트롤러 바뀌게////////
-		PlayerInputComponent->BindAction("EnterSpaceship", IE_Pressed, this, &AMetaStudiosCharacter::EnterSpaceship);
-		PlayerInputComponent->BindAction("EnterCar", IE_Pressed, this, &AMetaStudiosCharacter::EnterCar);
+		PlayerInputComponent->BindAction("EnterSpaceship", IE_Pressed, this, &AMetaStudiosCharacter::SelectAutoMobile);
+		//PlayerInputComponent->BindAction("EnterCar", IE_Pressed, this, &AMetaStudiosCharacter::EnterCar);
 	}
 	else
 	{
@@ -346,6 +346,23 @@ void AMetaStudiosCharacter::NetMulticast_ChangeCameraMode_Implementation()
 	IsTPSMode = !IsTPSMode;
 }
 
+void AMetaStudiosCharacter::SelectAutoMobile()
+{
+	if (!IsLocallyControlled())	return;
+
+	float spaceshipDist = GetDistanceTo(spaceshipActor);
+	float carDist = GetDistanceTo(carActor);
+
+	if (carDist < spaceshipDist)
+	{
+		Server_EnterCar();
+	}
+	else
+	{
+		Server_EnterSpaceship();
+	}
+}
+
 //////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
 void AMetaStudiosCharacter::EnterSpaceship()
 {
@@ -372,16 +389,16 @@ void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation()
 			SpaceshipActor = GetWorld()->SpawnActor<ASpaceshipPawn>(SpaceshipPawnFactory, SpawnParams);
 			UE_LOG(LogTemp, Error, TEXT("Failed to find or spawn SpaceshipActor."));
 		}
-		else
+
+		if (SpaceshipActor == nullptr)	return;
+
+		if (SpaceshipActor->CanPlayerEnter(this))
 		{
 			SpaceshipActor->player = this;
-			if (SpaceshipActor->CanPlayerEnter(this))
-			{
-				GetController()->Possess(SpaceshipActor);
-				UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn SpaceshipActor."));
-			}
+			GetController()->Possess(SpaceshipActor);
+			UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn SpaceshipActor."));
+			NetMulticast_EnterSpaceship(SpaceshipActor);
 		}
-		NetMulticast_EnterSpaceship(SpaceshipActor);
 	}
 }
 
@@ -406,8 +423,8 @@ void AMetaStudiosCharacter::EnterCar()
 	float spaceshipDist = GetDistanceTo(spaceshipActor);
 	float carDist = GetDistanceTo(carActor);
 
-	if( carDist >= spaceshipDist )
-	return;
+	if (carDist >= spaceshipDist)
+		return;
 
 	if (IsLocallyControlled())
 	{
@@ -426,18 +443,17 @@ void AMetaStudiosCharacter::Server_EnterCar_Implementation()
 			CarActor = GetWorld()->SpawnActor<ACarPawn>(CarPawnFactory, SpawnParams);
 			UE_LOG(LogTemp, Error, TEXT("Failed to find or spawn SpaceshipActor."));
 		}
-		else
+
+		if (CarActor == nullptr)	return;
+
+		if (CarActor->CanPlayerEnterCar(this))
 		{
 			CarActor->player = this;
-			if (!this && CarActor->CanPlayerEnterCar(this))
-			{
-				GetController()->Possess(CarActor);
-				UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn SpaceshipActor."));
-			}
+			GetController()->Possess(CarActor);
+			UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn SpaceshipActor."));
+			NetMulticast_EnterCar(CarActor);
 		}
-		NetMulticast_EnterCar(CarActor);
 	}
-
 }
 
 void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarActor)

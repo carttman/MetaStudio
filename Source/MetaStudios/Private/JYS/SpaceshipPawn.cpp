@@ -161,7 +161,7 @@ void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 		FVector spaceshipLoc = GetActorLocation();
 		FRotator spaceshipRot = GetActorRotation();
 
-		FVector offset = spaceshipRot.RotateVector(FVector(200.0f, 300.0f, 0.0f));
+		FVector offset = spaceshipRot.RotateVector(FVector(500.0f, 500.0f, 0.0f));
 		FVector playerSpawnLocation = spaceshipLoc + offset;
 
 		player->SetActorLocation(playerSpawnLocation);
@@ -191,15 +191,8 @@ void ASpaceshipPawn::ResetEnhancedInputSetting(class APlayerController* pc)
 	}
 }
 
-//////////////////////이동//////////////////////////////
 void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 {
-	//FVector2D v = value.Get<FVector2D>();
-	//direction.X = v.X;
-	//direction.Y = v.Y;
-	//direction.Z = v.Y;
-	//direction.Normalize();
-
 	FVector2D v = value.Get<FVector2D>();
 	if (v.X <= 0.0f && MoveStop == false)
 	{
@@ -228,21 +221,17 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
 
+	//ActivateThruster(true);
 	Server_OnMyActionMoveSpaceship(false);
-}
 
-
-void ASpaceshipPawn::Server_OnMyActionMoveSpaceship_Implementation(bool bMove)
-{
-	MoveStop = bMove;
 }
 
 void ASpaceshipPawn::OnMyActionLook(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();
 
-	AddControllerPitchInput(-v.Y);
-	AddControllerYawInput(v.X);
+	//AddControllerPitchInput(-v.Y);
+	//AddControllerYawInput(v.X);
 }
 
 void ASpaceshipPawn::OnMoveUp(const FInputActionValue& value)
@@ -312,12 +301,17 @@ void ASpaceshipPawn::ApplyRollBack()
 
 }
 
-void ASpaceshipPawn::Server_SpaceshipUpdateTransform_Implementation(FVector newLocation, FRotator newRotation)
+void ASpaceshipPawn::Server_UpdateTransformSpaceship_Implementation(FVector newLocation, FRotator newRotation)
 {
 	SetActorLocationAndRotation(newLocation, newRotation);
+
 }
 
-//////////////////이동//////////////////////////////
+void ASpaceshipPawn::Server_OnMyActionMoveSpaceship_Implementation(bool bMove)
+{
+	MoveStop = bMove;
+
+}
 
 void ASpaceshipPawn::StartFlyEffect()
 {
@@ -351,8 +345,6 @@ void ASpaceshipPawn::StartFlyEffect()
 	}
 
 }
-
-
 
 //void ASpaceshipPawn::ActivateStartFly(bool bActive)
 //{
