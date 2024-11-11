@@ -145,6 +145,8 @@ private:
 	UFUNCTION()
 	bool CheckLanding();
 
+
+	////////Animation////////////////////////////////
 	UFUNCTION(Server, Reliable)
 	void Server_PlayAnimMontage(class UAnimMontage* montageToPlay, float playRate = 1.0f, FName startSection = NAME_None);
 
@@ -159,11 +161,6 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_CloseDoorMontageSetting();
+	////////////Animation/////////////////////////
 
-
-	//UPROPERTY()
-	//bool bIsLanding = false;
-
-	//UPROPERTY()
-	//bool bIsFlying = false;
 };
