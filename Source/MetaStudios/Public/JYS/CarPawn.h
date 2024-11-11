@@ -59,11 +59,14 @@ public:
 	void OnMyActionMove(const FInputActionValue& value);
 	UFUNCTION(Server, Reliable)
 	void Server_OnMyActionMove(bool bMove);
-	//UFUNCTION(NetMulticast, Reliable)
-	//void NetMulticast_OnMyActionMove(const FInputActionValue& value);
+
+	void ApplyRoll(float RollInput);
+	void ApplyRollBack();
+	UPROPERTY(Replicated)
+	bool MoveStop = true;
 
 
-	float carSpeed = 500.0f;
+	float carSpeed = 2000.0f;
 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -93,13 +96,8 @@ public:
 	//UPROPERTY(EditAnywhere, Category = "Effects")
 	//class UNiagaraSystem* ThrusterFXSystem;
 
-	void ApplyRoll(float RollInput);
-	void ApplyRollBack();
-
 	void ActivateThruster(bool bActive);
 
-	UPROPERTY(Replicated)
-	bool MoveStop = true;
 
 	bool ActiveThruster = true;
 
