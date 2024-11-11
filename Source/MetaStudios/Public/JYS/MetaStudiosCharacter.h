@@ -124,6 +124,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_ChangeCameraMode();
 
+	void SelectAutoMobile();
 	// 플레이어랑 우주선 컨트롤러 바꾸기
 	void EnterSpaceship();
 
@@ -207,13 +208,13 @@ private:
 	bool bIsBoosting = false;
 
 	// 부스터 힘
-	float BoostStrength = 2000.0f;
+	float BoostStrength = 20000.0f;
 
 	// 부스터의 최대 값
-	float MaxBoosterAmount = 100.0f;
+	float MaxBoosterAmount = 500.0f;
 
 	// 현재 부스터 양
-	float BoosterAmount = 100.0f;
+	float BoosterAmount = 500.0f;
 
 	// 부스터 감소 속도
 	float BoosterDrainRate = 20.0f;
@@ -238,6 +239,8 @@ private:
 	float CameraModeTime;
 
 	float CameraBlendTime = 0;
+
+	////////////Animation//////////////////
 
 
 };
