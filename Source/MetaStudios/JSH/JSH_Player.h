@@ -4,10 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Gizmo/JSH_Translate_GizmoBox.h"
+#include "Gizmo/JSH_Translate_GizmoZ.h"
 #include "Logging/LogMacros.h"
 #include "JSH_Player.generated.h"
 
 
+class AJSH_Translate_GizmoY;
+class AJSH_Translate_GizmoX;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -129,10 +133,19 @@ class AJSH_Player : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Del;
-
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Gizmo_Click;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Gizmo_SelectMode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Gizmo_TranslateMode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Gizmo_ScaleMode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Gizmo_RotateMode;
+	
 public:
 	AJSH_Player();
 	
@@ -310,6 +323,9 @@ public:
 	UPROPERTY()
 	class AJSH_Editor_SpawnActor* Editor_SpawnActor;
 
+	UPROPERTY(replicated)
+	bool DisableEdit_b = false;
+
 #pragma endregion
 
 
@@ -325,43 +341,52 @@ public:
 
 
 
+
+
+	// 각자 Gimo에서 BeginPlay 떄에 함수 호출해서 Player에 자신의 정보 저장
+	// UFUNCTION()
+	// void Save_Gizmo_TX(AActor* Gizmo_TX);
+	// UPROPERTY()
+	// AJSH_Translate_GizmoX* Saved_Gizmo_TX;
+	//
+	// UFUNCTION()
+	// void Save_Gizmo_TY(AJSH_Translate_GizmoY* Gizmo_TY);
+	// UPROPERTY()
+	// AJSH_Translate_GizmoY* Saved_Gizmo_TY;
+	
 	UFUNCTION()
-	void Gizmo_Click();
+	void Save_Gizmo_TX(AActor* Gizmo_TX);
+	UPROPERTY()
+	AJSH_Translate_GizmoX* Saved_Gizmo_TX;
+	UFUNCTION()
+	void Save_Gizmo_TY(AActor* Gizmo_TY);
+	UPROPERTY()
+	AJSH_Translate_GizmoY* Saved_Gizmo_TY;
+	UFUNCTION()
+	void Save_Gizmo_TZ(AActor* Gizmo_TZ);
+	UPROPERTY()
+	AJSH_Translate_GizmoZ* Saved_Gizmo_TZ;
+	UFUNCTION()
+	void Save_Gizmo_TB(AActor* Gizmo_TB);
+	UPROPERTY()
+	AJSH_Translate_GizmoBox* Saved_Gizmo_TB;
+
+	
+	
+	// Gizmo Mode
+	bool FirstGizmode = false;
+	bool Gizmo_TranslateMode = false;
+	bool Gizmo_ScaleMode = false;
+	bool Gizmo_RotateMode = false;
 
 	UFUNCTION()
-	void Gizmo_Click_End();
-	
-	FVector2D MousePosition;
-	FVector Mouse_WorldLocation;
-	FVector Mouse_WorldDirection;
-
-
-	float Start_Mouse_WorldLocation;
-	float End_Mouse_WorldLocation;
-	float gizmogo;
-	
-	bool firstclick = false;
-
-
-	FVector StartActor_Location;
-
-	
-	FVector StartMouselocation;
-	FVector End_Location;
-
-	FVector StartGizmoLocation;
-	// FVector Start_Mouse_WorldLocation;
-	// FVector End_Mouse_WorldLocation;
-	
-
-	
-	FVector Startlocation;
-
-	bool Clicked = true;
-
-
-	FVector2D Start2d;
-	FVector2D end2d;
+	void G_SelecteMode();
+	UFUNCTION()
+	void G_TranslateMode();
+	UFUNCTION()
+	void G_SclaeMode();
+	UFUNCTION()
+	void G_RotateMode();
 	
 #pragma endregion
 

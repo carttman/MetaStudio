@@ -1,21 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../JSH/Gizmo/JSH_Translate_GizmoY.h"
+#include "../JSH/Gizmo/JSH_Translate_GizmoBox.h"
 #include "MetaStudios/JSH/JSH_PlayerController.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
 #include "Components/PrimitiveComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/EngineTypes.h"
-#include "JSH_Translate_GizmoZ.h"
+#include "JSH_Translate_GizmoY.h"
 #include "JSH_Translate_GizmoX.h"
-#include "JSH_Translate_GizmoBox.h"
+#include "JSH_Translate_GizmoZ.h"
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
-
 // Sets default values
-AJSH_Translate_GizmoY::AJSH_Translate_GizmoY()
+AJSH_Translate_GizmoBox::AJSH_Translate_GizmoBox()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -23,14 +22,14 @@ AJSH_Translate_GizmoY::AJSH_Translate_GizmoY()
 	// 기본 색상
 	Origin = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Origin"));
 	RootComponent = Origin;
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TMesh(TEXT("/Script/Engine.StaticMesh'/Game/JSH/BP/Gizmo/Translate_X/SM_TranslationHandle_X.SM_TranslationHandle_X'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TMesh(TEXT("/Script/Engine.StaticMesh'/Game/JSH/BP/Gizmo/StaticMesh/SM_ScreenTranslationHandle.SM_ScreenTranslationHandle'"));
 	if (TMesh.Succeeded())
 	{
 		Origin->SetStaticMesh(TMesh.Object);
 	}
 	
 	
-	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Green.MM_Gizmo_Green'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_White.MM_Gizmo_White'"));
 	if (OriginMaterial.Succeeded())
 	{
 		Origin->SetMaterial(0, OriginMaterial.Object);
@@ -43,30 +42,31 @@ AJSH_Translate_GizmoY::AJSH_Translate_GizmoY()
 		YellowMaterial = YellowMaterialLoader.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UMaterial> GreenMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Green.MM_Gizmo_Green'"));
-	if (GreenMaterialLoader.Succeeded())
+	ConstructorHelpers::FObjectFinder<UMaterial> BlueMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_White.MM_Gizmo_White'"));
+	if (BlueMaterialLoader.Succeeded())
 	{
-		GreenMaterial = GreenMaterialLoader.Object;
+		WhiteMaterial = BlueMaterialLoader.Object;
 	}
+
 }
 
+
 // Called when the game starts or when spawned
-void AJSH_Translate_GizmoY::BeginPlay()
+void AJSH_Translate_GizmoBox::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
 	if (OriginPlayer)
 	{
-		OriginPlayer->Save_Gizmo_TY(this);
+		OriginPlayer->Save_Gizmo_TB(this);
 	}
-
-	//FindAndStoreGizmoActors(GetWorld());
 }
 
 // Called every frame
-void AJSH_Translate_GizmoY::Tick(float DeltaTime)
+void AJSH_Translate_GizmoBox::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -94,7 +94,7 @@ void AJSH_Translate_GizmoY::Tick(float DeltaTime)
 
 
 
-void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
+void AJSH_Translate_GizmoBox::NotifyActorOnClicked(FKey ButtonPressed)
 {
 	Super::NotifyActorOnClicked(ButtonPressed);
 
@@ -102,16 +102,16 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 	if (!CursorOveringGizmo) return;
 	
 	//// 다른 기즈모가 실행 중 이면 , 기능 실행되지 않도록 ////
-	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON || OriginPlayer->Editor_SpawnActor->GizmoZ_ON || OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
-	if (!OriginPlayer->Editor_SpawnActor->GizmoY_ON)
+	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON || OriginPlayer->Editor_SpawnActor->GizmoY_ON || OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
+	if (!OriginPlayer->Editor_SpawnActor->GizmoB_ON)
 	{
-		OriginPlayer->Editor_SpawnActor->GizmoY_ON = true;
+		OriginPlayer->Editor_SpawnActor->GizmoB_ON = true;
 	}
 
 	// 중복을 막기 위해 사전에 생성자에서 NoCollision 해줬던거를 변경
 	//Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	
-	UE_LOG(LogTemp, Error, TEXT("y1"));
+	UE_LOG(LogTemp, Error, TEXT("Z1"));
 
 	//// Gizmo와 Player간의 거리 구하기 (bHit되지 않았을때 최대 거리 point로 hitpoint 잡아야함) ////
 	if (OriginPlayer != nullptr)
@@ -137,8 +137,8 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 
 	TArray<AActor*> IgnoreGizmos;
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TY);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TZ);
-	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
 	Params.AddIgnoredActors(IgnoreGizmos);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
@@ -151,7 +151,7 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 		Clicked = true;
 		firstclick = true;
 		
-		UE_LOG(LogTemp, Error, TEXT("y first"));
+		UE_LOG(LogTemp, Error, TEXT("Z First"));
 		
 		// Store initial mouse and gizmo positions
 		StartMouselocation = HitResult.ImpactPoint;
@@ -168,38 +168,39 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 		if (bHit)
 		{
 			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
-			UE_LOG(LogTemp, Error, TEXT("y2"));
+			UE_LOG(LogTemp, Error, TEXT("z 2"));
 			End_Location = HitResult.ImpactPoint;
-			NewLocation = FVector(StartGizmoLocation.X, End_Location.Y - StartActor_Location.Y, StartGizmoLocation.Z);
+			NewLocation = FVector(End_Location.X - StartActor_Location.X, End_Location.Y - StartActor_Location.Y, End_Location.Z - StartActor_Location.Z);
 			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
 		}
 		// bHit 되지 않았을 떄엔 Ray 끝점을 통해서 위치 이동 (위에서 구한 Player와 Gizmo 사이의 거리)
 		else
 		{
 			//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
-			UE_LOG(LogTemp, Error, TEXT("y3"));
+			UE_LOG(LogTemp, Error, TEXT("z 3"));
 			End_Location = End;
-			NewLocation = FVector(StartGizmoLocation.X, End_Location.Y - StartActor_Location.Y, StartGizmoLocation.Z);
+			NewLocation = FVector(End_Location.X - StartActor_Location.X, End_Location.Y - StartActor_Location.Y, End_Location.Z - StartActor_Location.Z);
 			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
 		}
 	}
 }
 
+
 // 오버랩 색상 변경
-void AJSH_Translate_GizmoY::NotifyActorBeginCursorOver()
+void AJSH_Translate_GizmoBox::NotifyActorBeginCursorOver()
 {
 	Super::NotifyActorBeginCursorOver();
 
 
 	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON) return;
+	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
-	if (OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
 	
 	SelectedColor();
 	CursorOveringGizmo = true;
 }
 
-void AJSH_Translate_GizmoY::NotifyActorEndCursorOver()
+void AJSH_Translate_GizmoBox::NotifyActorEndCursorOver()
 {
 	Super::NotifyActorEndCursorOver();
 
@@ -211,18 +212,18 @@ void AJSH_Translate_GizmoY::NotifyActorEndCursorOver()
 }
 
 
-void AJSH_Translate_GizmoY::OriginColor()
+void AJSH_Translate_GizmoBox::OriginColor()
 {
 	// Gizmo가 클릭된 상태라면 , 마우스가 Gizmo 위에 있지 않아도 계속해서 노란색 유지하기 위해
 	if (SelectedGizmo) return;
 	
-	if (GreenMaterial)
+	if (WhiteMaterial)
 	{
-		Origin->SetMaterial(0, GreenMaterial);
+		Origin->SetMaterial(0, WhiteMaterial);
 	}
 }
 
-void AJSH_Translate_GizmoY::SelectedColor()
+void AJSH_Translate_GizmoBox::SelectedColor()
 {
 	if (YellowMaterial)
 	{
@@ -231,13 +232,13 @@ void AJSH_Translate_GizmoY::SelectedColor()
 }
 
 
-void AJSH_Translate_GizmoY::HandleMouseReleaseOutsideActor()
+void AJSH_Translate_GizmoBox::HandleMouseReleaseOutsideActor()
 {
 	Clicked = false;
 	firstclick = false;
 	SelectedGizmo = false;
 	CursorOveringGizmo = false;
-	OriginPlayer->Editor_SpawnActor->GizmoY_ON = false;
+	OriginPlayer->Editor_SpawnActor->GizmoB_ON = false;
 	OriginColor();
 
 	// Else문 반복 실행을 막기 위해
@@ -246,12 +247,12 @@ void AJSH_Translate_GizmoY::HandleMouseReleaseOutsideActor()
 
 
 //// Player쪽에서 Gizmo Mode 바꿀때 조정해줌  ////
-void AJSH_Translate_GizmoY::Visible_and_Collision_On()
+void AJSH_Translate_GizmoBox::Visible_and_Collision_On()
 {
 	Origin->SetVisibility(true);
 	Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 }
-void AJSH_Translate_GizmoY::Visible_and_Collision_Off()
+void AJSH_Translate_GizmoBox::Visible_and_Collision_Off()
 {
 	Origin->SetVisibility(false);
 	Origin->SetCollisionProfileName(TEXT("NoCollision"));

@@ -28,7 +28,7 @@ AJSH_Editor_SpawnActor::AJSH_Editor_SpawnActor()
     // }
 
 
-    AssetMesh->OnClicked.AddDynamic(this, &AJSH_Editor_SpawnActor::OnMeshClicked);
+    //AssetMesh->OnClicked.AddDynamic(this, &AJSH_Editor_SpawnActor::OnMeshClicked);
 }
 
 // Called when the game starts
@@ -83,17 +83,6 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
 }
 
 
-void AJSH_Editor_SpawnActor::OnMeshClicked(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
-{
-    // APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    // if (!PlayerController) return;
-    //
-    //
-    // FHitResult HitResult;
-    // bool bHit = PlayerController->GetHitResultUnderCursorByChannel(static_cast<ETraceTypeQuery>(ECC_Visibility), true, HitResult);
-
-
-}
 
 void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
 {
@@ -101,14 +90,6 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
 
     if (!JPlayerController) return;
     
-    FHitResult HitResult;
-    bool bHit = JPlayerController->GetHitResultUnderCursorByChannel(static_cast<ETraceTypeQuery>(ECC_Visibility), true, HitResult);
-
-    
-    // 클릭 했을때 자신의 정보를 PlayerController에 저장
-    //JPlayerController->SaveEditorActor(this);
-    
-    UE_LOG(LogTemp, Error, TEXT("Click"));
     // 클릭 했을때 자신의 정보를 Player에 저장
     OriginPlayer->SaveEditorActor(this);
     GizmoSpawn();
