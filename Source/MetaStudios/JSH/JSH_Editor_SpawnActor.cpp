@@ -75,9 +75,12 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
     {
         FVector dd = GizmoActor->GetActorLocation();
         FVector d2 = this->GetActorLocation();
-        if (dd != d2)
+        if (GizmoActor != nullptr)
         {
-            GizmoActor->SetActorTransform(this->GetActorTransform()); 
+            if (dd != d2)
+            {
+                GizmoActor->SetActorTransform(this->GetActorTransform()); 
+            }  
         }
     }
 }
@@ -95,6 +98,13 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     
     // 클릭 했을때 자신의 정보를 Player에 저장
     OriginPlayer->SaveEditorActor(this);
+
+    // 이전 위치 돌아가기 위해 저장해뒀던 값을 초기화 
+    while (!OriginPlayer->PreviousLocations.empty())
+    {
+        OriginPlayer->PreviousLocations.pop();
+    }
+    
     GizmoSpawn();
 
     UE_LOG(LogTemp, Error, TEXT("Click"));

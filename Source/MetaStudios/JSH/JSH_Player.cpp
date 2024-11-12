@@ -330,6 +330,8 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_Gizmo_TranslateMode, ETriggerEvent::Started, this, &AJSH_Player::G_TranslateMode);
 		EnhancedInputComponent->BindAction(IA_Gizmo_ScaleMode, ETriggerEvent::Started, this, &AJSH_Player::G_SclaeMode);
 		EnhancedInputComponent->BindAction(IA_Gizmo_RotateMode, ETriggerEvent::Started, this, &AJSH_Player::G_RotateMode);
+
+		EnhancedInputComponent->BindAction(IA_PreviousLocation, ETriggerEvent::Started, this, &AJSH_Player::Return_Previous_location);
 	}
 	else
 	{
@@ -902,6 +904,7 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		{
 			Editor_SpawnActor->OriginGizmo->Destroy();
 			Editor_SpawnActor = nullptr;
+			
 		}
 		
 		
@@ -922,6 +925,7 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		// Editor 모드 종료 시 저장된 EditorSpwanAcotr Name 삭제
 		// JPlayerController->Editor_SpawnActor = nullptr;
 		Editor_SpawnActor = nullptr; // 에디터 모드가 아닐떄 삭제 못하게
+		
 
 		// @@@캐릭터 없어짐 @@@@@
 		// Fly Mode를 끌때에 아래로 레이 한번 쏴서 , Fly 모드 종료
@@ -1136,6 +1140,7 @@ void AJSH_Player::G_SelecteMode()
 	if (Editor_SpawnActor == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
 	Editor_SpawnActor = nullptr;
+	
 
 	
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
@@ -1354,6 +1359,13 @@ void AJSH_Player::Gizmo_Click()
 			Clicked_TB = true;
 		}
 	}
+	
+	
+	// Last Location 저장
+	if (Editor_SpawnActor != nullptr)
+	{
+		AddPreviousLocation(Editor_SpawnActor->GetActorLocation());
+	}
 }
 
 void AJSH_Player::Gizmo_Click_End()
@@ -1381,10 +1393,54 @@ void AJSH_Player::Gizmo_Click_End()
 	Gizmo_Clicking_forError = false;
 }
 
+
+void AJSH_Player::AddPreviousLocation(const FVector& newLocation)
+{
+	
+	if (PreviousLocations.size() >= MaxLocations)
+	{
+		PreviousLocations.pop();  // 제일 오래된 위치 제거
+	}
+	PreviousLocations.push(newLocation);
+}
+
+
+void AJSH_Player::Return_Previous_location()
+{
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+	
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+
+	// 여기는 UI 바뀌는거 넣음 될 듯
+	if (Editor_SpawnActor == nullptr) return;
+	////////////////////////////////////////////////////////////////////////////////
+
+	// 값 없을 때 팅기는 문제 때문에
+	if (PreviousLocations.size() == 0) return;
+	
+	
+	FVector previousLocation = PreviousLocations.top();
+	PreviousLocations.pop();  
+
+	if (Editor_SpawnActor->GetActorLocation() != previousLocation)
+	{
+		Editor_SpawnActor->SetActorLocation(previousLocation);
+	}
+
+	// 값 초기화는 Editor Spawn Actor에서 해주고 있음 (새로 다른 actor 클릭했을 시)
+}
+
+
+
+
 #pragma endregion
 
 
 #pragma region Camera Control
+
+
 
 
 void AJSH_Player::Camera_Zoom_In()
@@ -1555,6 +1611,7 @@ void AJSH_Player::Esc()
 	if (EditorMode_B == true)
 	{
 		Editor_SpawnActor = nullptr;
+		
 	}
 	// Editor 모드아닐때 ESC 방 나가기
 	else

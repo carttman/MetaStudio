@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include <queue>
+#include <stack>
+
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Gizmo/JSH_Translate_GizmoBox.h"
@@ -145,6 +148,10 @@ class AJSH_Player : public ACharacter
 	UInputAction* IA_Gizmo_ScaleMode;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Gizmo_RotateMode;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_PreviousLocation;
 	
 public:
 	AJSH_Player();
@@ -442,6 +449,20 @@ public:
 	bool Clicking_TY = false;
 	UPROPERTY()
 	bool Clicking_TZ = false;
+
+
+	// SpawnActor 이전 위치 저장
+
+	
+	UFUNCTION()
+	void Return_Previous_location();
+	UFUNCTION()
+	void AddPreviousLocation(const FVector& newLocation);
+	
+	std::stack<FVector> PreviousLocations;
+	const int MaxLocations = 5;
+
+	
 	
 #pragma endregion
 
