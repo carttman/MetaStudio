@@ -426,7 +426,9 @@ public:
 	bool Clicked_TY = false;
 	UPROPERTY()
 	bool Clicked_TZ = false;
-
+	UPROPERTY()
+	bool Clicked_TB = false;
+	
 	// 오버랩 됬을 때 중복 색상 변경
 	UPROPERTY()
 	bool Clicking_TX = false;

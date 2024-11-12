@@ -1165,6 +1165,7 @@ void AJSH_Player::G_SclaeMode()
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
+	Saved_Gizmo_TB->Visible_and_Collision_Off();
 }
 
 
@@ -1197,6 +1198,7 @@ void AJSH_Player::Gizmo_Detect()
 
 				Saved_Gizmo_TY->EndCursorOver();
 				Saved_Gizmo_TZ->EndCursorOver();
+				Saved_Gizmo_TB->EndCursorOver();
 			}
 		}
 		if (Saved_Gizmo_TY != nullptr)
@@ -1207,6 +1209,7 @@ void AJSH_Player::Gizmo_Detect()
 
 				Saved_Gizmo_TX->EndCursorOver();
 				Saved_Gizmo_TZ->EndCursorOver();
+				Saved_Gizmo_TB->EndCursorOver();
 			}
 		}
 		if (Saved_Gizmo_TZ != nullptr)
@@ -1217,6 +1220,18 @@ void AJSH_Player::Gizmo_Detect()
 
 				Saved_Gizmo_TY->EndCursorOver();
 				Saved_Gizmo_TX->EndCursorOver();
+				Saved_Gizmo_TB->EndCursorOver();
+			}
+		}
+		if (Saved_Gizmo_TB != nullptr)
+		{
+			if (HitResult.GetActor() == Saved_Gizmo_TB)
+			{
+				Saved_Gizmo_TB->BeginCursorOver();
+
+				Saved_Gizmo_TY->EndCursorOver();
+				Saved_Gizmo_TX->EndCursorOver();
+				Saved_Gizmo_TZ->EndCursorOver();
 			}
 		}
 	}
@@ -1237,6 +1252,10 @@ void AJSH_Player::Gizmo_Detect()
 		if (Saved_Gizmo_TZ != nullptr)
 		{
 			Saved_Gizmo_TZ->EndCursorOver();
+		}
+		if (Saved_Gizmo_TB != nullptr)
+		{
+			Saved_Gizmo_TB->EndCursorOver();
 		}
 	}
 }
@@ -1273,6 +1292,15 @@ void AJSH_Player::Gizmo_Click()
 			Clicked_TZ = true;
 		}
 	}
+	
+	if (Saved_Gizmo_TB != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_TB)
+		{
+			Saved_Gizmo_TB->GOnClicked();
+			Clicked_TB = true;
+		}
+	}
 }
 
 void AJSH_Player::Gizmo_Click_End()
@@ -1288,6 +1316,10 @@ void AJSH_Player::Gizmo_Click_End()
 	if (Clicked_TZ)
 	{
 		Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
+	}
+	if (Clicked_TB)
+	{
+		Saved_Gizmo_TB->HandleMouseReleaseOutsideActor();
 	}
 }
 
