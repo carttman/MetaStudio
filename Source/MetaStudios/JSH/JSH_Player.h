@@ -339,9 +339,7 @@ public:
 	UPROPERTY(Replicated)
 	bool Bool_EditorActorDestroy = false;
 
-
-
-
+	
 
 	// 각자 Gimo에서 BeginPlay 떄에 함수 호출해서 Player에 자신의 정보 저장
 	// UFUNCTION()
@@ -387,6 +385,57 @@ public:
 	void G_SclaeMode();
 	UFUNCTION()
 	void G_RotateMode();
+
+
+	UFUNCTION()
+	void Gizmo_Detect();
+	UPROPERTY()
+	FVector2D MousePosition;
+	UPROPERTY()
+	FVector Mouse_WorldLocation;
+	UPROPERTY()
+	FVector Mouse_WorldDirection;
+	UPROPERTY()
+	FVector Start;
+	UPROPERTY()
+	FVector End;
+	UPROPERTY()
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	UPROPERTY()
+	float Lay_Distance = 0.0f;
+
+	UPROPERTY()
+	bool Gizmo_Selected = false;
+
+	UPROPERTY()
+	bool EnableEditSystem = false;
+	
+	UPROPERTY()
+	bool Gizmo_Detecting = false;
+
+
+	UFUNCTION()
+	void Gizmo_Click();
+	UFUNCTION()
+	void Gizmo_Click_End();
+
+	UPROPERTY()
+	bool Clicked_TX = false;
+	UPROPERTY()
+	bool Clicked_TY = false;
+	UPROPERTY()
+	bool Clicked_TZ = false;
+	UPROPERTY()
+	bool Clicked_TB = false;
+	
+	// 오버랩 됬을 때 중복 색상 변경
+	UPROPERTY()
+	bool Clicking_TX = false;
+	UPROPERTY()
+	bool Clicking_TY = false;
+	UPROPERTY()
+	bool Clicking_TZ = false;
 	
 #pragma endregion
 
