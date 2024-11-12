@@ -228,6 +228,14 @@ void AJSH_Player::Tick(float DeltaTime)
 	// {
 	// 	Gizmo_Click();
 	// }
+
+	
+	// 기즈모가 선택되어 있지 않을때 레이를 통해 기즈모를 감지
+	// 기즈모가 선택 모드가 아니고 EnableEdit 모드일때만 Tick 돌게
+	if (!Gizmo_Selected && EnableEditSystem)
+	{
+		Gizmo_Detect();
+	}
 }
 
 
@@ -311,9 +319,9 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_Del, ETriggerEvent::Started, this, &AJSH_Player::EditorAcotorDestroy);
 
 
-		// // Gizmo Click
-		// EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Triggered, this, &AJSH_Player::Gizmo_Click);
-		// EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Completed, this, &AJSH_Player::Gizmo_Click_End);
+		// Gizmo Click
+		EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Started, this, &AJSH_Player::Gizmo_Click);
+		EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Completed, this, &AJSH_Player::Gizmo_Click_End);
 
 
 		// Gizmo Mode
@@ -949,6 +957,9 @@ void AJSH_Player::EnableEdit()
 	if (!EditorMode_B) return;
 	
 	DisableEdit_b = false;
+
+	// 기즈모 Tick 제어를 위한 (Enable Edit 상태일 때 Ray 쏘도록)
+	EnableEditSystem = true;
 	
 	// 마우스 우클릭을 안 하고 있으면 , ZoomMode를 Flase로
 	Bool_ZoomMode = false;
@@ -997,6 +1008,9 @@ void AJSH_Player::EnableEdit()
 void AJSH_Player::DisableEdit()
 {
 	DisableEdit_b = true;
+
+	// 기즈모 Tick 제어를 위한 (Enable Edit 상태일 때 Ray 쏘도록)
+	EnableEditSystem = false;
 	
 	// 마우스 우클릭 하고 있으면, ZoomMode를 True로
 	if (!Bool_ZoomMode)
@@ -1138,6 +1152,7 @@ void AJSH_Player::G_RotateMode()
 	Saved_Gizmo_TB->Visible_and_Collision_Off();
 }
 
+
 void AJSH_Player::G_SclaeMode()
 {
 	if (!EditorMode_B) return;
@@ -1151,12 +1166,135 @@ void AJSH_Player::G_SclaeMode()
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
 }
+
+
+void AJSH_Player::Gizmo_Detect()
+{
+	//// 마우스 2d Vector -> 3d Vector ////
+	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
+	{
+		JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
+	}
+	
+	///// Ray ////
+	Start = Mouse_WorldLocation;
+	End = (Mouse_WorldDirection * 10000.0f) + Mouse_WorldLocation;
+	
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel2, Params);
+
+	if (bHit)
+	{
+		// 기즈모가 감지 되었을떄 true -> Gizmo Click이 가능해짐.
+		
+		if (Gizmo_Detecting == false) Gizmo_Detecting = true;
+		
+		DrawDebugLine(GetWorld(), Start, End, FColor::Purple, false, 10, 0, 0.1);
+		if (Saved_Gizmo_TX != nullptr)
+		{
+			if (HitResult.GetActor())
+			{
+				Saved_Gizmo_TX->BeginCursorOver();
+
+				Saved_Gizmo_TY->EndCursorOver();
+				Saved_Gizmo_TZ->EndCursorOver();
+			}
+		}
+		if (Saved_Gizmo_TY != nullptr)
+		{
+			if (HitResult.GetActor() == Saved_Gizmo_TY)
+			{
+				Saved_Gizmo_TY->BeginCursorOver();
+
+				Saved_Gizmo_TX->EndCursorOver();
+				Saved_Gizmo_TZ->EndCursorOver();
+			}
+		}
+		if (Saved_Gizmo_TZ != nullptr)
+		{
+			if (HitResult.GetActor() == Saved_Gizmo_TZ)
+			{
+				Saved_Gizmo_TZ->BeginCursorOver();
+
+				Saved_Gizmo_TY->EndCursorOver();
+				Saved_Gizmo_TX->EndCursorOver();
+			}
+		}
+	}
+	else
+	{
+		if (Gizmo_Detecting == true) Gizmo_Detecting = false;
+		
+		HitResult.Reset();
+		
+		if (Saved_Gizmo_TX != nullptr)
+		{
+			Saved_Gizmo_TX->EndCursorOver();
+		}
+		if (Saved_Gizmo_TY != nullptr)
+		{
+			Saved_Gizmo_TY->EndCursorOver();
+		}
+		if (Saved_Gizmo_TZ != nullptr)
+		{
+			Saved_Gizmo_TZ->EndCursorOver();
+		}
+	}
+}
+
+
+void AJSH_Player::Gizmo_Click()
+{
+	// 기즈모가 감지되어 있지 않다면 , 클릭 x
+	if (Gizmo_Detecting == false) return;
+
+	if (Saved_Gizmo_TX != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_TX)
+		{
+			Saved_Gizmo_TX->GOnClicked();
+			Clicked_TX = true;
+		}
+	}
+	
+	if (Saved_Gizmo_TY != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_TY)
+		{
+			Saved_Gizmo_TY->GOnClicked();
+			Clicked_TY = true;
+		}
+	}
+
+	if (Saved_Gizmo_TZ != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_TZ)
+		{
+			Saved_Gizmo_TZ->GOnClicked();
+			Clicked_TZ = true;
+		}
+	}
+}
+
+void AJSH_Player::Gizmo_Click_End()
+{
+	if (Clicked_TX)
+	{
+		Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
+	}
+	if (Clicked_TY)
+	{
+		Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
+	}
+	if (Clicked_TZ)
+	{
+		Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
+	}
+}
+
 #pragma endregion
 
 
 #pragma region Camera Control
-
-
 
 
 void AJSH_Player::Camera_Zoom_In()
