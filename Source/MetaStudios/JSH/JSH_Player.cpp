@@ -1181,6 +1181,10 @@ void AJSH_Player::G_SclaeMode()
 
 void AJSH_Player::Gizmo_Detect()
 {
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+
+	
 	//// 마우스 2d Vector -> 3d Vector ////
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
 	{
@@ -1273,6 +1277,10 @@ void AJSH_Player::Gizmo_Detect()
 
 void AJSH_Player::Gizmo_Click()
 {
+
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+	
 	// 기즈모가 감지되어 있지 않다면 , 클릭 x
 	if (Gizmo_Detecting == false) return;
 
@@ -1318,6 +1326,8 @@ void AJSH_Player::Gizmo_Click()
 
 void AJSH_Player::Gizmo_Click_End()
 {
+	if (!Gizmo_Clicking_forError) return;
+
 	if (Clicked_TX)
 	{
 		Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
