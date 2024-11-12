@@ -263,8 +263,6 @@ void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
 	// 수직 하강
 	currentLocation.Z -= MovementSpeed * GetWorld()->GetDeltaSeconds();
 	SetActorLocation(currentLocation);
-
-
 }
 
 void ASpaceshipPawn::ApplyRoll(float RollInput)
@@ -433,16 +431,16 @@ void ASpaceshipPawn::MoveUpAnim()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("MoveUpAnim"))
 
-			if (Anim)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("legUpAnimMontage"))
-				Server_CloseDoorMontageSetting();
-				Server_PlayAnimMontage(Anim->closeDoorMontage);
-				FTimerHandle handle;
-				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
-					Server_PlayAnimMontage(Anim->legUpMontage, 1, TEXT("LegUpStartSection")); 
-					}, 1, false);
-			}
+		if (Anim)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("legUpAnimMontage"))
+			Server_CloseDoorMontageSetting();
+			Server_PlayAnimMontage(Anim->closeDoorMontage);
+			FTimerHandle handle;
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				Server_PlayAnimMontage(Anim->legUpMontage, 1, TEXT("LegUpStartSection")); 
+				}, 1, false);
+		}
 	}
 }
 

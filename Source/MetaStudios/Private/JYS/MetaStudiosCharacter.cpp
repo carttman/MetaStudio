@@ -19,6 +19,8 @@
 #include "JYS/SpaceshipPawn.h"
 #include "JYS/CarPawn.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "JYS/PlayerAnimInstance.h"
+
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -74,6 +76,8 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	BoosterFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent"));
 	BoosterFXComponent->SetupAttachment(GetMesh());
 
+	BoosterFXComponent2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent2"));
+	BoosterFXComponent->SetupAttachment(GetMesh());
 
 }
 
@@ -101,6 +105,42 @@ void AMetaStudiosCharacter::BeginPlay()
 
 	ActivateBooster(false);
 
+	Anim = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+
+}
+
+//////////////////////Animation/////////////////
+void AMetaStudiosCharacter::Server_PlayAnimMontage_Implementation(class UAnimMontage* montageToPlay, float playRate /*= 1.0f*/, FName startSection /*= NAME_None*/)
+{
+	NetMulticast_PlayAnimMontage(montageToPlay, playRate, startSection);
+}
+
+void AMetaStudiosCharacter::NetMulticast_PlayAnimMontage_Implementation(class UAnimMontage* montageToPlay, float playRate /*= 1.0f*/, FName startSection /*= NAME_None*/)
+{
+	if (montageToPlay)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("dddddddddddddd"))
+	}
+	if (Anim)
+	{
+		Anim->Montage_Play(montageToPlay, playRate, EMontagePlayReturnType::MontageLength);
+		UE_LOG(LogTemp, Warning, TEXT("aaaaaaaaaaaaaaaaaaaaaaa"))
+	}
+	else 
+	{
+		FString output;
+		output = Anim == nullptr ? TEXT("NULL") : *Anim->GetName();
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *output);
+	}
+
+}
+
+void AMetaStudiosCharacter::PickUpAnim()
+{
+	if (Anim)
+	{
+		Server_PlayAnimMontage(Anim->pickUpMontage);
+	}
 }
 
 //////////////////////Input////////////////////////////////
@@ -533,6 +573,7 @@ void AMetaStudiosCharacter::NetMulticast_FindObject_Implementation()
 	if (nearActor != nullptr)
 	{
 		DestroyObject();
+		PickUpAnim();
 	}
 }
 

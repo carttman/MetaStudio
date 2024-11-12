@@ -142,7 +142,6 @@ public:
 	//// 플레이어랑 자동차랑 컨트롤러 바꾸기
 	void EnterCar();
 
-	
 	UFUNCTION(Server, Reliable)
 	void Server_EnterCar();
 
@@ -164,6 +163,9 @@ public:
 	///////////////////이펙트 추가//////////////
 	UPROPERTY(EditAnywhere, Category = "Effects")
 	class UNiagaraComponent* BoosterFXComponent;	
+	
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UNiagaraComponent* BoosterFXComponent2;
 
 	void ActivateBooster(bool bActive);
 	
@@ -242,6 +244,17 @@ private:
 
 	////////////Animation//////////////////
 
+	UPROPERTY()
+	class UPlayerAnimInstance* Anim;
+
+	UFUNCTION(Server, Reliable)
+	void Server_PlayAnimMontage(class UAnimMontage* montageToPlay, float playRate = 1.0f, FName startSection = NAME_None);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_PlayAnimMontage(class UAnimMontage* montageToPlay, float playRate = 1.0f, FName startSection = NAME_None);
+
+	UFUNCTION()
+	void PickUpAnim();
 
 };
 
