@@ -159,6 +159,18 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 		StartActor_Location = StartMouselocation - StartGizmoLocation;
 		SelectedGizmo = true;
 	}
+	else if (!firstclick && !Clicked)
+	{
+		Clicked = true;
+		firstclick = true;
+		
+		// Store initial mouse and gizmo positions
+		StartMouselocation = End;
+		StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
+		StartActor_Location = StartMouselocation - StartGizmoLocation;
+		SelectedGizmo = true;
+	}
+	
 
 	
 	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
@@ -170,6 +182,7 @@ void AJSH_Translate_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 0.3);
 			UE_LOG(LogTemp, Error, TEXT("y2"));
 			End_Location = HitResult.ImpactPoint;
+			//End_Location = End;
 			NewLocation = FVector(StartGizmoLocation.X, End_Location.Y - StartActor_Location.Y, StartGizmoLocation.Z);
 			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
 		}

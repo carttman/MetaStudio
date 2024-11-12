@@ -163,7 +163,17 @@ void AJSH_Translate_GizmoZ::NotifyActorOnClicked(FKey ButtonPressed)
 		StartActor_Location = StartMouselocation - StartGizmoLocation;
 		SelectedGizmo = true;
 	}
-
+	else if (!firstclick && !Clicked)
+	{
+		Clicked = true;
+		firstclick = true;
+		
+		// Store initial mouse and gizmo positions
+		StartMouselocation = End;
+		StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
+		StartActor_Location = StartMouselocation - StartGizmoLocation;
+		SelectedGizmo = true;
+	}
 	
 	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
 	if (Clicked)
