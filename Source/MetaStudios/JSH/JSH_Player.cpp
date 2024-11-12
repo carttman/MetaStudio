@@ -816,6 +816,9 @@ void AJSH_Player::EditorMode()
 	
 	// 녹화 중이 아닐때에만 Editor 모드 가능
 	if (Record_b_On_Off) return;
+
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
+	if(Gizmo_Clicking_forError) return;
 	
 	
 	NetMulti_EditorMode();
@@ -829,6 +832,9 @@ void AJSH_Player::EditorMode()
 
 void AJSH_Player::NetMulti_EditorMode_Implementation()
 {
+	
+
+	
 	// Editor Mode On
 	if (!EditorMode_B)
 	{
@@ -1110,10 +1116,14 @@ void AJSH_Player::G_SelecteMode()
 {
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
+
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
+	if (Gizmo_Clicking_forError) return;
+
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
 	Editor_SpawnActor = nullptr;
 
-
+	
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
@@ -1266,6 +1276,9 @@ void AJSH_Player::Gizmo_Click()
 	// 기즈모가 감지되어 있지 않다면 , 클릭 x
 	if (Gizmo_Detecting == false) return;
 
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
+	Gizmo_Clicking_forError = true;
+	
 	if (Saved_Gizmo_TX != nullptr)
 	{
 		if (HitResult.GetActor() == Saved_Gizmo_TX)
@@ -1321,6 +1334,9 @@ void AJSH_Player::Gizmo_Click_End()
 	{
 		Saved_Gizmo_TB->HandleMouseReleaseOutsideActor();
 	}
+
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
+	Gizmo_Clicking_forError = false;
 }
 
 #pragma endregion

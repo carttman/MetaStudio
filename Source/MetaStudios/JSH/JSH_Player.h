@@ -421,6 +421,9 @@ public:
 	void Gizmo_Click_End();
 
 	UPROPERTY()
+	bool Gizmo_Clicking_forError = false;
+
+	UPROPERTY()
 	bool Clicked_TX = false;
 	UPROPERTY()
 	bool Clicked_TY = false;
