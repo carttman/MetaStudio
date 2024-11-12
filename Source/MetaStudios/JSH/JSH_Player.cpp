@@ -1235,7 +1235,7 @@ void AJSH_Player::Gizmo_Detect()
 		
 		if (Gizmo_Detecting == false) Gizmo_Detecting = true;
 		
-		DrawDebugLine(GetWorld(), Start, End, FColor::Purple, false, 10, 0, 0.1);
+		//DrawDebugLine(GetWorld(), Start, End, FColor::Purple, false, 10, 0, 0.1);
 		if (Saved_Gizmo_TX != nullptr)
 		{
 			if (HitResult.GetActor())

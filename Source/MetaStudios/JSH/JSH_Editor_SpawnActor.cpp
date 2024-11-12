@@ -71,7 +71,7 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
         }  
     }
     
-    if (GizmoActor && GizmoActor != nullptr)
+    if (GizmoActor != nullptr)
     {
         FVector dd = GizmoActor->GetActorLocation();
         FVector d2 = this->GetActorLocation();
@@ -89,6 +89,9 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     Super::NotifyActorOnClicked(ButtonPressed);
 
     if (!JPlayerController) return;
+
+    // 겹쳐져 있을 때에 기즈모가 클릭되고 스폰액터는 클릭 안 되도록
+    if (OriginPlayer->Gizmo_Detecting) return;
     
     // 클릭 했을때 자신의 정보를 Player에 저장
     OriginPlayer->SaveEditorActor(this);
