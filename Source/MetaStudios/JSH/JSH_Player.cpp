@@ -1364,7 +1364,8 @@ void AJSH_Player::Gizmo_Click()
 	// Last Location 저장
 	if (Editor_SpawnActor != nullptr)
 	{
-		AddPreviousLocation(Editor_SpawnActor->GetActorLocation());
+		Editor_SpawnActor->AddPreviousLocation(Editor_SpawnActor->GetActorLocation());
+		//Previous_Click_Actor = nullptr;
 	}
 }
 
@@ -1417,18 +1418,30 @@ void AJSH_Player::Return_Previous_location()
 	if (Editor_SpawnActor == nullptr) return;
 	////////////////////////////////////////////////////////////////////////////////
 
-	// 값 없을 때 팅기는 문제 때문에
-	if (PreviousLocations.size() == 0) return;
 	
-	
-	FVector previousLocation = PreviousLocations.top();
-	PreviousLocations.pop();  
-
-	if (Editor_SpawnActor->GetActorLocation() != previousLocation)
+	if (Now_Click_Actor != nullptr && Now_Click_Actor->PreviousLocations.size() >= 1)
 	{
-		Editor_SpawnActor->SetActorLocation(previousLocation);
+		Now_Click_Actor->ReturnPreviousLocation();
+		UE_LOG(LogTemp, Error, TEXT("~ 1"));
+	}
+	else if (Now_Click_Actor->PreviousLocations.size() == 0 && Previous_Click_Actor != nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("~ 2-1"));
+		SaveEditorActor(Previous_Click_Actor);
+		//Previous_Click_Actor->GizmoSpawn();
+		Previous_Click_Actor = nullptr;
+		UE_LOG(LogTemp, Error, TEXT("~ 2-2"));
+	}
+	else
+	{
+		if (Editor_SpawnActor != nullptr)
+		{
+			Editor_SpawnActor->ReturnPreviousLocation();
+			UE_LOG(LogTemp, Error, TEXT("~ 3"));
+		}
 	}
 
+	
 	// 값 초기화는 Editor Spawn Actor에서 해주고 있음 (새로 다른 actor 클릭했을 시)
 }
 

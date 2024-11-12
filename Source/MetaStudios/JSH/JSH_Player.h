@@ -20,6 +20,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+class AJSH_Editor_SpawnActor;
 
 // 순환참조 문제로, Include 말고
 class AJSH_PlayerController;
@@ -462,7 +463,11 @@ public:
 	std::stack<FVector> PreviousLocations;
 	const int MaxLocations = 5;
 
-	
+	UPROPERTY()
+	AJSH_Editor_SpawnActor* Previous_Click_Actor;
+
+	UPROPERTY()
+	AJSH_Editor_SpawnActor* Now_Click_Actor;
 	
 #pragma endregion
 
