@@ -195,7 +195,7 @@ void AJSH_Player::BeginPlay()
 	}
 
 	FlyMode();
-
+	
 	// 캐릭터 없어져서 그냥 바로 1인칭 시작
 	FollowCamera->SetActive(false);
 	RecordCamera->SetActive(true);
@@ -252,6 +252,7 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AJSH_Player, ClickedEditorActor);
 	DOREPLIFETIME(AJSH_Player, Bool_EditorActorDestroy);
 	DOREPLIFETIME(AJSH_Player, DisableEdit_b);
+	DOREPLIFETIME(AJSH_Player, DisableEdit2_b);
 }
 
 
@@ -671,7 +672,7 @@ void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 void AJSH_Player::FlyMode()
 {
 	// 메인 플랫폼 일떄 기능 LOCK
-	if(!Bool_MainLock) return;
+	//if(!Bool_MainLock) return;
 	
 	NetMulti_FlyMode();
 
@@ -679,13 +680,18 @@ void AJSH_Player::FlyMode()
 }
 void AJSH_Player::NetMulti_FlyMode_Implementation()
 {
-	if(!FlyMode_b_On_Off)
-	{
-		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		bUseControllerRotationPitch = true;
-		bUseControllerRotationYaw = true;
-		bUseControllerRotationRoll = true;
-	}
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	bUseControllerRotationPitch = true;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = true;
+	
+	// if(!FlyMode_b_On_Off)
+	// {
+	// 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	// 	bUseControllerRotationPitch = true;
+	// 	bUseControllerRotationYaw = true;
+	// 	bUseControllerRotationRoll = true;
+	// }
 	// @@ 캐릭터 없어짐 @@@
 	// else
 	// {
@@ -706,7 +712,7 @@ void AJSH_Player::Fly_Up_Down(const FInputActionValue& Value)
 
 void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& Value)
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("오잉"))
 	// @@ 캐릭터 없어짐 @@
 	// if (GetCharacterMovement()->IsFlying())
 	// {
@@ -727,10 +733,14 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 	// {
 	// 	FlyMode();	
 	// }
-
+	if (GetCharacterMovement()->IsFlying())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("f111"))
+	}
 	
 	if (GetCharacterMovement()->IsFlying())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("f222"))
 		if (!DisableEdit_b) return;
 
 		// 입력 값에서 Up/Down 액션 값 추출
@@ -744,6 +754,7 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 // (Q) 아래로 내려가는 -> 내려갈때 레이쏴서 일정 거리 가까워지면 FlyMode 종료 
 void AJSH_Player::Fly_Down_Ray(const FInputActionValue& Value)
 {
+	UE_LOG(LogTemp, Warning, TEXT("down"));
 	NetMulti_Fly_Down_Ray(Value);
 }
 
@@ -832,9 +843,6 @@ void AJSH_Player::EditorMode()
 
 void AJSH_Player::NetMulti_EditorMode_Implementation()
 {
-	
-
-	
 	// Editor Mode On
 	if (!EditorMode_B)
 	{
@@ -963,7 +971,8 @@ void AJSH_Player::EnableEdit()
 	if (!EditorMode_B) return;
 	
 	DisableEdit_b = false;
-
+	DisableEdit2_b = false;
+	
 	// 기즈모 Tick 제어를 위한 (Enable Edit 상태일 때 Ray 쏘도록)
 	EnableEditSystem = true;
 	
@@ -1013,8 +1022,11 @@ void AJSH_Player::EnableEdit()
 
 void AJSH_Player::DisableEdit()
 {
-	DisableEdit_b = true;
+	if (!EditorMode_B) return;
 
+	DisableEdit_b = true;
+	DisableEdit2_b = true;
+	
 	// 기즈모 Tick 제어를 위한 (Enable Edit 상태일 때 Ray 쏘도록)
 	EnableEditSystem = false;
 	
@@ -1116,10 +1128,12 @@ void AJSH_Player::G_SelecteMode()
 {
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
-
-	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
 	if (Gizmo_Clicking_forError) return;
 
+	// 여기는 UI 바뀌는거 넣음 될 듯
+	
+	if (Editor_SpawnActor == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
 	Editor_SpawnActor = nullptr;
 
@@ -1135,6 +1149,12 @@ void AJSH_Player::G_TranslateMode()
 {
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+
+	// 여기는 UI 바뀌는거 넣음 될 듯
+	
+	if (Editor_SpawnActor == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g translate"));
 	Gizmo_TranslateMode = true;
 	Gizmo_RotateMode = false;
@@ -1151,6 +1171,12 @@ void AJSH_Player::G_RotateMode()
 {
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+
+	// 여기는 UI 바뀌는거 넣음 될 듯
+	
+	if (Editor_SpawnActor == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g  rotate"));
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = true;
@@ -1167,6 +1193,12 @@ void AJSH_Player::G_SclaeMode()
 {
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+
+	// 여기는 UI 바뀌는거 넣음 될 듯 
+	
+	if (Editor_SpawnActor == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g scale"));
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = false;

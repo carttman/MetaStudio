@@ -324,7 +324,10 @@ public:
 	class AJSH_Editor_SpawnActor* Editor_SpawnActor;
 
 	UPROPERTY(replicated)
-	bool DisableEdit_b = false;
+	bool DisableEdit_b = true;
+
+	UPROPERTY(replicated)
+	bool DisableEdit2_b = false;
 
 #pragma endregion
 
