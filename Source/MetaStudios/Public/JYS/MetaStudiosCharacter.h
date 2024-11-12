@@ -174,6 +174,7 @@ public:
 
 	bool activeBooster = true;
 
+
 protected:
 
 	/** Called for movement input */

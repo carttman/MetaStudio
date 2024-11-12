@@ -502,6 +502,7 @@ void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarAc
 	{
 		CarActor->player = this;
 		GetMesh()->SetVisibility(false);
+		CarActor->RidingPlayer->SetVisibility(true);
 		CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
 	else

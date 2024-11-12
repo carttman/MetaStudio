@@ -38,6 +38,9 @@ ACarPawn::ACarPawn()
 	ThrusterComponent2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ThrusterComponent2"));
 	ThrusterComponent2->SetupAttachment(CarMesh);
 
+	RidingPlayer = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("playerVisible"));
+	RidingPlayer->SetupAttachment(CarMesh);
+
 }
 
 // Called when the game starts or when spawned
@@ -287,6 +290,7 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 
 		//characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
+		RidingPlayer->SetVisibility(false);
 
 		player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
