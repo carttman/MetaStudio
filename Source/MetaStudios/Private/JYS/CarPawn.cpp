@@ -128,6 +128,8 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 		Server_OnMyActionMove(true);
 		return;
 	}
+
+	if (v.X <= 0.0f)	return;
 	
 	//MoveStop = false;
 	direction.X = v.X;
@@ -152,7 +154,6 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
 	
-	//ActivateThruster(true);
 	Server_OnMyActionMove(false);
 }
 
