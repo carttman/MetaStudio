@@ -208,10 +208,11 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 	FVector2D v = value.Get<FVector2D>();
 	if (v.X <= 0.0f && MoveStop == false)
 	{
-		//MoveStop = true;
 		Server_OnMyActionMoveSpaceship(true);
 		return;
 	}
+
+	if( v.X <= 0.0f )	return;
 
 	//MoveStop = false;
 	direction.X = v.X;
@@ -233,9 +234,13 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
 
-	
 	Server_OnMyActionMoveSpaceship(false);
 
+}
+
+void ASpaceshipPawn::Server_OnMyActionMoveSpaceship_Implementation(bool bMove)
+{
+	MoveStop = bMove;
 }
 
 void ASpaceshipPawn::OnMyActionLook(const FInputActionValue& value)
@@ -315,11 +320,6 @@ void ASpaceshipPawn::ApplyRollBack()
 void ASpaceshipPawn::Server_UpdateTransformSpaceship_Implementation(FVector newLocation, FRotator newRotation)
 {
 	SetActorLocationAndRotation(newLocation, newRotation);
-}
-
-void ASpaceshipPawn::Server_OnMyActionMoveSpaceship_Implementation(bool bMove)
-{
-	MoveStop = bMove;
 }
 
 void ASpaceshipPawn::Server_StartFlyEffect_Implementation()
