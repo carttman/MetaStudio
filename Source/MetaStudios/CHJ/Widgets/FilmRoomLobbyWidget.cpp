@@ -6,6 +6,7 @@
 #include "FIlmSessionSlotWidget.h"
 #include "OnlineSubsystem.h"
 #include "Components/Button.h"
+#include "Components/CircularThrobber.h"
 #include "Components/ComboBoxString.h"
 #include "Components/EditableText.h"
 #include "Components/Overlay.h"
@@ -124,12 +125,14 @@ void UFilmRoomLobbyWidget::SetFindActive(bool value)
 		// 찾기 시도
 		FS_Text_Finding->SetVisibility(ESlateVisibility::Visible);
 		FS_Button_FindSessions->SetIsEnabled(false);
+		Trobber_FindSession->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		// 찾기 끝
 		FS_Text_Finding->SetVisibility(ESlateVisibility::Hidden);
 		FS_Button_FindSessions->SetIsEnabled(true);
+		Trobber_FindSession->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 

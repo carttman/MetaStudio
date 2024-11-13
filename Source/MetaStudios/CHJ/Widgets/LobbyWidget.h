@@ -101,4 +101,7 @@ public:
 	TArray<FString> FilmRoomValue;
 	
 	void GetPlayerNickName();
+	
+	UPROPERTY(meta=(BindWidget))
+	class UCircularThrobber* Trobber_FindSession;
 };

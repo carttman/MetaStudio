@@ -101,4 +101,8 @@ public:
 	TArray<FString> FilmRoomValue;
 	
 	void SetFilmRoomCombo();
+
+	UPROPERTY(meta=(BindWidget))
+	class UCircularThrobber* Trobber_FindSession;
+	
 };

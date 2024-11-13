@@ -12,6 +12,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
 #include "SessionSlotWidget.h"
+#include "Components/CircularThrobber.h"
 #include "Components/ComboBoxString.h"
 #include "Components/Overlay.h"
 #include "Components/UniformGridPanel.h"
@@ -146,12 +147,14 @@ void ULobbyWidget::SetFindActive(bool value)
 		// 찾기 시도
 		FS_Text_Finding->SetVisibility(ESlateVisibility::Visible);
 		FS_Button_FindSessions->SetIsEnabled(false);
+		Trobber_FindSession->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		// 찾기 끝
 		FS_Text_Finding->SetVisibility(ESlateVisibility::Hidden);
 		FS_Button_FindSessions->SetIsEnabled(true);
+		Trobber_FindSession->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 }
