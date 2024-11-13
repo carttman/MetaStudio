@@ -167,8 +167,6 @@ void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 
 void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 {
-	//APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-
 	if (player)
 	{
 		FVector spaceshipLoc = GetActorLocation();
@@ -182,6 +180,7 @@ void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 
 		//characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
+		Server_EndFlyEffect();
 
 		player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
@@ -265,7 +264,7 @@ void ASpaceshipPawn::OnMoveUp(const FInputActionValue& value)
 	}
 
 
-	SetActorLocation(currentLocation);
+	//SetActorLocation(currentLocation);
 }
 
 void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
@@ -407,23 +406,23 @@ void ASpaceshipPawn::ActivateStartFly(bool bActive)
 
 bool ASpaceshipPawn::CheckLanding()
 {
-	UE_LOG(LogTemp, Warning, TEXT("checkLanding"))
 
 	if (!IsLocallyControlled())	return false;
 	FVector start = GetActorLocation();
-	FVector end = start - FVector(0, 0, LandingDistance);
+	FVector end = start - FVector(0, 0, 10000);
 
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
-
+	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f, 0, 20.0f);
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
 	{
 		DrawDebugLine(GetWorld(), start, end, FColor::Magenta, false, 1.0f, 0, 20.0f);
 
-		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.Location);
+		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.ImpactPoint);
+		UE_LOG(LogTemp, Warning, TEXT("dist : %f - %f"), distanceToGround, LandingDistance)
 
-		if (distanceToGround < LandingDistance && SpaceshipSkeletalMesh && Anim)
+		if (distanceToGround < LandingDistance)
 		{
 			bCantMove = true;
 			bLanded = true;
@@ -434,6 +433,7 @@ bool ASpaceshipPawn::CheckLanding()
 				Server_PlayAnimMontage(Anim->openDoorMontage);
 				}, 2, false);
 			Server_EndFlyEffect();
+
 			return true;
 		}
 	}
