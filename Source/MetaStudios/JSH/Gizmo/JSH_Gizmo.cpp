@@ -2,6 +2,11 @@
 
 
 #include "../Gizmo/JSH_Gizmo.h"
+#include "../Gizmo/JSH_Translate_GizmoBox.h"
+#include "../Gizmo/JSH_Translate_GizmoX.h"
+#include "../Gizmo/JSH_Translate_GizmoY.h"
+#include "../Gizmo/JSH_Translate_GizmoZ.h"
+#include "Kismet/GameplayStatics.h"
 #include "MetaStudios/JSH/JSH_PlayerController.h"
 
 // Sets default values
@@ -28,8 +33,8 @@ AJSH_Gizmo::AJSH_Gizmo()
 		Translate_Box->SetChildActorClass(TranslateBoxClass);
 		Translate_Box->SetRelativeLocationAndRotation(FVector(0, 0, 0), FRotator(0, 0, 0));
 		Translate_Box->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
+		//Origin_Translate_Box = Cast<AJSH_Translate_GizmoBox>(Translate_Box);
 	}
-
 	
 	Translate_X = CreateDefaultSubobject<UChildActorComponent>(TEXT("Translate_X"));
 	Translate_X->SetupAttachment(Translate_Box);
@@ -39,6 +44,7 @@ AJSH_Gizmo::AJSH_Gizmo()
 		Translate_X->SetChildActorClass(Translate_X_Class);
 		Translate_X->SetRelativeLocationAndRotation(FVector(8.0, 0, 0), FRotator(0, 0, 0));
 		Translate_X->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
+		//Origin_Translate_X = Cast<AJSH_Translate_GizmoX>(Translate_X);
 	}
 	
 	
@@ -50,6 +56,7 @@ AJSH_Gizmo::AJSH_Gizmo()
 		Translate_Y->SetChildActorClass(Translate_Y_Class);
 		Translate_Y->SetRelativeLocationAndRotation(FVector(0, 8.0, 0), FRotator(0, 90.0, 0));
 		Translate_Y->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
+		//Origin_Translate_Y = Cast<AJSH_Translate_GizmoY>(Translate_Y);
 	}
 	
 	Translate_Z = CreateDefaultSubobject<UChildActorComponent>(TEXT("Translate_Z"));
@@ -60,6 +67,7 @@ AJSH_Gizmo::AJSH_Gizmo()
 		Translate_Z->SetChildActorClass(Translate_Z_Class);
 		Translate_Z->SetRelativeLocationAndRotation(FVector(0, 0, 8.0), FRotator(90.0, 0, 0));
 		Translate_Z->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
+		//Origin_Translate_Z = Cast<AJSH_Translate_GizmoZ>(Translate_Z);
 	}
 
 	// if (OriginPlayer->Editor_SpawnActor->GizmoX_ON)
@@ -128,15 +136,15 @@ void AJSH_Gizmo::BeginPlay()
 	
 	//ScaleMode();
 
-	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	if (JPlayerController)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Begin_ScaleX"));
-	}
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	// JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	// if (JPlayerController)
+	// {
+	// 	UE_LOG(LogTemp, Error, TEXT("Begin_ScaleX"));
+	// }
+	// OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
 	
 	// 처음 크기
-	InitialScale = GetActorScale3D();
+	// InitialScale = GetActorScale3D();
 
 
 	//ScaleMode();
@@ -235,5 +243,47 @@ void AJSH_Gizmo::ScaleMode()
 #pragma endregion
 
 
+
+void AJSH_Gizmo::BeginPlayerContorller(AJSH_PlayerController* temp)
+{
+	JPlayerController = temp;
+	//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	if (OriginPlayer)
+	{
+		OriginPlayer->Save_Gizmo_TX(this);
+	}
+	
+	//처음 크기
+	InitialScale = GetActorScale3D();
+}
+
+void AJSH_Gizmo::Child_Actor_Detect()
+{
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_X"), Tag_X);
+	if(Tag_X.Num() > 0)
+	{
+		Origin_Translate_X = Cast<AJSH_Translate_GizmoX>(Tag_X[0]);
+	}
+
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Y"), Tag_Y);
+	if(Tag_Y.Num() > 0)
+	{
+		Origin_Translate_Y = Cast<AJSH_Translate_GizmoY>(Tag_Y[0]);
+	}
+
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Z"), Tag_Z);
+	if(Tag_Z.Num() > 0)
+	{
+		Origin_Translate_Z = Cast<AJSH_Translate_GizmoZ>(Tag_Z[0]);
+	}
+
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Box"), Tag_Box);
+	if(Tag_Box.Num() > 0)
+	{
+		Origin_Translate_Box = Cast<AJSH_Translate_GizmoBox>(Tag_Box[0]);
+	}
+	//UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Y"), Tag_Y);
+}
 
 

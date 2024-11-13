@@ -5,7 +5,11 @@
 #include "Components/PrimitiveComponent.h"
 #include "DrawDebugHelpers.h"
 #include "JSH_PlayerController.h"
-#include "Engine/EngineTypes.h" 
+#include "Engine/EngineTypes.h"
+#include "../JSH/Gizmo/JSH_Translate_GizmoX.h"
+#include "../JSH/Gizmo/JSH_Translate_GizmoY.h"
+#include "../JSH/Gizmo/JSH_Translate_GizmoZ.h"
+#include "../JSH/Gizmo/JSH_Translate_GizmoBox.h"
 #include "GameFramework/GameModeBase.h"
 
 // Constructor: Set default values
@@ -167,8 +171,18 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
     if (GizmoClass)
     {
         GizmoActor = GetWorld()->SpawnActorDeferred<AActor>(GizmoClass, ThisTransform);
-        
+
         OriginGizmo = Cast<AJSH_Gizmo>(GizmoActor);
+
+        // Gizmo 내부 컨트롤러 
+        OriginGizmo->BeginPlayerContorller(JPlayerController);
+        // Gizmo 내부 Child Actor 찾기
+        OriginGizmo->Child_Actor_Detect();
+        
+        OriginGizmo->Origin_Translate_X->BeginPlayerContorller(JPlayerController);
+        OriginGizmo->Origin_Translate_Y->BeginPlayerContorller(JPlayerController);
+        OriginGizmo->Origin_Translate_Z->BeginPlayerContorller(JPlayerController);
+        OriginGizmo->Origin_Translate_Box->BeginPlayerContorller(JPlayerController);
         
         // 원랜 켜야하는데 beginplay에서 해주고 있어서 일단 주석 처리
         //AJSH_PlayerController* PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());

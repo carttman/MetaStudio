@@ -58,12 +58,12 @@ void AJSH_Translate_GizmoX::BeginPlay()
 	Super::BeginPlay();
 	
 	
-	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-	if (OriginPlayer)
-	{
-		OriginPlayer->Save_Gizmo_TX(this);
-	}
+	// JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	// OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	// if (OriginPlayer)
+	// {
+	// 	OriginPlayer->Save_Gizmo_TX(this);
+	// }
 }
 
 // Called every frame
@@ -73,10 +73,14 @@ void AJSH_Translate_GizmoX::Tick(float DeltaTime)
 
 	
 	// Editor Mode 마우스 우클릭 시 초기화
-	if (OriginPlayer->DisableEdit_b)
+	if (OriginPlayer != nullptr)
 	{
-		HandleMouseReleaseOutsideActor();
+		if (OriginPlayer->DisableEdit_b)
+		{
+			HandleMouseReleaseOutsideActor();
+		}
 	}
+
 
 	// Gizmo 클릭 시 Tick으로 NotifyActorOnClicked() 돌리기 위한 (Actor에는 Trigger처럼 못함)
 	// if (Clicked)
@@ -214,6 +218,13 @@ void AJSH_Translate_GizmoX::GOnClicked()
 {
 	// Cursor에 오버랩 되었을때 True로 바뀌는 bool값임 , 커서에 마우스 올라가 있을때에만 클릭해도 실행되도록 (왜 넣었는지 기억 안남, 없어도 될듯 싶음)
 	if (!CursorOveringGizmo) return;
+
+	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	if (OriginPlayer)
+	{
+		OriginPlayer->Save_Gizmo_TX(this);
+	}
 	
 	//// 다른 기즈모가 실행 중 이면 , 기능 실행되지 않도록 ////
 	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON || OriginPlayer->Editor_SpawnActor->GizmoZ_ON || OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
@@ -298,7 +309,15 @@ void AJSH_Translate_GizmoX::GOnClicked()
 void AJSH_Translate_GizmoX::BeginCursorOver()
 {
 	//Super::NotifyActorBeginCursorOver();
-	
+	if (OriginPlayer == nullptr)
+	{
+		//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+		OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+		if (OriginPlayer)
+		{
+			OriginPlayer->Save_Gizmo_TX(this);
+		}
+	}
 	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
@@ -366,4 +385,17 @@ void AJSH_Translate_GizmoX::Visible_and_Collision_Off()
 {
 	Origin->SetVisibility(false);
 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
+}
+
+void AJSH_Translate_GizmoX::BeginPlayerContorller(AJSH_PlayerController* temp)
+{
+	if (!HasAuthority()) return;
+
+	JPlayerController = temp;
+	//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	if (OriginPlayer)
+	{
+		OriginPlayer->Save_Gizmo_TX(this);
+	}
 }
