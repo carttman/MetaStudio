@@ -44,6 +44,10 @@ public:
 public:
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 	// virtual void NotifyActorOnReleased(FKey ButtonReleased);
+
+	UFUNCTION()
+	void GOnClicked();
+	
 	
 	UPROPERTY()
 	AJSH_Player* OriginPlayer;
@@ -88,10 +92,14 @@ public:
 	UPROPERTY()
 	bool SelectedGizmo = false;
 	
+	// UFUNCTION()
+	// virtual void NotifyActorBeginCursorOver();
+	// UFUNCTION()
+	// virtual void NotifyActorEndCursorOver();
 	UFUNCTION()
-	virtual void NotifyActorBeginCursorOver();
+	void BeginCursorOver();
 	UFUNCTION()
-	virtual void NotifyActorEndCursorOver();
+	void EndCursorOver();
 	
 	
 	// int32 ConsecutiveHitCount = 0;

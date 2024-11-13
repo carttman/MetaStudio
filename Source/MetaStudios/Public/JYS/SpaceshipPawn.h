@@ -93,8 +93,12 @@ public:
 
 	void ApplyRoll(float RollInput);
 	void ApplyRollBack();
+
 	UPROPERTY(Replicated)
-	bool MoveStop = true;
+	bool MoveStop = true;	
+	
+	/*UPROPERTY(Replicated)
+	bool effect = false;*/
 
 	UFUNCTION(Server, Unreliable)
 	void Server_UpdateTransformSpaceship(FVector newLocation, FRotator newRotation);
@@ -116,17 +120,30 @@ public:
 	bool bLanded = true;
 
 	////////////////Effect//////////////
-	void StartFlyEffect();
 
-	//UPROPERTY(EditAnywhere, Category = "Effects")
-	//class UNiagaraComponent* startFlyFXComponent;
+	UFUNCTION(Server, Reliable)
+	void Server_StartFlyEffect();
 
-	//void ActivateStartFly(bool bActive);
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_StartFlyEffect();
 
-	//UPROPERTY(Replicated)
-	//bool MoveStop = true;
+	void EndFlyEffect();
 
-	//bool activeStartFly = true;
+	UFUNCTION(Server, Reliable)
+	void Server_EndFlyEffect();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_EndFlyEffect();
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UNiagaraComponent* startFlyFXComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UNiagaraComponent* startFlyFXComponent2;
+
+	void ActivateStartFly(bool bActive);
+
+	bool activeStartFly = true;
 
 private:
 	

@@ -50,3 +50,4 @@ void USpaceshipAnimInstance::SetCloseDoorMontagePlayRate()
 	Montage_SetPlayRate(closeDoorMontage, -1);
 	Montage_JumpToSection(TEXT("closeDoorStartSection"));
 }
+

@@ -7,7 +7,9 @@
 #include "JSH_Gizmo.generated.h"
 
 
+// class AJSH_Editor_SpawnActor;
 class AJSH_PlayerController;
+class AJSH_Player;
 
 UCLASS()
 class METASTUDIOS_API AJSH_Gizmo : public AActor
@@ -58,9 +60,6 @@ public:
 	UFUNCTION()
 	void ScaleMode();
 	
-	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
-	virtual void NotifyActorOnReleased(FKey ButtonReleased);
-
 	
 	FVector2D MousePosition;
 	FVector Mouse_WorldLocation;
@@ -95,18 +94,7 @@ public:
 	bool Clicked = false;
 
 
-	UFUNCTION()
-	void OriginColor();
-
-	UFUNCTION()
-	void SelectedColor();
-
-	UPROPERTY()
-	UMaterial* YellowMaterial;
-
-	UPROPERTY()
-	UMaterial* RedMaterial;
-
+\
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scaling")
 	float MinDistance = 100.0f;
@@ -116,5 +104,11 @@ public:
 
 	FVector InitialScale;
 
+
+	// Director에 자신의 정보를 저장하기 위해서
+	UPROPERTY()
+	AJSH_Player* OriginPlayer;
+
+	
 
 };

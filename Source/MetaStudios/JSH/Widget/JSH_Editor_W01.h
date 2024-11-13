@@ -45,4 +45,8 @@ public:
 	FVector Start;
 	FVector End;
 	APlayerController* PlayerController;
+
+
+	UFUNCTION()
+	void Chang_Motorcycle();
 };

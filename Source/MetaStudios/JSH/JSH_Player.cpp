@@ -195,7 +195,7 @@ void AJSH_Player::BeginPlay()
 	}
 
 	FlyMode();
-
+	
 	// 캐릭터 없어져서 그냥 바로 1인칭 시작
 	FollowCamera->SetActive(false);
 	RecordCamera->SetActive(true);
@@ -228,6 +228,14 @@ void AJSH_Player::Tick(float DeltaTime)
 	// {
 	// 	Gizmo_Click();
 	// }
+
+	
+	// 기즈모가 선택되어 있지 않을때 레이를 통해 기즈모를 감지
+	// 기즈모가 선택 모드가 아니고 EnableEdit 모드일때만 Tick 돌게
+	if (!Gizmo_Selected && EnableEditSystem)
+	{
+		Gizmo_Detect();
+	}
 }
 
 
@@ -244,6 +252,7 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AJSH_Player, ClickedEditorActor);
 	DOREPLIFETIME(AJSH_Player, Bool_EditorActorDestroy);
 	DOREPLIFETIME(AJSH_Player, DisableEdit_b);
+	DOREPLIFETIME(AJSH_Player, DisableEdit2_b);
 }
 
 
@@ -311,9 +320,9 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_Del, ETriggerEvent::Started, this, &AJSH_Player::EditorAcotorDestroy);
 
 
-		// // Gizmo Click
-		// EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Triggered, this, &AJSH_Player::Gizmo_Click);
-		// EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Completed, this, &AJSH_Player::Gizmo_Click_End);
+		// Gizmo Click
+		EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Started, this, &AJSH_Player::Gizmo_Click);
+		EnhancedInputComponent->BindAction(IA_Gizmo_Click, ETriggerEvent::Completed, this, &AJSH_Player::Gizmo_Click_End);
 
 
 		// Gizmo Mode
@@ -321,6 +330,8 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_Gizmo_TranslateMode, ETriggerEvent::Started, this, &AJSH_Player::G_TranslateMode);
 		EnhancedInputComponent->BindAction(IA_Gizmo_ScaleMode, ETriggerEvent::Started, this, &AJSH_Player::G_SclaeMode);
 		EnhancedInputComponent->BindAction(IA_Gizmo_RotateMode, ETriggerEvent::Started, this, &AJSH_Player::G_RotateMode);
+
+		EnhancedInputComponent->BindAction(IA_PreviousLocation, ETriggerEvent::Started, this, &AJSH_Player::Return_Previous_location);
 	}
 	else
 	{
@@ -663,7 +674,7 @@ void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 void AJSH_Player::FlyMode()
 {
 	// 메인 플랫폼 일떄 기능 LOCK
-	if(!Bool_MainLock) return;
+	//if(!Bool_MainLock) return;
 	
 	NetMulti_FlyMode();
 
@@ -671,13 +682,18 @@ void AJSH_Player::FlyMode()
 }
 void AJSH_Player::NetMulti_FlyMode_Implementation()
 {
-	if(!FlyMode_b_On_Off)
-	{
-		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		bUseControllerRotationPitch = true;
-		bUseControllerRotationYaw = true;
-		bUseControllerRotationRoll = true;
-	}
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	bUseControllerRotationPitch = true;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = true;
+	
+	// if(!FlyMode_b_On_Off)
+	// {
+	// 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	// 	bUseControllerRotationPitch = true;
+	// 	bUseControllerRotationYaw = true;
+	// 	bUseControllerRotationRoll = true;
+	// }
 	// @@ 캐릭터 없어짐 @@@
 	// else
 	// {
@@ -698,7 +714,7 @@ void AJSH_Player::Fly_Up_Down(const FInputActionValue& Value)
 
 void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& Value)
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("오잉"))
 	// @@ 캐릭터 없어짐 @@
 	// if (GetCharacterMovement()->IsFlying())
 	// {
@@ -719,10 +735,14 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 	// {
 	// 	FlyMode();	
 	// }
-
+	if (GetCharacterMovement()->IsFlying())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("f111"))
+	}
 	
 	if (GetCharacterMovement()->IsFlying())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("f222"))
 		if (!DisableEdit_b) return;
 
 		// 입력 값에서 Up/Down 액션 값 추출
@@ -736,6 +756,7 @@ void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& V
 // (Q) 아래로 내려가는 -> 내려갈때 레이쏴서 일정 거리 가까워지면 FlyMode 종료 
 void AJSH_Player::Fly_Down_Ray(const FInputActionValue& Value)
 {
+	UE_LOG(LogTemp, Warning, TEXT("down"));
 	NetMulti_Fly_Down_Ray(Value);
 }
 
@@ -808,6 +829,9 @@ void AJSH_Player::EditorMode()
 	
 	// 녹화 중이 아닐때에만 Editor 모드 가능
 	if (Record_b_On_Off) return;
+
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
+	if(Gizmo_Clicking_forError) return;
 	
 	
 	NetMulti_EditorMode();
@@ -880,6 +904,7 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		{
 			Editor_SpawnActor->OriginGizmo->Destroy();
 			Editor_SpawnActor = nullptr;
+			
 		}
 		
 		
@@ -900,6 +925,7 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		// Editor 모드 종료 시 저장된 EditorSpwanAcotr Name 삭제
 		// JPlayerController->Editor_SpawnActor = nullptr;
 		Editor_SpawnActor = nullptr; // 에디터 모드가 아닐떄 삭제 못하게
+		
 
 		// @@@캐릭터 없어짐 @@@@@
 		// Fly Mode를 끌때에 아래로 레이 한번 쏴서 , Fly 모드 종료
@@ -949,6 +975,10 @@ void AJSH_Player::EnableEdit()
 	if (!EditorMode_B) return;
 	
 	DisableEdit_b = false;
+	DisableEdit2_b = false;
+	
+	// 기즈모 Tick 제어를 위한 (Enable Edit 상태일 때 Ray 쏘도록)
+	EnableEditSystem = true;
 	
 	// 마우스 우클릭을 안 하고 있으면 , ZoomMode를 Flase로
 	Bool_ZoomMode = false;
@@ -996,7 +1026,13 @@ void AJSH_Player::EnableEdit()
 
 void AJSH_Player::DisableEdit()
 {
+	if (!EditorMode_B) return;
+
 	DisableEdit_b = true;
+	DisableEdit2_b = true;
+	
+	// 기즈모 Tick 제어를 위한 (Enable Edit 상태일 때 Ray 쏘도록)
+	EnableEditSystem = false;
 	
 	// 마우스 우클릭 하고 있으면, ZoomMode를 True로
 	if (!Bool_ZoomMode)
@@ -1037,17 +1073,29 @@ void AJSH_Player::CLickAndDel()
 // EditorActor를 클릭하면 그곳에서 자기 정보를 SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor) 여기로 전달 후 저장
 void AJSH_Player::SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor)
 {
-
 	NetMulti_SaveEditorActor_Implementation(ClickedActor);
 }
 
 void AJSH_Player::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor* ClickedActor)
 {
 	Editor_SpawnActor = ClickedActor;
-	
-	FString tempname = 	ClickedActor->GetName();
-
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *tempname);
+	UE_LOG(LogTemp, Error, TEXT("ss 111"));
+	// 이전 위치 돌아가는 함수 
+	if (Recent_Clicked_SpawnActor == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ss 22"));
+		Recent_Clicked_SpawnActor = ClickedActor;
+		//Recent_Clicked_SpawnActor->Onclicked();
+	}
+	else if (Recent_Clicked_SpawnActor != nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ss 33"));
+		First_Clicked_SpawnActor = Recent_Clicked_SpawnActor;
+		First_Clicked_SpawnActor->Unclicked();
+		Recent_Clicked_SpawnActor = ClickedActor;
+		//Recent_Clicked_SpawnActor->Onclicked();
+		
+	}
 }
 
 
@@ -1096,10 +1144,17 @@ void AJSH_Player::G_SelecteMode()
 {
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+
+	// 여기는 UI 바뀌는거 넣음 될 듯
+	
+	if (Editor_SpawnActor == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
 	Editor_SpawnActor = nullptr;
+	
 
-
+	
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
@@ -1111,6 +1166,12 @@ void AJSH_Player::G_TranslateMode()
 {
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+
+	// 여기는 UI 바뀌는거 넣음 될 듯
+	
+	if (Editor_SpawnActor == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g translate"));
 	Gizmo_TranslateMode = true;
 	Gizmo_RotateMode = false;
@@ -1127,6 +1188,12 @@ void AJSH_Player::G_RotateMode()
 {
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+
+	// 여기는 UI 바뀌는거 넣음 될 듯
+	
+	if (Editor_SpawnActor == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g  rotate"));
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = true;
@@ -1138,10 +1205,17 @@ void AJSH_Player::G_RotateMode()
 	Saved_Gizmo_TB->Visible_and_Collision_Off();
 }
 
+
 void AJSH_Player::G_SclaeMode()
 {
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+
+	// 여기는 UI 바뀌는거 넣음 될 듯 
+	
+	if (Editor_SpawnActor == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g scale"));
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = false;
@@ -1150,7 +1224,242 @@ void AJSH_Player::G_SclaeMode()
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
+	Saved_Gizmo_TB->Visible_and_Collision_Off();
 }
+
+
+void AJSH_Player::Gizmo_Detect()
+{
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+
+	
+	//// 마우스 2d Vector -> 3d Vector ////
+	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
+	{
+		JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
+	}
+	
+	///// Ray ////
+	Start = Mouse_WorldLocation;
+	End = (Mouse_WorldDirection * 10000.0f) + Mouse_WorldLocation;
+	
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel2, Params);
+
+	if (bHit)
+	{
+		// 기즈모가 감지 되었을떄 true -> Gizmo Click이 가능해짐.
+		
+		if (Gizmo_Detecting == false) Gizmo_Detecting = true;
+		
+		//DrawDebugLine(GetWorld(), Start, End, FColor::Purple, false, 10, 0, 0.1);
+		if (Saved_Gizmo_TX != nullptr)
+		{
+			if (HitResult.GetActor())
+			{
+				Saved_Gizmo_TX->BeginCursorOver();
+
+				Saved_Gizmo_TY->EndCursorOver();
+				Saved_Gizmo_TZ->EndCursorOver();
+				Saved_Gizmo_TB->EndCursorOver();
+			}
+		}
+		if (Saved_Gizmo_TY != nullptr)
+		{
+			if (HitResult.GetActor() == Saved_Gizmo_TY)
+			{
+				Saved_Gizmo_TY->BeginCursorOver();
+
+				Saved_Gizmo_TX->EndCursorOver();
+				Saved_Gizmo_TZ->EndCursorOver();
+				Saved_Gizmo_TB->EndCursorOver();
+			}
+		}
+		if (Saved_Gizmo_TZ != nullptr)
+		{
+			if (HitResult.GetActor() == Saved_Gizmo_TZ)
+			{
+				Saved_Gizmo_TZ->BeginCursorOver();
+
+				Saved_Gizmo_TY->EndCursorOver();
+				Saved_Gizmo_TX->EndCursorOver();
+				Saved_Gizmo_TB->EndCursorOver();
+			}
+		}
+		if (Saved_Gizmo_TB != nullptr)
+		{
+			if (HitResult.GetActor() == Saved_Gizmo_TB)
+			{
+				Saved_Gizmo_TB->BeginCursorOver();
+
+				Saved_Gizmo_TY->EndCursorOver();
+				Saved_Gizmo_TX->EndCursorOver();
+				Saved_Gizmo_TZ->EndCursorOver();
+			}
+		}
+	}
+	else
+	{
+		if (Gizmo_Detecting == true) Gizmo_Detecting = false;
+		
+		HitResult.Reset();
+		
+		if (Saved_Gizmo_TX != nullptr)
+		{
+			Saved_Gizmo_TX->EndCursorOver();
+		}
+		if (Saved_Gizmo_TY != nullptr)
+		{
+			Saved_Gizmo_TY->EndCursorOver();
+		}
+		if (Saved_Gizmo_TZ != nullptr)
+		{
+			Saved_Gizmo_TZ->EndCursorOver();
+		}
+		if (Saved_Gizmo_TB != nullptr)
+		{
+			Saved_Gizmo_TB->EndCursorOver();
+		}
+	}
+}
+
+
+void AJSH_Player::Gizmo_Click()
+{
+
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+	
+	// 기즈모가 감지되어 있지 않다면 , 클릭 x
+	if (Gizmo_Detecting == false) return;
+
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
+	Gizmo_Clicking_forError = true;
+	
+	if (Saved_Gizmo_TX != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_TX)
+		{
+			Saved_Gizmo_TX->GOnClicked();
+			Clicked_TX = true;
+		}
+	}
+	
+	if (Saved_Gizmo_TY != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_TY)
+		{
+			Saved_Gizmo_TY->GOnClicked();
+			Clicked_TY = true;
+		}
+	}
+
+	if (Saved_Gizmo_TZ != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_TZ)
+		{
+			Saved_Gizmo_TZ->GOnClicked();
+			Clicked_TZ = true;
+		}
+	}
+	
+	if (Saved_Gizmo_TB != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_TB)
+		{
+			Saved_Gizmo_TB->GOnClicked();
+			Clicked_TB = true;
+		}
+	}
+	
+	
+	// Last Location 저장
+	if (Editor_SpawnActor != nullptr)
+	{
+		Editor_SpawnActor->AddPreviousLocation(Editor_SpawnActor->GetActorLocation());
+		//Previous_Click_Actor = nullptr;
+	}
+}
+
+void AJSH_Player::Gizmo_Click_End()
+{
+	if (!Gizmo_Clicking_forError) return;
+
+	if (Clicked_TX)
+	{
+		Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
+	}
+	if (Clicked_TY)
+	{
+		Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
+	}
+	if (Clicked_TZ)
+	{
+		Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
+	}
+	if (Clicked_TB)
+	{
+		Saved_Gizmo_TB->HandleMouseReleaseOutsideActor();
+	}
+
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
+	Gizmo_Clicking_forError = false;
+}
+
+
+void AJSH_Player::AddPreviousLocation(const FVector& newLocation)
+{
+	
+	if (PreviousLocations.size() >= MaxLocations)
+	{
+		PreviousLocations.pop();  // 제일 오래된 위치 제거
+	}
+	PreviousLocations.push(newLocation);
+}
+
+
+void AJSH_Player::Return_Previous_location()
+{
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+	
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+
+	// 여기는 UI 바뀌는거 넣음 될 듯
+	if (Editor_SpawnActor == nullptr) return;
+	////////////////////////////////////////////////////////////////////////////////
+
+	
+	if (Now_Click_Actor != nullptr && Now_Click_Actor->PreviousLocations.size() >= 1)
+	{
+		Now_Click_Actor->ReturnPreviousLocation();
+		UE_LOG(LogTemp, Error, TEXT("~ 1"));
+	}
+	else if (Now_Click_Actor->PreviousLocations.size() == 0 && Previous_Click_Actor != nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("~ 2-1"));
+		SaveEditorActor(Previous_Click_Actor);
+		//Previous_Click_Actor->GizmoSpawn();
+		Previous_Click_Actor = nullptr;
+		UE_LOG(LogTemp, Error, TEXT("~ 2-2"));
+	}
+	else
+	{
+		if (Editor_SpawnActor != nullptr)
+		{
+			Editor_SpawnActor->ReturnPreviousLocation();
+			UE_LOG(LogTemp, Error, TEXT("~ 3"));
+		}
+	}
+
+	
+	// 값 초기화는 Editor Spawn Actor에서 해주고 있음 (새로 다른 actor 클릭했을 시)
+}
+
+
+
+
 #pragma endregion
 
 
@@ -1327,6 +1636,7 @@ void AJSH_Player::Esc()
 	if (EditorMode_B == true)
 	{
 		Editor_SpawnActor = nullptr;
+		
 	}
 	// Editor 모드아닐때 ESC 방 나가기
 	else

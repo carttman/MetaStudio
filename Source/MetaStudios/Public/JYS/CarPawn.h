@@ -98,7 +98,6 @@ public:
 
 	void ActivateThruster(bool bActive);
 
-
 	bool ActiveThruster = true;
 
 	FVector MovementDirection;
@@ -108,8 +107,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 1000.0f;
 
-
-
-
+	////////////플레이어가 앉아 있는 자세 Visible 껐다 켜기//////////////
+	UPROPERTY(EditAnywhere)
+	class USkeletalMeshComponent* RidingPlayer;
 
 };

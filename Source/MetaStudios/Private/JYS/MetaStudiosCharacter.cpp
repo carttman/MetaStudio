@@ -19,6 +19,8 @@
 #include "JYS/SpaceshipPawn.h"
 #include "JYS/CarPawn.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "JYS/PlayerAnimInstance.h"
+
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -74,6 +76,8 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	BoosterFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent"));
 	BoosterFXComponent->SetupAttachment(GetMesh());
 
+	BoosterFXComponent2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent2"));
+	BoosterFXComponent2->SetupAttachment(GetMesh());
 
 }
 
@@ -101,6 +105,42 @@ void AMetaStudiosCharacter::BeginPlay()
 
 	ActivateBooster(false);
 
+	Anim = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+
+}
+
+//////////////////////Animation/////////////////
+void AMetaStudiosCharacter::Server_PlayAnimMontage_Implementation(class UAnimMontage* montageToPlay, float playRate /*= 1.0f*/, FName startSection /*= NAME_None*/)
+{
+	NetMulticast_PlayAnimMontage(montageToPlay, playRate, startSection);
+}
+
+void AMetaStudiosCharacter::NetMulticast_PlayAnimMontage_Implementation(class UAnimMontage* montageToPlay, float playRate /*= 1.0f*/, FName startSection /*= NAME_None*/)
+{
+	if (montageToPlay)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("dddddddddddddd"))
+	}
+	if (Anim)
+	{
+		Anim->Montage_Play(montageToPlay, playRate, EMontagePlayReturnType::MontageLength);
+		UE_LOG(LogTemp, Warning, TEXT("aaaaaaaaaaaaaaaaaaaaaaa"))
+	}
+	else
+	{
+		FString output;
+		output = Anim == nullptr ? TEXT("NULL") : *Anim->GetName();
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *output);
+	}
+
+}
+
+void AMetaStudiosCharacter::PickUpAnim()
+{
+	if (Anim)
+	{
+		Server_PlayAnimMontage(Anim->pickUpMontage);
+	}
 }
 
 //////////////////////Input////////////////////////////////
@@ -294,6 +334,7 @@ void AMetaStudiosCharacter::GravityScaleOn()
 	GetCharacterMovement()->GravityScale = GravityScaleNormal;
 }
 
+////////////////////////Effect///////////////////
 void AMetaStudiosCharacter::ActivateBooster(bool bActive)
 {
 	if (activeBooster == bActive)	return;
@@ -308,6 +349,17 @@ void AMetaStudiosCharacter::ActivateBooster(bool bActive)
 		else
 		{
 			BoosterFXComponent->Deactivate();
+		}
+	}
+	if (BoosterFXComponent2)
+	{
+		if (bActive)
+		{
+			BoosterFXComponent2->Activate();
+		}
+		else
+		{
+			BoosterFXComponent2->Deactivate();
 		}
 	}
 }
@@ -349,17 +401,26 @@ void AMetaStudiosCharacter::NetMulticast_ChangeCameraMode_Implementation()
 void AMetaStudiosCharacter::SelectAutoMobile()
 {
 	if (!IsLocallyControlled())	return;
-
-	float spaceshipDist = GetDistanceTo(spaceshipActor);
-	float carDist = GetDistanceTo(carActor);
-
-	if (carDist < spaceshipDist)
+	if (spaceshipActor != nullptr && carActor != nullptr)
 	{
-		Server_EnterCar();
+		float spaceshipDist = GetDistanceTo(spaceshipActor);
+		float carDist = GetDistanceTo(carActor);
+
+		if (carDist < spaceshipDist)
+		{
+			Server_EnterCar();
+		}
+		else
+		{
+			Server_EnterSpaceship();
+		}
 	}
 	else
 	{
-		Server_EnterSpaceship();
+		if (spaceshipActor != nullptr)
+			Server_EnterSpaceship();
+		else if (carActor != nullptr)
+			Server_EnterCar();
 	}
 }
 
@@ -462,6 +523,7 @@ void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarAc
 	{
 		CarActor->player = this;
 		GetMesh()->SetVisibility(false);
+		CarActor->RidingPlayer->SetVisibility(true);
 		CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
 	else
@@ -533,6 +595,7 @@ void AMetaStudiosCharacter::NetMulticast_FindObject_Implementation()
 	if (nearActor != nullptr)
 	{
 		DestroyObject();
+		PickUpAnim();
 	}
 }
 
