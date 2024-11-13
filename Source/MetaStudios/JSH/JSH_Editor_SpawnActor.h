@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Gizmo/JSH_Gizmo.h"
@@ -32,6 +34,11 @@ public:
 	UFUNCTION()
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 
+	UFUNCTION()
+	void Onclicked();
+	UFUNCTION()
+	void Unclicked();
+	
 	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
 	
@@ -60,5 +67,18 @@ public:
 	bool GizmoY_ON = false;
 	bool GizmoZ_ON = false;
 	bool GizmoB_ON = false;
+
+
+	
+	// SpawnActor 이전 위치 저장
+
+	
+	UFUNCTION()
+	void ReturnPreviousLocation();
+	UFUNCTION()
+	void AddPreviousLocation(const FVector& newLocation);
+	
+	std::stack<FVector> PreviousLocations;
+	const int MaxLocations = 5;
 	
 };

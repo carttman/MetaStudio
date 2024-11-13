@@ -2,7 +2,6 @@
 
 
 #include "../Gizmo/JSH_Gizmo.h"
-
 #include "MetaStudios/JSH/JSH_PlayerController.h"
 
 // Sets default values
@@ -134,12 +133,14 @@ void AJSH_Gizmo::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Begin_ScaleX"));
 	}
-
+	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	
 	// 처음 크기
 	InitialScale = GetActorScale3D();
 
 
 	//ScaleMode();
+	
 	
 }
 
@@ -162,11 +163,35 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 			Scale_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
 		}
 	}
+
 	
-	if (Clicked)
-	{
-		NotifyActorOnClicked();
-	}
+	// if (OriginPlayer && OriginPlayer->Editor_SpawnActor != nullptr)
+	// {
+	// 	FVector dd = OriginPlayer->Editor_SpawnActor->GetActorLocation();
+	// 	FVector d2 = GetActorLocation();
+	//
+	// 	if (dd != d2)
+	// 	{
+	// 		SetActorTransform( OriginPlayer->Editor_SpawnActor->GetActorTransform()); 
+	// 	}
+	// }
+	//
+
+
+
+
+	// if (GizmoActor != nullptr)
+	// {
+	//     FVector dd = GizmoActor->GetActorLocation();
+	//     FVector d2 = this->GetActorLocation();
+	//     if (dd != d2)
+	//     {
+	//         if (GizmoActor != nullptr)
+	//         {
+	//             GizmoActor->SetActorTransform(this->GetActorTransform()); 
+	//         }
+	//     }  
+	// }
 
 }
 
@@ -211,26 +236,4 @@ void AJSH_Gizmo::ScaleMode()
 
 
 
-#pragma region Ing
 
-void AJSH_Gizmo::NotifyActorOnClicked(FKey ButtonPressed)
-{
-	Super::NotifyActorOnClicked(ButtonPressed);
-}
-
-
-
-void AJSH_Gizmo::NotifyActorOnReleased(FKey ButtonReleased)
-{
-	Super::NotifyActorOnReleased(ButtonReleased);
-}
-
-void AJSH_Gizmo::OriginColor()
-{
-}
-
-void AJSH_Gizmo::SelectedColor()
-{
-}
-
-#pragma endregion

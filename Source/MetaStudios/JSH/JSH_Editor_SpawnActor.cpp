@@ -64,22 +64,25 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
            {
             AssetMesh->SetRenderCustomDepth(false);
             AssetMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
-            if (GizmoActor && GizmoActor != nullptr)
-            {
-                GizmoActor->Destroy();
-            }
+            // if (GizmoActor && IsValid(GizmoActor) && GizmoActor->GetWorld())
+            // {
+            //     GizmoActor->Destroy();
+            //     // GizmoActor->SetActorHiddenInGame(false);
+            // }
         }  
     }
     
-    if (GizmoActor && GizmoActor != nullptr)
-    {
-        FVector dd = GizmoActor->GetActorLocation();
-        FVector d2 = this->GetActorLocation();
-        if (dd != d2)
-        {
-            GizmoActor->SetActorTransform(this->GetActorTransform()); 
-        }
-    }
+    
+    // if (GizmoActor != nullptr)
+    // {
+    //     FVector gizmoLocation = GizmoActor->GetActorLocation();
+    //     FVector currentLocation = this->GetActorLocation();
+    //
+    //     if (!gizmoLocation.Equals(currentLocation))
+    //     {
+    //         GizmoActor->SetActorTransform(this->GetActorTransform());
+    //     }
+    // }
 }
 
 
@@ -89,12 +92,59 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     Super::NotifyActorOnClicked(ButtonPressed);
 
     if (!JPlayerController) return;
-    
+
+    //겹쳐져 있을 때에 기즈모가 클릭되고 스폰액터는 클릭 안 되도록
+    if (OriginPlayer->Gizmo_Detecting) return;
+
+    UE_LOG(LogTemp, Error, TEXT("saved"));
     // 클릭 했을때 자신의 정보를 Player에 저장
     OriginPlayer->SaveEditorActor(this);
+
+    
+    // 이전 위치 돌아가는 함수 
+    if (OriginPlayer->Now_Click_Actor == nullptr)
+    {
+        OriginPlayer->Now_Click_Actor = this;
+    }
+    else if (OriginPlayer->Now_Click_Actor != nullptr)
+    {
+        OriginPlayer->Previous_Click_Actor = OriginPlayer->Now_Click_Actor;
+        OriginPlayer->Now_Click_Actor = this;
+    }
+    
+
+    // // 이전 위치 돌아가기 위해 저장해뒀던 값을 초기화 
+    // while (!OriginPlayer->PreviousLocations.empty())
+    // {
+    //     OriginPlayer->PreviousLocations.pop();
+    // }
+
+
     GizmoSpawn();
 
+    // else
+    // {
+    //     GizmoActor->SetActorHiddenInGame(false);
+    // }
+
     UE_LOG(LogTemp, Error, TEXT("Click"));
+}
+
+void AJSH_Editor_SpawnActor::Onclicked()
+{
+    AssetMesh->SetRenderCustomDepth(true);
+    AssetMesh->SetCollisionProfileName(TEXT("NoCollision"));
+}
+
+void AJSH_Editor_SpawnActor::Unclicked()
+{
+    // AssetMesh->SetRenderCustomDepth(false);
+    // AssetMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+    if (GizmoActor && IsValid(GizmoActor) && GizmoActor->GetWorld())
+    {
+        GizmoActor->Destroy();
+        // GizmoActor->SetActorHiddenInGame(false);
+    }
 }
 
 
@@ -128,6 +178,12 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
         {
             UE_LOG(LogTemp, Error, TEXT("Component 111111"));
             UGameplayStatics::FinishSpawningActor(GizmoActor, ThisTransform);
+
+            // GizmoActor 스폰 논리
+            if (GizmoActor != nullptr)
+            {
+                GizmoActor->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+            }
         }
     }
 }
@@ -139,4 +195,45 @@ void AJSH_Editor_SpawnActor::DestroyThis()
     {
         GizmoActor->Destroy();
     }
+}
+
+
+void AJSH_Editor_SpawnActor::AddPreviousLocation(const FVector& newLocation)
+{
+    if (PreviousLocations.size() >= MaxLocations)
+    {
+        PreviousLocations.pop();  // 제일 오래된 위치 제거
+    }
+    PreviousLocations.push(newLocation);
+}
+
+
+
+void AJSH_Editor_SpawnActor::ReturnPreviousLocation()
+{
+    if (!OriginPlayer->EditorMode_B) return;
+    if (OriginPlayer->DisableEdit_b) return;
+	
+    // 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+    if (OriginPlayer->Gizmo_Clicking_forError) return;
+
+    // 여기는 UI 바뀌는거 넣음 될 듯
+    if (OriginPlayer->Editor_SpawnActor == nullptr) return;
+    ////////////////////////////////////////////////////////////////////////////////
+
+    
+	
+    // 값 없을 때 팅기는 문제 때문에
+    if (PreviousLocations.size() == 0) return;
+	
+	
+    FVector previousLocation = PreviousLocations.top();
+    PreviousLocations.pop();  
+
+    if (this->GetActorLocation() != previousLocation)
+    {
+        this->SetActorLocation(previousLocation);
+    }
+
+    // 값 초기화는 Editor Spawn Actor에서 해주고 있음 (새로 다른 actor 클릭했을 시)
 }
