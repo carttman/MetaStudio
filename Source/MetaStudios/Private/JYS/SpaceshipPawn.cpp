@@ -31,8 +31,11 @@ ASpaceshipPawn::ASpaceshipPawn()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArm);
 
-	/*startFlyFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("startFlyEffectComponent"));
-	startFlyFXComponent->SetupAttachment(SpaceshipSkeletalMesh);*/
+	startFlyFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("startFlyEffectComponent"));
+	startFlyFXComponent->SetupAttachment(SpaceshipSkeletalMesh);
+
+	startFlyFXComponent2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("startFlyEffectComponent2"));
+	startFlyFXComponent2->SetupAttachment(SpaceshipSkeletalMesh);
 }
 
 // Called when the game starts or when spawned
@@ -46,7 +49,7 @@ void ASpaceshipPawn::BeginPlay()
 	{
 		Anim->SetLegUpMontagePlayRate();
 	}
-	// ActivateStartFly(false);
+	ActivateStartFly(false);
 }
 
 
@@ -69,7 +72,17 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 	currentRotation.Pitch = 0.0f;
 	SetActorRotation(currentRotation);
 
-	// ActivateStartFly(!MoveStop);
+	if (MoveStop == true)
+	{
+		ApplyRollBack();
+	}
+
+
+	//ActivateStartFly(!MoveStop);
+	//if (MoveStop)
+	//{
+	//	ActivateStartFly(false);
+	//}
 }
 
 // Called to bind functionality to input
@@ -154,8 +167,6 @@ void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 
 void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 {
-	//APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-
 	if (player)
 	{
 		FVector spaceshipLoc = GetActorLocation();
@@ -169,6 +180,7 @@ void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 
 		//characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
+		Server_EndFlyEffect();
 
 		player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
@@ -196,10 +208,11 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 	FVector2D v = value.Get<FVector2D>();
 	if (v.X <= 0.0f && MoveStop == false)
 	{
-		//MoveStop = true;
 		Server_OnMyActionMoveSpaceship(true);
 		return;
 	}
+
+	if( v.X <= 0.0f )	return;
 
 	//MoveStop = false;
 	direction.X = v.X;
@@ -221,9 +234,13 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
 
-	//ActivateThruster(true);
 	Server_OnMyActionMoveSpaceship(false);
 
+}
+
+void ASpaceshipPawn::Server_OnMyActionMoveSpaceship_Implementation(bool bMove)
+{
+	MoveStop = bMove;
 }
 
 void ASpaceshipPawn::OnMyActionLook(const FInputActionValue& value)
@@ -247,10 +264,12 @@ void ASpaceshipPawn::OnMoveUp(const FInputActionValue& value)
 	{
 		bLanded = false;
 		MoveUpAnim();
+		Server_StartFlyEffect();
+		// ActivateStartFly(true);
 	}
 
-	StartFlyEffect();
-	SetActorLocation(currentLocation);
+
+	//SetActorLocation(currentLocation);
 }
 
 void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
@@ -263,6 +282,7 @@ void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
 	// 수직 하강
 	currentLocation.Z -= MovementSpeed * GetWorld()->GetDeltaSeconds();
 	SetActorLocation(currentLocation);
+
 }
 
 void ASpaceshipPawn::ApplyRoll(float RollInput)
@@ -280,7 +300,6 @@ void ASpaceshipPawn::ApplyRoll(float RollInput)
 	CurrentRotation.Yaw = YawCur + 50.0f * RollInput * GetWorld()->DeltaTimeSeconds;
 
 	GetController()->SetControlRotation(CurrentRotation);
-
 }
 
 void ASpaceshipPawn::ApplyRollBack()
@@ -296,22 +315,19 @@ void ASpaceshipPawn::ApplyRollBack()
 	CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, 0.0f, GetWorld()->GetDeltaSeconds(), 3.0f);
 
 	GetController()->SetControlRotation(CurrentRotation);
-
 }
 
 void ASpaceshipPawn::Server_UpdateTransformSpaceship_Implementation(FVector newLocation, FRotator newRotation)
 {
 	SetActorLocationAndRotation(newLocation, newRotation);
-
 }
 
-void ASpaceshipPawn::Server_OnMyActionMoveSpaceship_Implementation(bool bMove)
+void ASpaceshipPawn::Server_StartFlyEffect_Implementation()
 {
-	MoveStop = bMove;
-
+	NetMulticast_StartFlyEffect();
 }
 
-void ASpaceshipPawn::StartFlyEffect()
+void ASpaceshipPawn::NetMulticast_StartFlyEffect_Implementation()
 {
 	FVector start = GetActorLocation();
 	FVector end = start - FVector(0, 0, 1000.0f);
@@ -332,7 +348,7 @@ void ASpaceshipPawn::StartFlyEffect()
 			currentLocation.Z += 500.0f * GetWorld()->GetDeltaSeconds();
 
 			/////////////////우주선 출발할 때 이펙트/////////////////
-			//ActivateStartFly(true);
+			ActivateStartFly(true);
 		}
 
 		if (FVector::Dist(currentLocation, hitResult.Location) > 10.0f)
@@ -341,48 +357,72 @@ void ASpaceshipPawn::StartFlyEffect()
 		}
 		SetActorLocation(currentLocation);
 	}
-
 }
 
-//void ASpaceshipPawn::ActivateStartFly(bool bActive)
-//{
-//	if (activeStartFly == bActive)	return;
-//	activeStartFly = bActive;
-//
-//	if (startFlyFXComponent)
-//	{
-//		if (bActive)
-//		{
-//			startFlyFXComponent->Activate();
-//		}
-//		else
-//		{
-//			startFlyFXComponent->Deactivate();
-//		}
-//	}
-//}
+void ASpaceshipPawn::Server_EndFlyEffect_Implementation()
+{
+	NetMulticast_EndFlyEffect();
+}
+
+void ASpaceshipPawn::NetMulticast_EndFlyEffect_Implementation()
+{
+	ActivateStartFly(false);
+}
+
+void ASpaceshipPawn::EndFlyEffect()
+{
+}
+
+void ASpaceshipPawn::ActivateStartFly(bool bActive)
+{
+	if (activeStartFly == bActive)	return;
+	activeStartFly = bActive;
+
+	if (startFlyFXComponent)
+	{
+		if (bActive)
+		{
+			startFlyFXComponent->Activate();
+		}
+		else
+		{
+			startFlyFXComponent->Deactivate();
+		}
+	}
+	if (startFlyFXComponent2)
+	{
+		if (bActive)
+		{
+			startFlyFXComponent2->Activate();
+		}
+		else
+		{
+			startFlyFXComponent2->Deactivate();
+		}
+	}
+}
 
 ////////////라인트레이스를 쏴서 일정 거리 이하가 됐을 때 착지 애니메이션 실행/////////////////////
 
 bool ASpaceshipPawn::CheckLanding()
 {
-	UE_LOG(LogTemp, Warning, TEXT("checkLanding"))
 
 	if (!IsLocallyControlled())	return false;
 	FVector start = GetActorLocation();
-	FVector end = start - FVector(0, 0, LandingDistance);
+	FVector end = start - FVector(0, 0, 10000);
 
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
-
+	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f, 0, 20.0f);
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
 	{
 		DrawDebugLine(GetWorld(), start, end, FColor::Magenta, false, 1.0f, 0, 20.0f);
 
-		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.Location);
+		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.ImpactPoint);
+		UE_LOG(LogTemp, Warning, TEXT("dist : %f - %f"), distanceToGround, LandingDistance)
 
-		if (distanceToGround < LandingDistance && SpaceshipSkeletalMesh && Anim)
+		if (distanceToGround < LandingDistance)
 		{
 			bCantMove = true;
 			bLanded = true;
@@ -392,6 +432,8 @@ bool ASpaceshipPawn::CheckLanding()
 			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 				Server_PlayAnimMontage(Anim->openDoorMontage);
 				}, 2, false);
+			Server_EndFlyEffect();
+
 			return true;
 		}
 	}

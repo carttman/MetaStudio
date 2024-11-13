@@ -12,6 +12,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
 #include "SessionSlotWidget.h"
+#include "Components/CircularThrobber.h"
 #include "Components/ComboBoxString.h"
 #include "Components/Overlay.h"
 #include "Components/UniformGridPanel.h"
@@ -117,8 +118,8 @@ void ULobbyWidget::AddSessionSlotWidget(const struct FRoomInfo& info, int32 Room
 	if(!TB_TEXT_SearchSession->GetText().IsEmpty() && info.roomName.Contains(TB_TEXT_SearchSession->GetText().ToString()))
 	{
 		int32 index = UGP_Grid->GetChildrenCount();
-		int32 X = index % 2;
-		int32 Y = index / 2;
+		int32 X = index % 3;
+		int32 Y = index / 3;
 		auto* slot = CreateWidget<USessionSlotWidget>(this , SessionSlotWidgetFactory);
 		slot->UpdateInfo(info);
 		
@@ -127,8 +128,8 @@ void ULobbyWidget::AddSessionSlotWidget(const struct FRoomInfo& info, int32 Room
 	else if(TB_TEXT_SearchSession->GetText().IsEmpty())
 	{
 		int32 index = UGP_Grid->GetChildrenCount();
-		int32 X = index % 2;
-		int32 Y = index / 2;
+		int32 X = index % 3;
+		int32 Y = index / 3;
 		auto* slot = CreateWidget<USessionSlotWidget>(this , SessionSlotWidgetFactory);
 		
 		slot->UpdateInfo(info);
@@ -146,12 +147,14 @@ void ULobbyWidget::SetFindActive(bool value)
 		// 찾기 시도
 		FS_Text_Finding->SetVisibility(ESlateVisibility::Visible);
 		FS_Button_FindSessions->SetIsEnabled(false);
+		Trobber_FindSession->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		// 찾기 끝
 		FS_Text_Finding->SetVisibility(ESlateVisibility::Hidden);
 		FS_Button_FindSessions->SetIsEnabled(true);
+		Trobber_FindSession->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 }

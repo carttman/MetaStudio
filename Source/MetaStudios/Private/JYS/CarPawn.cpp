@@ -59,7 +59,8 @@ void ACarPawn::Tick(float DeltaTime)
 	ActivateThruster(!MoveStop);
 	if (MoveStop == true)
 	{
-		ApplyRollBack();		
+		ApplyRollBack();
+		ActivateThruster(false);
 	}
 
 	Server_UpdateTransform(GetActorLocation(), GetActorRotation());
@@ -127,6 +128,8 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 		Server_OnMyActionMove(true);
 		return;
 	}
+
+	if (v.X <= 0.0f)	return;
 	
 	//MoveStop = false;
 	direction.X = v.X;
@@ -135,10 +138,13 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 	if (direction.X != 0.0f)
 	{
 		ApplyRoll(v.Y);
+		UE_LOG(LogTemp, Warning, TEXT("direction.X != 0.0f"))
 	}	
 	else
 	{
 		ApplyRollBack();
+		UE_LOG(LogTemp, Warning, TEXT("ApplyRollBack"))
+
 	}
 
 	FTransform ttt = FTransform(GetControlRotation());
@@ -148,7 +154,6 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
 	
-	//ActivateThruster(true);
 	Server_OnMyActionMove(false);
 }
 
@@ -260,7 +265,7 @@ void ACarPawn::Server_ExitCar_Implementation()
 			FVector carLoc = GetActorLocation();
 			FRotator carRot = GetActorRotation();
 
-			FVector offset = carRot.RotateVector(FVector(200.0f, 100.0f, 0.0f));
+			FVector offset = carRot.RotateVector(FVector(200.0f, 200.0f, 0.0f));
 			FVector playerSpawnLocation = carLoc + offset;
 
 			player->SetActorLocation(playerSpawnLocation);
@@ -268,6 +273,10 @@ void ACarPawn::Server_ExitCar_Implementation()
 
 			GetController()->Possess(player);
 			UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn Player"));
+
+			FRotator rot = this->GetActorRotation();
+			rot.Roll = 0.0f;
+			this->SetActorRotation(rot);
 		}
 
 	}
@@ -282,7 +291,7 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 		FVector carLoc = GetActorLocation();
 		FRotator carRot = GetActorRotation();
 
-		FVector offset = carRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
+		FVector offset = carRot.RotateVector(FVector(-100.0f, 100.0f, 10.0f));
 		FVector playerSpawnLocation = carLoc + offset;
 
 		player->SetActorLocation(playerSpawnLocation);
@@ -293,6 +302,15 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 		RidingPlayer->SetVisibility(false);
 
 		player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+
+		FRotator CurrentRotation = GetControlRotation();
+
+		float RollAmount = CurrentRotation.Roll;
+		if (RollAmount == 0.0f)	return;
+
+		CurrentRotation.Roll = 0.0f;
+
+		GetController()->SetControlRotation(CurrentRotation);
 	}
 
 }

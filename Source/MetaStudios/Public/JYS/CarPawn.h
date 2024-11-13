@@ -98,7 +98,6 @@ public:
 
 	void ActivateThruster(bool bActive);
 
-
 	bool ActiveThruster = true;
 
 	FVector MovementDirection;
