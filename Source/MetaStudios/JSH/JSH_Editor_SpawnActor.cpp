@@ -64,11 +64,11 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
            {
             AssetMesh->SetRenderCustomDepth(false);
             AssetMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
-            if (GizmoActor && IsValid(GizmoActor) && GizmoActor->GetWorld())
-            {
-                GizmoActor->Destroy();
-                // GizmoActor->SetActorHiddenInGame(false);
-            }
+            // if (GizmoActor && IsValid(GizmoActor) && GizmoActor->GetWorld())
+            // {
+            //     GizmoActor->Destroy();
+            //     // GizmoActor->SetActorHiddenInGame(false);
+            // }
         }  
     }
     
@@ -93,13 +93,15 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
 
     if (!JPlayerController) return;
 
-    // 겹쳐져 있을 때에 기즈모가 클릭되고 스폰액터는 클릭 안 되도록
+    //겹쳐져 있을 때에 기즈모가 클릭되고 스폰액터는 클릭 안 되도록
     if (OriginPlayer->Gizmo_Detecting) return;
-    
+
+    UE_LOG(LogTemp, Error, TEXT("saved"));
     // 클릭 했을때 자신의 정보를 Player에 저장
     OriginPlayer->SaveEditorActor(this);
 
     
+    // 이전 위치 돌아가는 함수 
     if (OriginPlayer->Now_Click_Actor == nullptr)
     {
         OriginPlayer->Now_Click_Actor = this;
@@ -126,6 +128,23 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     // }
 
     UE_LOG(LogTemp, Error, TEXT("Click"));
+}
+
+void AJSH_Editor_SpawnActor::Onclicked()
+{
+    AssetMesh->SetRenderCustomDepth(true);
+    AssetMesh->SetCollisionProfileName(TEXT("NoCollision"));
+}
+
+void AJSH_Editor_SpawnActor::Unclicked()
+{
+    // AssetMesh->SetRenderCustomDepth(false);
+    // AssetMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+    if (GizmoActor && IsValid(GizmoActor) && GizmoActor->GetWorld())
+    {
+        GizmoActor->Destroy();
+        // GizmoActor->SetActorHiddenInGame(false);
+    }
 }
 
 

@@ -34,6 +34,11 @@ public:
 	UFUNCTION()
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 
+	UFUNCTION()
+	void Onclicked();
+	UFUNCTION()
+	void Unclicked();
+	
 	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
 	

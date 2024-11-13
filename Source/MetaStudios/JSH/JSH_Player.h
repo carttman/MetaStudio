@@ -329,7 +329,13 @@ public:
 	void NetMulti_SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
 
 	UPROPERTY()
-	class AJSH_Editor_SpawnActor* Editor_SpawnActor;
+	AJSH_Editor_SpawnActor* Editor_SpawnActor;
+
+
+	UPROPERTY()
+	AJSH_Editor_SpawnActor* First_Clicked_SpawnActor = nullptr;
+	UPROPERTY()
+	AJSH_Editor_SpawnActor* Recent_Clicked_SpawnActor = nullptr;
 
 	UPROPERTY(replicated)
 	bool DisableEdit_b = true;
