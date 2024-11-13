@@ -335,7 +335,10 @@ void AJSH_Translate_GizmoBox::HandleMouseReleaseOutsideActor()
 	firstclick = false;
 	SelectedGizmo = false;
 	CursorOveringGizmo = false;
-	OriginPlayer->Editor_SpawnActor->GizmoB_ON = false;
+	if (OriginPlayer->Editor_SpawnActor != nullptr && OriginPlayer->Editor_SpawnActor->GizmoB_ON != false)
+	{
+		OriginPlayer->Editor_SpawnActor->GizmoB_ON = false;
+	}
 	OriginColor();
 
 	// Else문 반복 실행을 막기 위해

@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include <queue>
+#include <stack>
+
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Gizmo/JSH_Translate_GizmoBox.h"
@@ -17,6 +20,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+class AJSH_Editor_SpawnActor;
 
 // 순환참조 문제로, Include 말고
 class AJSH_PlayerController;
@@ -145,6 +149,10 @@ class AJSH_Player : public ACharacter
 	UInputAction* IA_Gizmo_ScaleMode;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Gizmo_RotateMode;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_PreviousLocation;
 	
 public:
 	AJSH_Player();
@@ -321,10 +329,19 @@ public:
 	void NetMulti_SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
 
 	UPROPERTY()
-	class AJSH_Editor_SpawnActor* Editor_SpawnActor;
+	AJSH_Editor_SpawnActor* Editor_SpawnActor;
+
+
+	UPROPERTY()
+	AJSH_Editor_SpawnActor* First_Clicked_SpawnActor = nullptr;
+	UPROPERTY()
+	AJSH_Editor_SpawnActor* Recent_Clicked_SpawnActor = nullptr;
 
 	UPROPERTY(replicated)
-	bool DisableEdit_b = false;
+	bool DisableEdit_b = true;
+
+	UPROPERTY(replicated)
+	bool DisableEdit2_b = false;
 
 #pragma endregion
 
@@ -421,6 +438,9 @@ public:
 	void Gizmo_Click_End();
 
 	UPROPERTY()
+	bool Gizmo_Clicking_forError = false;
+
+	UPROPERTY()
 	bool Clicked_TX = false;
 	UPROPERTY()
 	bool Clicked_TY = false;
@@ -436,6 +456,24 @@ public:
 	bool Clicking_TY = false;
 	UPROPERTY()
 	bool Clicking_TZ = false;
+
+
+	// SpawnActor 이전 위치 저장
+
+	
+	UFUNCTION()
+	void Return_Previous_location();
+	UFUNCTION()
+	void AddPreviousLocation(const FVector& newLocation);
+	
+	std::stack<FVector> PreviousLocations;
+	const int MaxLocations = 5;
+
+	UPROPERTY()
+	AJSH_Editor_SpawnActor* Previous_Click_Actor;
+
+	UPROPERTY()
+	AJSH_Editor_SpawnActor* Now_Click_Actor;
 	
 #pragma endregion
 
