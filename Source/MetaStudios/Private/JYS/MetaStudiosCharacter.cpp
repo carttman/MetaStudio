@@ -77,7 +77,7 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	BoosterFXComponent->SetupAttachment(GetMesh());
 
 	BoosterFXComponent2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent2"));
-	BoosterFXComponent->SetupAttachment(GetMesh());
+	BoosterFXComponent2->SetupAttachment(GetMesh());
 
 }
 
@@ -126,7 +126,7 @@ void AMetaStudiosCharacter::NetMulticast_PlayAnimMontage_Implementation(class UA
 		Anim->Montage_Play(montageToPlay, playRate, EMontagePlayReturnType::MontageLength);
 		UE_LOG(LogTemp, Warning, TEXT("aaaaaaaaaaaaaaaaaaaaaaa"))
 	}
-	else 
+	else
 	{
 		FString output;
 		output = Anim == nullptr ? TEXT("NULL") : *Anim->GetName();
@@ -334,6 +334,7 @@ void AMetaStudiosCharacter::GravityScaleOn()
 	GetCharacterMovement()->GravityScale = GravityScaleNormal;
 }
 
+////////////////////////Effect///////////////////
 void AMetaStudiosCharacter::ActivateBooster(bool bActive)
 {
 	if (activeBooster == bActive)	return;
@@ -348,6 +349,17 @@ void AMetaStudiosCharacter::ActivateBooster(bool bActive)
 		else
 		{
 			BoosterFXComponent->Deactivate();
+		}
+	}
+	if (BoosterFXComponent2)
+	{
+		if (bActive)
+		{
+			BoosterFXComponent2->Activate();
+		}
+		else
+		{
+			BoosterFXComponent2->Deactivate();
 		}
 	}
 }
@@ -389,17 +401,26 @@ void AMetaStudiosCharacter::NetMulticast_ChangeCameraMode_Implementation()
 void AMetaStudiosCharacter::SelectAutoMobile()
 {
 	if (!IsLocallyControlled())	return;
-
-	float spaceshipDist = GetDistanceTo(spaceshipActor);
-	float carDist = GetDistanceTo(carActor);
-
-	if (carDist < spaceshipDist)
+	if (spaceshipActor != nullptr && carActor != nullptr)
 	{
-		Server_EnterCar();
+		float spaceshipDist = GetDistanceTo(spaceshipActor);
+		float carDist = GetDistanceTo(carActor);
+
+		if (carDist < spaceshipDist)
+		{
+			Server_EnterCar();
+		}
+		else
+		{
+			Server_EnterSpaceship();
+		}
 	}
 	else
 	{
-		Server_EnterSpaceship();
+		if (spaceshipActor != nullptr)
+			Server_EnterSpaceship();
+		else if (carActor != nullptr)
+			Server_EnterCar();
 	}
 }
 
