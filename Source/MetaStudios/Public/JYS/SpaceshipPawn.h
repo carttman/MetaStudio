@@ -80,7 +80,7 @@ public:
 
 	void OnMyActionLook(const FInputActionValue& value);
 
-	float speed = 5000.0f;
+	float speed = 10000.0f;
 
 	UFUNCTION(Server, Unreliable)
 	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
