@@ -5,7 +5,11 @@
 #include "Components/PrimitiveComponent.h"
 #include "DrawDebugHelpers.h"
 #include "JSH_PlayerController.h"
-#include "Engine/EngineTypes.h" 
+#include "Engine/EngineTypes.h"
+#include "../JSH/Gizmo/JSH_Translate_GizmoX.h"
+#include "../JSH/Gizmo/JSH_Translate_GizmoY.h"
+#include "../JSH/Gizmo/JSH_Translate_GizmoZ.h"
+#include "../JSH/Gizmo/JSH_Scale_GizmoX.h"
 #include "GameFramework/GameModeBase.h"
 
 // Constructor: Set default values
@@ -92,7 +96,6 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     Super::NotifyActorOnClicked(ButtonPressed);
 
     if (!JPlayerController) return;
-
     //겹쳐져 있을 때에 기즈모가 클릭되고 스폰액터는 클릭 안 되도록
     if (OriginPlayer->Gizmo_Detecting) return;
 
@@ -150,40 +153,57 @@ void AJSH_Editor_SpawnActor::Unclicked()
 
 void AJSH_Editor_SpawnActor::GizmoSpawn()
 {
+    UE_LOG(LogTemp, Error, TEXT("pak 1"));
     // 1. 현재 Actor 위치 가져오기
     ThisTransform = this->GetActorTransform();
 
-    
+
+    UE_LOG(LogTemp, Error, TEXT("pak 2"));
     // 2. 기즈모를 ThisTransform 위치에 스폰하기
     FActorSpawnParameters SpawnParams;
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	
     AGameModeBase* tt = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
 	
-	
+    UE_LOG(LogTemp, Error, TEXT("pak 3"));
     // 3. 블루프린트 클래스 로드 -> 스폰
     UClass* GizmoClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/JSH/BP/Gizmo/BP_Gizmo.BP_Gizmo_C"));
     
     if (GizmoClass)
     {
+        UE_LOG(LogTemp, Error, TEXT("pak 4"));
         GizmoActor = GetWorld()->SpawnActorDeferred<AActor>(GizmoClass, ThisTransform);
-        
+
         OriginGizmo = Cast<AJSH_Gizmo>(GizmoActor);
+
+        // Gizmo 내부 컨트롤러 -> Gizmo 내부 Child Actor 찾기 -> 내부 child actor들 컨트롤러 로드 -> player에 정보 전달
+        OriginGizmo->BeginPlayerContorller(JPlayerController);
+
+        // Gizmo 내부 Child Actor 찾기
+        //OriginGizmo->Child_Actor_Detect();
+        // OriginGizmo->Origin_Translate_X->BeginPlayerContorller(JPlayerController);
+        // OriginGizmo->Origin_Translate_Y->BeginPlayerContorller(JPlayerController);
+        // OriginGizmo->Origin_Translate_Z->BeginPlayerContorller(JPlayerController);
+        // OriginGizmo->Origin_Translate_Box->BeginPlayerContorller(JPlayerController);
         
+        UE_LOG(LogTemp, Error, TEXT("pak 5"));
         // 원랜 켜야하는데 beginplay에서 해주고 있어서 일단 주석 처리
         //AJSH_PlayerController* PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 
         //AActor* Gizmo = Cast<APawn>(GizmoActor);
         if (GizmoActor)
         {
+            UE_LOG(LogTemp, Error, TEXT("pak 6"));
             UE_LOG(LogTemp, Error, TEXT("Component 111111"));
             UGameplayStatics::FinishSpawningActor(GizmoActor, ThisTransform);
 
-            // GizmoActor 스폰 논리
-            if (GizmoActor != nullptr)
-            {
-                GizmoActor->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-            }
+            // // GizmoActor 스폰 논리
+            // if (GizmoActor != nullptr)
+            // {
+            //     UE_LOG(LogTemp, Error, TEXT("pak 7"));
+            //     //GizmoActor->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+            //     AttachToActor(GizmoActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+            // }
         }
     }
 }

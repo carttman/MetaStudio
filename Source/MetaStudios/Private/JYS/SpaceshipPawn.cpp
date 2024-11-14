@@ -167,8 +167,6 @@ void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 
 void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 {
-	//APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-
 	if (player)
 	{
 		FVector spaceshipLoc = GetActorLocation();
@@ -182,6 +180,7 @@ void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 
 		//characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
+		Server_EndFlyEffect();
 
 		player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
@@ -209,10 +208,11 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 	FVector2D v = value.Get<FVector2D>();
 	if (v.X <= 0.0f && MoveStop == false)
 	{
-		//MoveStop = true;
 		Server_OnMyActionMoveSpaceship(true);
 		return;
 	}
+
+	if( v.X <= 0.0f )	return;
 
 	//MoveStop = false;
 	direction.X = v.X;
@@ -234,9 +234,13 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
 
-	
 	Server_OnMyActionMoveSpaceship(false);
 
+}
+
+void ASpaceshipPawn::Server_OnMyActionMoveSpaceship_Implementation(bool bMove)
+{
+	MoveStop = bMove;
 }
 
 void ASpaceshipPawn::OnMyActionLook(const FInputActionValue& value)
@@ -265,7 +269,7 @@ void ASpaceshipPawn::OnMoveUp(const FInputActionValue& value)
 	}
 
 
-	SetActorLocation(currentLocation);
+	//SetActorLocation(currentLocation);
 }
 
 void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
@@ -316,11 +320,6 @@ void ASpaceshipPawn::ApplyRollBack()
 void ASpaceshipPawn::Server_UpdateTransformSpaceship_Implementation(FVector newLocation, FRotator newRotation)
 {
 	SetActorLocationAndRotation(newLocation, newRotation);
-}
-
-void ASpaceshipPawn::Server_OnMyActionMoveSpaceship_Implementation(bool bMove)
-{
-	MoveStop = bMove;
 }
 
 void ASpaceshipPawn::Server_StartFlyEffect_Implementation()
@@ -407,23 +406,23 @@ void ASpaceshipPawn::ActivateStartFly(bool bActive)
 
 bool ASpaceshipPawn::CheckLanding()
 {
-	UE_LOG(LogTemp, Warning, TEXT("checkLanding"))
 
 	if (!IsLocallyControlled())	return false;
 	FVector start = GetActorLocation();
-	FVector end = start - FVector(0, 0, LandingDistance);
+	FVector end = start - FVector(0, 0, 10000);
 
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
-
+	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f, 0, 20.0f);
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
 	{
 		DrawDebugLine(GetWorld(), start, end, FColor::Magenta, false, 1.0f, 0, 20.0f);
 
-		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.Location);
+		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.ImpactPoint);
+		UE_LOG(LogTemp, Warning, TEXT("dist : %f - %f"), distanceToGround, LandingDistance)
 
-		if (distanceToGround < LandingDistance && SpaceshipSkeletalMesh && Anim)
+		if (distanceToGround < LandingDistance)
 		{
 			bCantMove = true;
 			bLanded = true;
@@ -434,6 +433,7 @@ bool ASpaceshipPawn::CheckLanding()
 				Server_PlayAnimMontage(Anim->openDoorMontage);
 				}, 2, false);
 			Server_EndFlyEffect();
+
 			return true;
 		}
 	}

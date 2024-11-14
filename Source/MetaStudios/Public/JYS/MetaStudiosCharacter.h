@@ -169,7 +169,7 @@ public:
 
 	void ActivateBooster(bool bActive);
 	
-	UPROPERTY(Replicated)
+	UPROPERTY()
 	bool MoveStop = true;
 
 	bool activeBooster = true;
@@ -211,13 +211,13 @@ private:
 	bool bIsBoosting = false;
 
 	// 부스터 힘
-	float BoostStrength = 20000.0f;
+	float BoostStrength = 50000.0f;
 
 	// 부스터의 최대 값
-	float MaxBoosterAmount = 500.0f;
+	float MaxBoosterAmount = 1000.0f;
 
 	// 현재 부스터 양
-	float BoosterAmount = 500.0f;
+	float BoosterAmount = 1000.0f;
 
 	// 부스터 감소 속도
 	float BoosterDrainRate = 20.0f;

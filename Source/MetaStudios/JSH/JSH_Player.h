@@ -7,12 +7,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Gizmo/JSH_Gizmo.h"
 #include "Gizmo/JSH_Translate_GizmoBox.h"
 #include "Gizmo/JSH_Translate_GizmoZ.h"
 #include "Logging/LogMacros.h"
 #include "JSH_Player.generated.h"
 
 
+class AJSH_Scale_GizmoBox;
+class AJSH_Scale_GizmoZ;
+class AJSH_Scale_GizmoY;
+class AJSH_Scale_GizmoX;
 class AJSH_Translate_GizmoY;
 class AJSH_Translate_GizmoX;
 class USpringArmComponent;
@@ -184,6 +189,8 @@ public:
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION()
+	void Saved_PlayerController();
 
 #pragma region Record
 
@@ -368,7 +375,11 @@ public:
 	// void Save_Gizmo_TY(AJSH_Translate_GizmoY* Gizmo_TY);
 	// UPROPERTY()
 	// AJSH_Translate_GizmoY* Saved_Gizmo_TY;
-	
+
+	UFUNCTION()
+	void Save_Gizmo_Parents(AActor* Gizmo_Parents);
+	UPROPERTY()
+	AJSH_Gizmo* Saved_Gizmo_Parents;
 	UFUNCTION()
 	void Save_Gizmo_TX(AActor* Gizmo_TX);
 	UPROPERTY()
@@ -385,6 +396,24 @@ public:
 	void Save_Gizmo_TB(AActor* Gizmo_TB);
 	UPROPERTY()
 	AJSH_Translate_GizmoBox* Saved_Gizmo_TB;
+
+	
+	UFUNCTION()
+	void Save_Gizmo_SX(AActor* Gizmo_SX);
+	UPROPERTY()
+	AJSH_Scale_GizmoX* Saved_Gizmo_SX;
+	UFUNCTION()
+	void Save_Gizmo_SY(AActor* Gizmo_SY);
+	UPROPERTY()
+	AJSH_Scale_GizmoY* Saved_Gizmo_SY;
+	UFUNCTION()
+	void Save_Gizmo_SZ(AActor* Gizmo_SZ);
+	UPROPERTY()
+	AJSH_Scale_GizmoZ* Saved_Gizmo_SZ;
+	UFUNCTION()
+	void Save_Gizmo_SB(AActor* Gizmo_SB);
+	UPROPERTY()
+	AJSH_Scale_GizmoBox* Saved_Gizmo_SB;
 
 	
 	
@@ -441,13 +470,13 @@ public:
 	bool Gizmo_Clicking_forError = false;
 
 	UPROPERTY()
-	bool Clicked_TX = false;
+	bool Clicked_X = false;
 	UPROPERTY()
-	bool Clicked_TY = false;
+	bool Clicked_Y = false;
 	UPROPERTY()
-	bool Clicked_TZ = false;
+	bool Clicked_Z = false;
 	UPROPERTY()
-	bool Clicked_TB = false;
+	bool Clicked_B = false;
 	
 	// 오버랩 됬을 때 중복 색상 변경
 	UPROPERTY()

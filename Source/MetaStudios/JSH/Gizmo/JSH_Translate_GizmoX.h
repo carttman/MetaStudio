@@ -131,4 +131,8 @@ public:
 	void Visible_and_Collision_On();
 	UFUNCTION()
 	void Visible_and_Collision_Off();
+
+
+	UFUNCTION()
+	void BeginPlayerContorller(AJSH_PlayerController* temp);
 };
