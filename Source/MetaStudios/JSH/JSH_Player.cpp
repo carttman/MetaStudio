@@ -947,7 +947,7 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		// 	bUseControllerRotationPitch = false;
 		// 	bUseControllerRotationRoll = false;
 		// }
-		Camera_b_Third_First = false;
+		//Camera_b_Third_First = false;
 
 
 		// Editor 모드 종료 시 저장된 EditorSpwanAcotr Name 삭제
@@ -1769,10 +1769,11 @@ void AJSH_Player::Esc()
 		if (CHJ_Instance == nullptr) CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
 
 		// 종료하겠습니까 위젯 하나 뛰어줘야할듯
-		CHJ_Instance->ExitSession();
-		UE_LOG(LogTemp, Error, TEXT("ESC"));
-
-		
+		if (HasAuthority())
+		{
+			CHJ_Instance->ExitSession();
+			UE_LOG(LogTemp, Error, TEXT("ESC"));
+		}
 		// if (!EditorMode_B) return;
 		// if (DisableEdit_b) return;
 		// // 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
