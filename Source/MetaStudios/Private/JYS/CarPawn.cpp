@@ -151,6 +151,25 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 	direction = ttt.TransformVector(direction);
 	direction.Z = 0;
 	direction.Normalize();
+
+	///////////////LineTrace//////////////////////
+	FVector startLocation = GetActorLocation();
+	FVector endLocation = startLocation + -(FVector::UpVector * 10000.0f); // Trace downwards
+	FHitResult hitResult;
+	FCollisionQueryParams queryParams;
+	queryParams.AddIgnoredActor(this);
+
+	if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_Visibility, queryParams))
+	{
+		DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
+
+		FVector newLocation = hitResult.ImpactPoint;
+		newLocation.Z += 30.0f;  
+		SetActorLocation(newLocation);
+		UE_LOG(LogTemp, Warning, TEXT("tttttttttttttttttttttt"))
+	}
+	///////////////LineTrace//////////////////////
+
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
 	

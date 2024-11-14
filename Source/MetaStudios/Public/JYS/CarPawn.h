@@ -66,7 +66,7 @@ public:
 	bool MoveStop = true;
 
 
-	float carSpeed = 2000.0f;
+	float carSpeed = 10000.0f;
 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
