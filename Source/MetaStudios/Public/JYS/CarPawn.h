@@ -62,7 +62,8 @@ public:
 
 	void ApplyRoll(float RollInput);
 	void ApplyRollBack();
-	UPROPERTY(Replicated)
+
+	UPROPERTY()
 	bool MoveStop = true;
 
 

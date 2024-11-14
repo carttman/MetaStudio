@@ -169,7 +169,7 @@ public:
 
 	void ActivateBooster(bool bActive);
 	
-	UPROPERTY(Replicated)
+	UPROPERTY()
 	bool MoveStop = true;
 
 	bool activeBooster = true;

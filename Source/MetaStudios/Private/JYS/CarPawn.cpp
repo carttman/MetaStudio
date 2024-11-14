@@ -161,7 +161,7 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_Visibility, queryParams))
 	{
-		DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
+		// DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
 
 		FVector newLocation = hitResult.ImpactPoint;
 		newLocation.Z += 30.0f;  
