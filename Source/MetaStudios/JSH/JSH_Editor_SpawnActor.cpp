@@ -9,7 +9,7 @@
 #include "../JSH/Gizmo/JSH_Translate_GizmoX.h"
 #include "../JSH/Gizmo/JSH_Translate_GizmoY.h"
 #include "../JSH/Gizmo/JSH_Translate_GizmoZ.h"
-#include "../JSH/Gizmo/JSH_Translate_GizmoBox.h"
+#include "../JSH/Gizmo/JSH_Scale_GizmoX.h"
 #include "GameFramework/GameModeBase.h"
 
 // Constructor: Set default values
@@ -197,12 +197,13 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
             UE_LOG(LogTemp, Error, TEXT("Component 111111"));
             UGameplayStatics::FinishSpawningActor(GizmoActor, ThisTransform);
 
-            // GizmoActor 스폰 논리
-            if (GizmoActor != nullptr)
-            {
-                UE_LOG(LogTemp, Error, TEXT("pak 7"));
-                GizmoActor->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-            }
+            // // GizmoActor 스폰 논리
+            // if (GizmoActor != nullptr)
+            // {
+            //     UE_LOG(LogTemp, Error, TEXT("pak 7"));
+            //     //GizmoActor->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+            //     AttachToActor(GizmoActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+            // }
         }
     }
 }

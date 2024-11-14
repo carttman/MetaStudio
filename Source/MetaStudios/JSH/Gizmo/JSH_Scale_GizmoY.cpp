@@ -23,6 +23,8 @@ AJSH_Scale_GizmoY::AJSH_Scale_GizmoY()
 	if (TMesh.Succeeded())
 	{
 		Origin->SetStaticMesh(TMesh.Object);
+		Origin->SetVisibility(false);
+		Origin->SetCollisionProfileName(TEXT("NoCollision"));
 	}
 	
 	

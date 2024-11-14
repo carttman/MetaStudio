@@ -14,6 +14,7 @@
 #include "JSH_Player.generated.h"
 
 
+class AJSH_Scale_GizmoBox;
 class AJSH_Scale_GizmoZ;
 class AJSH_Scale_GizmoY;
 class AJSH_Scale_GizmoX;
@@ -398,21 +399,21 @@ public:
 
 	
 	UFUNCTION()
-	void Save_Scale_SX(AActor* Gizmo_SX);
+	void Save_Gizmo_SX(AActor* Gizmo_SX);
 	UPROPERTY()
 	AJSH_Scale_GizmoX* Saved_Gizmo_SX;
 	UFUNCTION()
-	void Save_Scale_SY(AActor* Gizmo_SY);
+	void Save_Gizmo_SY(AActor* Gizmo_SY);
 	UPROPERTY()
 	AJSH_Scale_GizmoY* Saved_Gizmo_SY;
 	UFUNCTION()
-	void Save_Scale_SZ(AActor* Gizmo_SZ);
+	void Save_Gizmo_SZ(AActor* Gizmo_SZ);
 	UPROPERTY()
 	AJSH_Scale_GizmoZ* Saved_Gizmo_SZ;
-	// UFUNCTION()
-	// void Save_Scale_SB(AActor* Gizmo_SB);
-	// UPROPERTY()
-	// AJSH_Translate_GizmoBox* Saved_Gizmo_SB;
+	UFUNCTION()
+	void Save_Gizmo_SB(AActor* Gizmo_SB);
+	UPROPERTY()
+	AJSH_Scale_GizmoBox* Saved_Gizmo_SB;
 
 	
 	
@@ -469,13 +470,13 @@ public:
 	bool Gizmo_Clicking_forError = false;
 
 	UPROPERTY()
-	bool Clicked_TX = false;
+	bool Clicked_X = false;
 	UPROPERTY()
-	bool Clicked_TY = false;
+	bool Clicked_Y = false;
 	UPROPERTY()
-	bool Clicked_TZ = false;
+	bool Clicked_Z = false;
 	UPROPERTY()
-	bool Clicked_TB = false;
+	bool Clicked_B = false;
 	
 	// 오버랩 됬을 때 중복 색상 변경
 	UPROPERTY()

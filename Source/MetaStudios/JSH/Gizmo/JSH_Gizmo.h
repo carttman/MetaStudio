@@ -47,8 +47,12 @@ public:
 	// Sclae
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Scale_Box;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Scale_X;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class AJSH_Scale_GizmoX* Origin_Scale_X;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Scale_Y;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -131,4 +135,9 @@ public:
 	TArray<AActor*> Tag_Y;
 	TArray<AActor*> Tag_Z;
 	TArray<AActor*> Tag_Box;
+
+	TArray<AActor*> Tag_SX;
+	TArray<AActor*> Tag_SY;
+	TArray<AActor*> Tag_SZ;
+	TArray<AActor*> Tag_SBox;
 };

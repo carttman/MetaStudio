@@ -82,6 +82,14 @@ public:
 	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
 
+	UPROPERTY()
+	FVector Start_Scale;
+	UPROPERTY()
+	FVector End_Scale;
+	
+	UPROPERTY()
+	float XDifference;
+
 	// Gizmo 처음 클릭 확인을 위한 
 	UPROPERTY()
 	bool Clicked = false;

@@ -21,11 +21,13 @@ AJSH_Scale_GizmoX::AJSH_Scale_GizmoX()
 	// 기본 색상
 	Origin = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Origin"));
 	RootComponent = Origin;
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TMesh(TEXT("/Script/Engine.StaticMesh'/Game/JSH/BP/Gizmo/Translate_X/SM_TranslationHandle_X.SM_TranslationHandle_X'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TMesh(TEXT("/Script/Engine.StaticMesh'/Game/JSH/BP/Gizmo/StaticMesh/SM_ScaleHandle.SM_ScaleHandle'"));
 	if (TMesh.Succeeded())
 	{
 		Origin->SetStaticMesh(TMesh.Object);
 		Origin->SetCollisionProfileName(TEXT("Gizmo"));
+		Origin->SetVisibility(false);
+		Origin->SetCollisionProfileName(TEXT("NoCollision"));
 	}
 	
 	
@@ -47,6 +49,8 @@ AJSH_Scale_GizmoX::AJSH_Scale_GizmoX()
 	{
 		RedMaterial = RedMaterialLoader.Object;
 	}
+	
+	Tags.Add(FName("Scale_Gizmo_X"));
 }
 
 
@@ -96,7 +100,7 @@ void AJSH_Scale_GizmoX::GOnClicked()
 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
 	if (OriginPlayer)
 	{
-		OriginPlayer->Save_Gizmo_TX(this);
+		OriginPlayer->Save_Gizmo_SX(this);
 	}
 	
 	//// 다른 기즈모가 실행 중 이면 , 기능 실행되지 않도록 ////
@@ -130,12 +134,12 @@ void AJSH_Scale_GizmoX::GOnClicked()
 	Start = Mouse_WorldLocation;
 	End = (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
 
-
-	TArray<AActor*> IgnoreGizmos;
-	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TX);
-	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TZ);
-	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
-	Params.AddIgnoredActors(IgnoreGizmos);
+	// 다 만들고 추가
+	//TArray<AActor*> IgnoreGizmos;
+	//IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
+	// IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
+	// IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
+	//Params.AddIgnoredActors(IgnoreGizmos);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
 	///// 처음 클릭했을때 값 저장하기 위한 함수 ////
@@ -149,8 +153,8 @@ void AJSH_Scale_GizmoX::GOnClicked()
 		// Store initial mouse and gizmo positions
 		//StartMouselocation = HitResult.ImpactPoint;
 		StartMouselocation = End;
-		StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
-		StartActor_Location = StartMouselocation - StartGizmoLocation;
+		Start_Scale = OriginPlayer->Editor_SpawnActor->GetActorRelativeScale3D();
+		
 		SelectedGizmo = true;
 	}
 	else if (!firstclick && !Clicked)
@@ -160,21 +164,18 @@ void AJSH_Scale_GizmoX::GOnClicked()
 		
 		// Store initial mouse and gizmo positions
 		StartMouselocation = End;
-		StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
-		StartActor_Location = StartMouselocation - StartGizmoLocation;
+		Start_Scale = OriginPlayer->Editor_SpawnActor->GetActorRelativeScale3D();
 		SelectedGizmo = true;
 	}
 
 	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
 	if (Clicked)
 	{
-		// 생각 해 보니깐 레이를 쏠 필요도 없씀 ㅋㅌㅋㅌㅋ
 		End_Location = End;
-		NewLocation = FVector(End_Location.X - StartActor_Location.X, StartGizmoLocation.Y, StartGizmoLocation.Z);
-		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);		
+		End_Scale = FVector(Start_Scale.X + (( End_Location.X - StartMouselocation.X) * 0.01), Start_Scale.Y, Start_Scale.Z);
+		OriginPlayer->Editor_SpawnActor->SetActorRelativeScale3D(End_Scale);		
 	}
 }
-
 
 // 오버랩 색상 변경
 void AJSH_Scale_GizmoX::BeginCursorOver()
@@ -186,7 +187,7 @@ void AJSH_Scale_GizmoX::BeginCursorOver()
 		OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
 		if (OriginPlayer)
 		{
-			OriginPlayer->Save_Gizmo_TX(this);
+			OriginPlayer->Save_Gizmo_SX(this);
 		}
 	}
 	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
@@ -267,6 +268,6 @@ void AJSH_Scale_GizmoX::BeginPlayerContorller(AJSH_PlayerController* temp)
 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
 	if (OriginPlayer)
 	{
-		OriginPlayer->Save_Gizmo_TX(this);
+		OriginPlayer->Save_Gizmo_SX(this);
 	}
 }

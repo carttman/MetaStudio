@@ -29,6 +29,7 @@
 #include "Engine/Engine.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpectatorPawnMovement.h"
+#include "Gizmo/JSH_Scale_GizmoBox.h"
 #include "Gizmo/JSH_Scale_GizmoX.h"
 #include "Gizmo/JSH_Scale_GizmoY.h"
 #include "Gizmo/JSH_Scale_GizmoZ.h"
@@ -1153,25 +1154,22 @@ void AJSH_Player::Save_Gizmo_TB(AActor* Gizmo_TB)
 }
 
 // Scale정보 저장 
-
-void AJSH_Player::Save_Scale_SX(AActor* Gizmo_SX)
+void AJSH_Player::Save_Gizmo_SX(AActor* Gizmo_SX)
 {
 	Saved_Gizmo_SX = Cast<AJSH_Scale_GizmoX>(Gizmo_SX);
 }
-void AJSH_Player::Save_Scale_SY(AActor* Gizmo_SY)
+void AJSH_Player::Save_Gizmo_SY(AActor* Gizmo_SY)
 {
 	Saved_Gizmo_SY = Cast<AJSH_Scale_GizmoY>(Gizmo_SY);
 }
-void AJSH_Player::Save_Scale_SZ(AActor* Gizmo_SZ)
+void AJSH_Player::Save_Gizmo_SZ(AActor* Gizmo_SZ)
 {
 	Saved_Gizmo_SZ = Cast<AJSH_Scale_GizmoZ>(Gizmo_SZ);
 }
-
-
-
-
-
-
+void AJSH_Player::Save_Gizmo_SB(AActor* Gizmo_SB)
+{
+	Saved_Gizmo_SB = Cast<AJSH_Scale_GizmoBox>(Gizmo_SB);
+}
 
 
 void AJSH_Player::EditorAcotorDestroy()
@@ -1203,6 +1201,9 @@ void AJSH_Player::G_SelecteMode()
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
 	Editor_SpawnActor = nullptr;
 	
+	Gizmo_TranslateMode = false;
+	Gizmo_RotateMode = false;
+	Gizmo_ScaleMode = false;
 	
 
 	
@@ -1210,6 +1211,11 @@ void AJSH_Player::G_SelecteMode()
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
 	Saved_Gizmo_TB->Visible_and_Collision_Off();
+
+	Saved_Gizmo_SX->Visible_and_Collision_Off();
+	// Saved_Gizmo_SY->Visible_and_Collision_Off();
+	// Saved_Gizmo_SZ->Visible_and_Collision_Off();
+	// Saved_Gizmo_SB->Visible_and_Collision_Off();
 	
 }
 
@@ -1233,6 +1239,11 @@ void AJSH_Player::G_TranslateMode()
 	Saved_Gizmo_TY->Visible_and_Collision_On();
 	Saved_Gizmo_TZ->Visible_and_Collision_On();
 	Saved_Gizmo_TB->Visible_and_Collision_On();
+
+	Saved_Gizmo_SX->Visible_and_Collision_Off();
+	// Saved_Gizmo_SY->Visible_and_Collision_Off();
+	// Saved_Gizmo_SZ->Visible_and_Collision_Off();
+	// Saved_Gizmo_SB->Visible_and_Collision_Off();
 }
 
 
@@ -1252,10 +1263,17 @@ void AJSH_Player::G_RotateMode()
 	Gizmo_RotateMode = true;
 	Gizmo_ScaleMode = false;
 
+	
+
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
 	Saved_Gizmo_TB->Visible_and_Collision_Off();
+
+	Saved_Gizmo_SX->Visible_and_Collision_Off();
+	// Saved_Gizmo_SY->Visible_and_Collision_Off();
+	// Saved_Gizmo_SZ->Visible_and_Collision_Off();
+	// Saved_Gizmo_SB->Visible_and_Collision_Off();
 }
 
 
@@ -1279,6 +1297,11 @@ void AJSH_Player::G_SclaeMode()
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
 	Saved_Gizmo_TB->Visible_and_Collision_Off();
+
+	Saved_Gizmo_SX->Visible_and_Collision_On();
+	// Saved_Gizmo_SY->Visible_and_Collision_Off();
+	// Saved_Gizmo_SZ->Visible_and_Collision_Off();
+	// Saved_Gizmo_SB->Visible_and_Collision_Off();
 }
 
 
@@ -1287,6 +1310,9 @@ void AJSH_Player::Gizmo_Detect()
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
+
+	// Sclae 세팅 끝나면 키기
+	// if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SX == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
 	
 	if (JPlayerController == nullptr) Saved_PlayerController();
 	//// 마우스 2d Vector -> 3d Vector ////
@@ -1308,9 +1334,11 @@ void AJSH_Player::Gizmo_Detect()
 		if (Gizmo_Detecting == false) Gizmo_Detecting = true;
 		
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Purple, false, 10, 0, 0.1);
+
+		/// Translate
 		if (Saved_Gizmo_TX != nullptr)
 		{
-			if (HitResult.GetActor())
+			if (HitResult.GetActor()  == Saved_Gizmo_TX)
 			{
 				Saved_Gizmo_TX->BeginCursorOver();
 
@@ -1352,13 +1380,27 @@ void AJSH_Player::Gizmo_Detect()
 				Saved_Gizmo_TZ->EndCursorOver();
 			}
 		}
+
+		/// Sclae
+		if (Saved_Gizmo_SX != nullptr)
+		{
+			if (HitResult.GetActor()  == Saved_Gizmo_SX)
+			{
+				Saved_Gizmo_SX->BeginCursorOver();
+
+				// Saved_Gizmo_SY->EndCursorOver();
+				// Saved_Gizmo_SZ->EndCursorOver();
+				// Saved_Gizmo_SB->EndCursorOver();
+			}
+		}
 	}
 	else
 	{
 		if (Gizmo_Detecting == true) Gizmo_Detecting = false;
 		
 		HitResult.Reset();
-		
+
+		// Translate
 		if (Saved_Gizmo_TX != nullptr)
 		{
 			Saved_Gizmo_TX->EndCursorOver();
@@ -1375,6 +1417,12 @@ void AJSH_Player::Gizmo_Detect()
 		{
 			Saved_Gizmo_TB->EndCursorOver();
 		}
+
+		// Sclae
+		if (Saved_Gizmo_SX != nullptr)
+		{
+			Saved_Gizmo_SX->EndCursorOver();
+		}
 	}
 }
 
@@ -1390,13 +1438,15 @@ void AJSH_Player::Gizmo_Click()
 
 	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
 	Gizmo_Clicking_forError = true;
-	
+
+
+	// Translate
 	if (Saved_Gizmo_TX != nullptr)
 	{
 		if (HitResult.GetActor() == Saved_Gizmo_TX)
 		{
 			Saved_Gizmo_TX->GOnClicked();
-			Clicked_TX = true;
+			Clicked_X = true;
 		}
 	}
 	
@@ -1405,7 +1455,7 @@ void AJSH_Player::Gizmo_Click()
 		if (HitResult.GetActor() == Saved_Gizmo_TY)
 		{
 			Saved_Gizmo_TY->GOnClicked();
-			Clicked_TY = true;
+			Clicked_Y = true;
 		}
 	}
 
@@ -1414,7 +1464,7 @@ void AJSH_Player::Gizmo_Click()
 		if (HitResult.GetActor() == Saved_Gizmo_TZ)
 		{
 			Saved_Gizmo_TZ->GOnClicked();
-			Clicked_TZ = true;
+			Clicked_Z = true;
 		}
 	}
 	
@@ -1423,7 +1473,17 @@ void AJSH_Player::Gizmo_Click()
 		if (HitResult.GetActor() == Saved_Gizmo_TB)
 		{
 			Saved_Gizmo_TB->GOnClicked();
-			Clicked_TB = true;
+			Clicked_B = true;
+		}
+	}
+
+	// Scale
+	if (Saved_Gizmo_SX != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_SX)
+		{
+			Saved_Gizmo_SX->GOnClicked();
+			Clicked_X = true;
 		}
 	}
 	
@@ -1440,19 +1500,20 @@ void AJSH_Player::Gizmo_Click_End()
 {
 	if (!Gizmo_Clicking_forError) return;
 
-	if (Clicked_TX)
+	if (Clicked_X)
 	{
-		Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
+		if (Gizmo_TranslateMode) Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
+		else if (Gizmo_ScaleMode) Saved_Gizmo_SX->HandleMouseReleaseOutsideActor();
 	}
-	if (Clicked_TY)
+	if (Clicked_Y)
 	{
 		Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
 	}
-	if (Clicked_TZ)
+	if (Clicked_Z)
 	{
 		Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
 	}
-	if (Clicked_TB)
+	if (Clicked_B)
 	{
 		Saved_Gizmo_TB->HandleMouseReleaseOutsideActor();
 	}
