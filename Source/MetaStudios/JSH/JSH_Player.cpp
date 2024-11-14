@@ -205,6 +205,12 @@ void AJSH_Player::BeginPlay()
 	RecordCamera->SetActive(true);
 	bUseControllerRotationYaw = true;
 	CameraSpawn_b_On_Off = true;
+	
+	
+	if (CHJ_Instance == nullptr)
+	{
+		CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+	}
 }
 
 void AJSH_Player::Tick(float DeltaTime)
@@ -505,7 +511,11 @@ void AJSH_Player::StartRecording()
 	
 		// Record 함수를 끌고 오기 위한 GameInstance 
 		ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
-		CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+		if (CHJ_Instance == nullptr)
+		{
+			CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+		}
+		
 		
 		// 카메라 확대, 축소, 회전 , 초기화
 		CameraReset();
@@ -1756,6 +1766,8 @@ void AJSH_Player::Esc()
 	// Editor 모드일때 ESC 누르면 선택 없어지는거
 	if (EditorMode_B == false)
 	{
+		if (CHJ_Instance == nullptr) CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+
 		// 종료하겠습니까 위젯 하나 뛰어줘야할듯
 		CHJ_Instance->ExitSession();
 		UE_LOG(LogTemp, Error, TEXT("ESC"));
