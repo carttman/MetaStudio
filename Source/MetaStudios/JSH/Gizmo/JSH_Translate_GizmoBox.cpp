@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../JSH/Gizmo/JSH_Translate_GizmoBox.h"
+#include "../Gizmo/JSH_Translate_GizmoBox.h"
 #include "MetaStudios/JSH/JSH_PlayerController.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"

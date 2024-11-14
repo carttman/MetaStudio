@@ -172,6 +172,7 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 		}
 	}
 
+
 	
 	// if (OriginPlayer && OriginPlayer->Editor_SpawnActor != nullptr)
 	// {
@@ -224,7 +225,6 @@ void AJSH_Gizmo::TranslateMode()
 
 void AJSH_Gizmo::ScaleMode()
 {
-
 	// Translate Off
 	Translate_Box->SetVisibility(false);
 	Translate_X->SetVisibility(false);
@@ -251,38 +251,58 @@ void AJSH_Gizmo::BeginPlayerContorller(AJSH_PlayerController* temp)
 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
 	if (OriginPlayer)
 	{
-		OriginPlayer->Save_Gizmo_TX(this);
+		OriginPlayer->Save_Gizmo_Parents(this);
 	}
 	
 	//처음 크기
 	InitialScale = GetActorScale3D();
+
+	Child_Actor_Detect();
 }
 
 void AJSH_Gizmo::Child_Actor_Detect()
 {
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Box"), Tag_Box);
+	if(Tag_Box.Num() > 0)
+	{
+		Origin_Translate_Box = Cast<AJSH_Translate_GizmoBox>(Tag_Box[0]);
+		if (Origin_Translate_Box != nullptr)
+		{
+			Origin_Translate_Box->BeginPlayerContorller(JPlayerController);
+		}
+	}
+	
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_X"), Tag_X);
 	if(Tag_X.Num() > 0)
 	{
 		Origin_Translate_X = Cast<AJSH_Translate_GizmoX>(Tag_X[0]);
+		if (Origin_Translate_X != nullptr)
+		{
+			Origin_Translate_X->BeginPlayerContorller(JPlayerController);
+		}
 	}
 
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Y"), Tag_Y);
 	if(Tag_Y.Num() > 0)
 	{
 		Origin_Translate_Y = Cast<AJSH_Translate_GizmoY>(Tag_Y[0]);
+		if (Origin_Translate_Y != nullptr)
+		{
+			Origin_Translate_Y->BeginPlayerContorller(JPlayerController);
+		}
 	}
 
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Z"), Tag_Z);
 	if(Tag_Z.Num() > 0)
 	{
 		Origin_Translate_Z = Cast<AJSH_Translate_GizmoZ>(Tag_Z[0]);
+		if (Origin_Translate_Z != nullptr)
+		{
+			Origin_Translate_Z->BeginPlayerContorller(JPlayerController);
+		}
 	}
 
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Box"), Tag_Box);
-	if(Tag_Box.Num() > 0)
-	{
-		Origin_Translate_Box = Cast<AJSH_Translate_GizmoBox>(Tag_Box[0]);
-	}
+
 	//UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Y"), Tag_Y);
 }
 
