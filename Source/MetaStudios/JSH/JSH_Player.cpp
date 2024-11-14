@@ -1749,17 +1749,16 @@ void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 void AJSH_Player::Esc()
 {
 	// Editor 모드일때 ESC 누르면 선택 없어지는거
-	if (EditorMode_B == true)
-	{
-		Editor_SpawnActor = nullptr;
-		
-	}
-	// Editor 모드아닐때 ESC 방 나가기
-	else
+	if (EditorMode_B == false)
 	{
 		// 종료하겠습니까 위젯 하나 뛰어줘야할듯
 		CHJ_Instance->ExitSession();
 		UE_LOG(LogTemp, Error, TEXT("ESC"));
+		// if (!EditorMode_B) return;
+		// if (DisableEdit_b) return;
+		// // 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+		// if (Gizmo_Clicking_forError) return;
+		// Editor_SpawnActor = nullptr;
 	}
 }
 

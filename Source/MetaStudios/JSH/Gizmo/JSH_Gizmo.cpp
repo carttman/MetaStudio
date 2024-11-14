@@ -176,10 +176,11 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 		}
 	}
 
-	// if (OriginPlayer && OriginPlayer->Editor_SpawnActor)
-	// {
-	// 	SetActorLocation(OriginPlayer->Editor_SpawnActor->GetActorLocation());
-	// }
+	if (OriginPlayer && OriginPlayer->Editor_SpawnActor)
+	{
+		//SetActorTransform(OriginPlayer->Editor_SpawnActor->GetActorTransform());
+		SetActorLocation(OriginPlayer->Editor_SpawnActor->GetActorLocation());
+	}
 }
 
 
@@ -237,7 +238,7 @@ void AJSH_Gizmo::BeginPlayerContorller(AJSH_PlayerController* temp)
 
 	Child_Actor_Detect();
 
-	AttachToActor(OriginPlayer->Editor_SpawnActor, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	//AttachToActor(OriginPlayer->Editor_SpawnActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
 void AJSH_Gizmo::Child_Actor_Detect()
