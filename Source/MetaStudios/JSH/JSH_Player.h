@@ -11,6 +11,7 @@
 #include "Gizmo/JSH_Translate_GizmoBox.h"
 #include "Gizmo/JSH_Translate_GizmoZ.h"
 #include "Logging/LogMacros.h"
+#include "Widget/JSH_Record_UI.h"
 #include "JSH_Player.generated.h"
 
 
@@ -290,6 +291,8 @@ public:
 	
 	UFUNCTION()
 	void FlySpeed(const FInputActionValue& Value);
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_FlySpeed(float Value);
 	
 #pragma endregion
 
@@ -317,11 +320,19 @@ public:
 	// UI
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<class UUserWidget> UI_Editor_Main;
-	
 	UPROPERTY(EditDefaultsOnly)
 	class UUserWidget* PlayerMainUI;
 
+	// UI
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UUserWidget> UI_Record_01;
+	UPROPERTY(EditDefaultsOnly)
+	class UUserWidget* RecordUI_01;
 
+	UPROPERTY()
+	UJSH_Record_UI* Origin_RecordUI;
+	
+	
 	// Editor Actor Destroy
 	UFUNCTION()
 	void CLickAndDel();
@@ -588,3 +599,4 @@ public:
 
 	
 };
+
