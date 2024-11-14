@@ -29,6 +29,10 @@
 #include "Engine/Engine.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpectatorPawnMovement.h"
+#include "Gizmo/JSH_Scale_GizmoBox.h"
+#include "Gizmo/JSH_Scale_GizmoX.h"
+#include "Gizmo/JSH_Scale_GizmoY.h"
+#include "Gizmo/JSH_Scale_GizmoZ.h"
 #include "Gizmo/JSH_Translate_GizmoX.h"
 #include "Gizmo/JSH_Translate_GizmoY.h"
 #include "Gizmo/JSH_Translate_GizmoZ.h"
@@ -171,29 +175,28 @@ void AJSH_Player::BeginPlay()
 	Super::BeginPlay();
 
 
-	FString RelativePath = FPaths::ProjectContentDir();
+	// FString RelativePath = FPaths::ProjectContentDir();
+	//
+	// FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
+	// IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
+	// UE_LOG(LogTemp, Error, TEXT("RelativePath: %s"), *RelativePath);
+	// UE_LOG(LogTemp, Error, TEXT("FullPath: %s"), *FullPath);
+	//
+	// // Record 함수를 끌고 오기 위한 GameInstance 
+	// ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
+	// CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
 
-	FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
-	IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
-	UE_LOG(LogTemp, Error, TEXT("RelativePath: %s"), *RelativePath);
-	UE_LOG(LogTemp, Error, TEXT("FullPath: %s"), *FullPath);
 	
-	// Record 함수를 끌고 오기 위한 GameInstance 
-	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
-	CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
-
-	
-	UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller00000"));
-	// 플레이어 컨트롤러
-	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	if (JPlayerController)
-	{
-		JPlayerController->bEnableTouchEvents = false;
-		
-		UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller1111"));
-		// 플레이어 컨트롤러에 Director 저장
-		JPlayerController->SaveOriginCharacter();
-	}
+	// // 플레이어 컨트롤러
+	// JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	// if (JPlayerController)
+	// {
+	// 	JPlayerController->bEnableTouchEvents = false;
+	// 	
+	// 	UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller1111"));
+	// 	// 플레이어 컨트롤러에 Director 저장
+	// 	JPlayerController->SaveOriginCharacter();
+	// }
 
 	FlyMode();
 	
@@ -202,23 +205,6 @@ void AJSH_Player::BeginPlay()
 	RecordCamera->SetActive(true);
 	bUseControllerRotationYaw = true;
 	CameraSpawn_b_On_Off = true;
-
-	
-	// AGameModeBase* currGameMode = Cast<AGameModeBase>(GetWorld()->GetAuthGameMode());
-	//
-	// if (currGameMode != nullptr)
-	// {
-	// 	currgamemodename = currGameMode->GetName();
-	// 	if(currgamemodename.Contains(FString(TEXT("filmroom"))))
-	// 	{
-	// 		UE_LOG(LogTemp, Error, TEXT("Succed"));
-	// 		Bool_MainLock = true;
-	// 	}
-	// 	else
-	// 	{
-	// 		Bool_MainLock = false;
-	// 	}
-	// }
 }
 
 void AJSH_Player::Tick(float DeltaTime)
@@ -254,6 +240,19 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AJSH_Player, Bool_EditorActorDestroy);
 	DOREPLIFETIME(AJSH_Player, DisableEdit_b);
 	DOREPLIFETIME(AJSH_Player, DisableEdit2_b);
+}
+
+void AJSH_Player::Saved_PlayerController()
+{
+	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	if (JPlayerController)
+	{
+		JPlayerController->bEnableTouchEvents = false;
+		
+		UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller1111"));
+		// 플레이어 컨트롤러에 Director 저장
+		JPlayerController->SaveOriginCharacter();
+	}
 }
 
 
@@ -425,8 +424,9 @@ void AJSH_Player::NetMulti_SpectatorMode_Implementation()
 
 		// 원랜 켜야하는데 beginplay에서 해주고 있어서 일단 주석 처리
 		//AJSH_PlayerController* PlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-		
 
+		if (JPlayerController == nullptr) Saved_PlayerController();
+		
 		if (JPlayerController && SpectatorActor)
 		{
 			APawn* SpectatorPawn = Cast<APawn>(SpectatorActor);
@@ -496,13 +496,29 @@ void AJSH_Player::StartRecording()
 	
 	if (HasAuthority())
 	{
+		// FString RelativePath = FPaths::ProjectContentDir();
+		//
+		// FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
+		// IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
+		// UE_LOG(LogTemp, Error, TEXT("RelativePath: %s"), *RelativePath);
+		// UE_LOG(LogTemp, Error, TEXT("FullPath: %s"), *FullPath);
+	
+		// Record 함수를 끌고 오기 위한 GameInstance 
+		ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
+		CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+		
 		// 카메라 확대, 축소, 회전 , 초기화
 		CameraReset();
-		
+
+		if (JPlayerController == nullptr) Saved_PlayerController();
 		// 인스턴스에 넣어둔 녹화 기능 시작
 		//ObsGamInstance->StartRecord();
-		JPlayerController->StartRecord();
-		NetMulti_StartRecording();
+
+		if (JPlayerController)
+		{
+			JPlayerController->StartRecord();
+			NetMulti_StartRecording();
+		}
 	}
 
 	// NetMulti_StartRecording();
@@ -993,6 +1009,7 @@ void AJSH_Player::EnableEdit()
 
 	
 	GetMovementComponent()->SetComponentTickEnabled(false);
+	if (JPlayerController == nullptr) Saved_PlayerController();
 	
 	if (JPlayerController)
 	{
@@ -1045,6 +1062,7 @@ void AJSH_Player::DisableEdit()
 	
 	GetMovementComponent()->SetComponentTickEnabled(true);
 
+	if (JPlayerController == nullptr) Saved_PlayerController();
 	if (JPlayerController)
 	{
 		JPlayerController->SetIgnoreLookInput(false);
@@ -1109,7 +1127,15 @@ void AJSH_Player::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor
 
 
 
-// Gizmo 정보 저장
+// Gizmo 정보 저장 ///
+
+void AJSH_Player::Save_Gizmo_Parents(AActor* Gizmo_Parents)
+{
+	Saved_Gizmo_Parents = Cast<AJSH_Gizmo>(Gizmo_Parents);
+}
+
+// Translate 정보 저장 
+
 void AJSH_Player::Save_Gizmo_TX(AActor* Gizmo_TX)
 {
 	Saved_Gizmo_TX = Cast<AJSH_Translate_GizmoX>(Gizmo_TX);
@@ -1122,10 +1148,27 @@ void AJSH_Player::Save_Gizmo_TZ(AActor* Gizmo_TZ)
 {
 	Saved_Gizmo_TZ = Cast<AJSH_Translate_GizmoZ>(Gizmo_TZ);
 }
-
 void AJSH_Player::Save_Gizmo_TB(AActor* Gizmo_TB)
 {
 	Saved_Gizmo_TB = Cast<AJSH_Translate_GizmoBox>(Gizmo_TB);
+}
+
+// Scale정보 저장 
+void AJSH_Player::Save_Gizmo_SX(AActor* Gizmo_SX)
+{
+	Saved_Gizmo_SX = Cast<AJSH_Scale_GizmoX>(Gizmo_SX);
+}
+void AJSH_Player::Save_Gizmo_SY(AActor* Gizmo_SY)
+{
+	Saved_Gizmo_SY = Cast<AJSH_Scale_GizmoY>(Gizmo_SY);
+}
+void AJSH_Player::Save_Gizmo_SZ(AActor* Gizmo_SZ)
+{
+	Saved_Gizmo_SZ = Cast<AJSH_Scale_GizmoZ>(Gizmo_SZ);
+}
+void AJSH_Player::Save_Gizmo_SB(AActor* Gizmo_SB)
+{
+	Saved_Gizmo_SB = Cast<AJSH_Scale_GizmoBox>(Gizmo_SB);
 }
 
 
@@ -1152,8 +1195,15 @@ void AJSH_Player::G_SelecteMode()
 	// 여기는 UI 바뀌는거 넣음 될 듯
 	
 	if (Editor_SpawnActor == nullptr) return;
+	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
+
+	
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
 	Editor_SpawnActor = nullptr;
+	
+	Gizmo_TranslateMode = false;
+	Gizmo_RotateMode = false;
+	Gizmo_ScaleMode = false;
 	
 
 	
@@ -1161,6 +1211,11 @@ void AJSH_Player::G_SelecteMode()
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
 	Saved_Gizmo_TB->Visible_and_Collision_Off();
+
+	Saved_Gizmo_SX->Visible_and_Collision_Off();
+	// Saved_Gizmo_SY->Visible_and_Collision_Off();
+	// Saved_Gizmo_SZ->Visible_and_Collision_Off();
+	// Saved_Gizmo_SB->Visible_and_Collision_Off();
 	
 }
 
@@ -1174,6 +1229,7 @@ void AJSH_Player::G_TranslateMode()
 	// 여기는 UI 바뀌는거 넣음 될 듯
 	
 	if (Editor_SpawnActor == nullptr) return;
+	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g translate"));
 	Gizmo_TranslateMode = true;
 	Gizmo_RotateMode = false;
@@ -1183,6 +1239,11 @@ void AJSH_Player::G_TranslateMode()
 	Saved_Gizmo_TY->Visible_and_Collision_On();
 	Saved_Gizmo_TZ->Visible_and_Collision_On();
 	Saved_Gizmo_TB->Visible_and_Collision_On();
+
+	Saved_Gizmo_SX->Visible_and_Collision_Off();
+	// Saved_Gizmo_SY->Visible_and_Collision_Off();
+	// Saved_Gizmo_SZ->Visible_and_Collision_Off();
+	// Saved_Gizmo_SB->Visible_and_Collision_Off();
 }
 
 
@@ -1196,15 +1257,23 @@ void AJSH_Player::G_RotateMode()
 	// 여기는 UI 바뀌는거 넣음 될 듯
 	
 	if (Editor_SpawnActor == nullptr) return;
+	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g  rotate"));
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = true;
 	Gizmo_ScaleMode = false;
 
+	
+
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
 	Saved_Gizmo_TB->Visible_and_Collision_Off();
+
+	Saved_Gizmo_SX->Visible_and_Collision_Off();
+	// Saved_Gizmo_SY->Visible_and_Collision_Off();
+	// Saved_Gizmo_SZ->Visible_and_Collision_Off();
+	// Saved_Gizmo_SB->Visible_and_Collision_Off();
 }
 
 
@@ -1218,6 +1287,7 @@ void AJSH_Player::G_SclaeMode()
 	// 여기는 UI 바뀌는거 넣음 될 듯 
 	
 	if (Editor_SpawnActor == nullptr) return;
+	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	UE_LOG(LogTemp, Warning, TEXT("g scale"));
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = false;
@@ -1227,6 +1297,11 @@ void AJSH_Player::G_SclaeMode()
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
 	Saved_Gizmo_TB->Visible_and_Collision_Off();
+
+	Saved_Gizmo_SX->Visible_and_Collision_On();
+	// Saved_Gizmo_SY->Visible_and_Collision_Off();
+	// Saved_Gizmo_SZ->Visible_and_Collision_Off();
+	// Saved_Gizmo_SB->Visible_and_Collision_Off();
 }
 
 
@@ -1234,8 +1309,12 @@ void AJSH_Player::Gizmo_Detect()
 {
 	if (!EditorMode_B) return;
 	if (DisableEdit_b) return;
+	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 
+	// Sclae 세팅 끝나면 키기
+	// if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SX == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
 	
+	if (JPlayerController == nullptr) Saved_PlayerController();
 	//// 마우스 2d Vector -> 3d Vector ////
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
 	{
@@ -1255,9 +1334,11 @@ void AJSH_Player::Gizmo_Detect()
 		if (Gizmo_Detecting == false) Gizmo_Detecting = true;
 		
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Purple, false, 10, 0, 0.1);
+
+		/// Translate
 		if (Saved_Gizmo_TX != nullptr)
 		{
-			if (HitResult.GetActor())
+			if (HitResult.GetActor()  == Saved_Gizmo_TX)
 			{
 				Saved_Gizmo_TX->BeginCursorOver();
 
@@ -1299,13 +1380,27 @@ void AJSH_Player::Gizmo_Detect()
 				Saved_Gizmo_TZ->EndCursorOver();
 			}
 		}
+
+		/// Sclae
+		if (Saved_Gizmo_SX != nullptr)
+		{
+			if (HitResult.GetActor()  == Saved_Gizmo_SX)
+			{
+				Saved_Gizmo_SX->BeginCursorOver();
+
+				// Saved_Gizmo_SY->EndCursorOver();
+				// Saved_Gizmo_SZ->EndCursorOver();
+				// Saved_Gizmo_SB->EndCursorOver();
+			}
+		}
 	}
 	else
 	{
 		if (Gizmo_Detecting == true) Gizmo_Detecting = false;
 		
 		HitResult.Reset();
-		
+
+		// Translate
 		if (Saved_Gizmo_TX != nullptr)
 		{
 			Saved_Gizmo_TX->EndCursorOver();
@@ -1322,6 +1417,12 @@ void AJSH_Player::Gizmo_Detect()
 		{
 			Saved_Gizmo_TB->EndCursorOver();
 		}
+
+		// Sclae
+		if (Saved_Gizmo_SX != nullptr)
+		{
+			Saved_Gizmo_SX->EndCursorOver();
+		}
 	}
 }
 
@@ -1337,13 +1438,15 @@ void AJSH_Player::Gizmo_Click()
 
 	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
 	Gizmo_Clicking_forError = true;
-	
+
+
+	// Translate
 	if (Saved_Gizmo_TX != nullptr)
 	{
 		if (HitResult.GetActor() == Saved_Gizmo_TX)
 		{
 			Saved_Gizmo_TX->GOnClicked();
-			Clicked_TX = true;
+			Clicked_X = true;
 		}
 	}
 	
@@ -1352,7 +1455,7 @@ void AJSH_Player::Gizmo_Click()
 		if (HitResult.GetActor() == Saved_Gizmo_TY)
 		{
 			Saved_Gizmo_TY->GOnClicked();
-			Clicked_TY = true;
+			Clicked_Y = true;
 		}
 	}
 
@@ -1361,7 +1464,7 @@ void AJSH_Player::Gizmo_Click()
 		if (HitResult.GetActor() == Saved_Gizmo_TZ)
 		{
 			Saved_Gizmo_TZ->GOnClicked();
-			Clicked_TZ = true;
+			Clicked_Z = true;
 		}
 	}
 	
@@ -1370,7 +1473,17 @@ void AJSH_Player::Gizmo_Click()
 		if (HitResult.GetActor() == Saved_Gizmo_TB)
 		{
 			Saved_Gizmo_TB->GOnClicked();
-			Clicked_TB = true;
+			Clicked_B = true;
+		}
+	}
+
+	// Scale
+	if (Saved_Gizmo_SX != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_SX)
+		{
+			Saved_Gizmo_SX->GOnClicked();
+			Clicked_X = true;
 		}
 	}
 	
@@ -1387,19 +1500,20 @@ void AJSH_Player::Gizmo_Click_End()
 {
 	if (!Gizmo_Clicking_forError) return;
 
-	if (Clicked_TX)
+	if (Clicked_X)
 	{
-		Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
+		if (Gizmo_TranslateMode) Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
+		else if (Gizmo_ScaleMode) Saved_Gizmo_SX->HandleMouseReleaseOutsideActor();
 	}
-	if (Clicked_TY)
+	if (Clicked_Y)
 	{
 		Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
 	}
-	if (Clicked_TZ)
+	if (Clicked_Z)
 	{
 		Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
 	}
-	if (Clicked_TB)
+	if (Clicked_B)
 	{
 		Saved_Gizmo_TB->HandleMouseReleaseOutsideActor();
 	}
@@ -1635,17 +1749,16 @@ void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 void AJSH_Player::Esc()
 {
 	// Editor 모드일때 ESC 누르면 선택 없어지는거
-	if (EditorMode_B == true)
-	{
-		Editor_SpawnActor = nullptr;
-		
-	}
-	// Editor 모드아닐때 ESC 방 나가기
-	else
+	if (EditorMode_B == false)
 	{
 		// 종료하겠습니까 위젯 하나 뛰어줘야할듯
 		CHJ_Instance->ExitSession();
 		UE_LOG(LogTemp, Error, TEXT("ESC"));
+		// if (!EditorMode_B) return;
+		// if (DisableEdit_b) return;
+		// // 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+		// if (Gizmo_Clicking_forError) return;
+		// Editor_SpawnActor = nullptr;
 	}
 }
 

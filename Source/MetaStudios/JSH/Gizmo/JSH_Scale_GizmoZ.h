@@ -4,17 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "JSH_Scale_Gizmo.generated.h"
-
+#include "JSH_Scale_GizmoZ.generated.h"
 
 UCLASS()
-class METASTUDIOS_API AJSH_Scale_Gizmo : public AActor
+class METASTUDIOS_API AJSH_Scale_GizmoZ : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AJSH_Scale_Gizmo();
+	AJSH_Scale_GizmoZ();
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,7 +22,5 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-
 
 };

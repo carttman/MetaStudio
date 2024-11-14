@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../JSH/Gizmo/JSH_Scale_GizmoY.h"
+#include "../Gizmo/JSH_Scale_GizmoY.h"
 #include "MetaStudios/JSH/JSH_PlayerController.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
@@ -23,6 +23,8 @@ AJSH_Scale_GizmoY::AJSH_Scale_GizmoY()
 	if (TMesh.Succeeded())
 	{
 		Origin->SetStaticMesh(TMesh.Object);
+		Origin->SetVisibility(false);
+		Origin->SetCollisionProfileName(TEXT("NoCollision"));
 	}
 	
 	
