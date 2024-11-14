@@ -218,7 +218,8 @@ void AJSH_Translate_GizmoX::GOnClicked()
 {
 	// Cursor에 오버랩 되었을때 True로 바뀌는 bool값임 , 커서에 마우스 올라가 있을때에만 클릭해도 실행되도록 (왜 넣었는지 기억 안남, 없어도 될듯 싶음)
 	if (!CursorOveringGizmo) return;
-
+	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON || OriginPlayer->Editor_SpawnActor->GizmoZ_ON || OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
+	
 	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
 	if (OriginPlayer)
@@ -227,7 +228,7 @@ void AJSH_Translate_GizmoX::GOnClicked()
 	}
 	
 	//// 다른 기즈모가 실행 중 이면 , 기능 실행되지 않도록 ////
-	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON || OriginPlayer->Editor_SpawnActor->GizmoZ_ON || OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
+	
 	if (!OriginPlayer->Editor_SpawnActor->GizmoX_ON)
 	{
 		OriginPlayer->Editor_SpawnActor->GizmoX_ON = true;

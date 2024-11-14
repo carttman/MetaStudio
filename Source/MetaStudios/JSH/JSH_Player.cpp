@@ -205,6 +205,12 @@ void AJSH_Player::BeginPlay()
 	RecordCamera->SetActive(true);
 	bUseControllerRotationYaw = true;
 	CameraSpawn_b_On_Off = true;
+	
+	
+	if (CHJ_Instance == nullptr)
+	{
+		CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+	}
 }
 
 void AJSH_Player::Tick(float DeltaTime)
@@ -505,7 +511,11 @@ void AJSH_Player::StartRecording()
 	
 		// Record 함수를 끌고 오기 위한 GameInstance 
 		ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
-		CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+		if (CHJ_Instance == nullptr)
+		{
+			CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+		}
+		
 		
 		// 카메라 확대, 축소, 회전 , 초기화
 		CameraReset();
@@ -1178,6 +1188,11 @@ void AJSH_Player::EditorAcotorDestroy()
 }
 void AJSH_Player::NetMulti_EditorAcotorDestroy_Implementation()
 {
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+	
 	if (Editor_SpawnActor != nullptr)
 	{
 		Editor_SpawnActor->DestroyThis();
@@ -1751,9 +1766,13 @@ void AJSH_Player::Esc()
 	// Editor 모드일때 ESC 누르면 선택 없어지는거
 	if (EditorMode_B == false)
 	{
+		if (CHJ_Instance == nullptr) CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+
 		// 종료하겠습니까 위젯 하나 뛰어줘야할듯
 		CHJ_Instance->ExitSession();
 		UE_LOG(LogTemp, Error, TEXT("ESC"));
+
+		
 		// if (!EditorMode_B) return;
 		// if (DisableEdit_b) return;
 		// // 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
