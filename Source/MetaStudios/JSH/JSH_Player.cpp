@@ -1178,6 +1178,11 @@ void AJSH_Player::EditorAcotorDestroy()
 }
 void AJSH_Player::NetMulti_EditorAcotorDestroy_Implementation()
 {
+	if (!EditorMode_B) return;
+	if (DisableEdit_b) return;
+	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
+	if (Gizmo_Clicking_forError) return;
+	
 	if (Editor_SpawnActor != nullptr)
 	{
 		Editor_SpawnActor->DestroyThis();
@@ -1754,6 +1759,8 @@ void AJSH_Player::Esc()
 		// 종료하겠습니까 위젯 하나 뛰어줘야할듯
 		CHJ_Instance->ExitSession();
 		UE_LOG(LogTemp, Error, TEXT("ESC"));
+
+		
 		// if (!EditorMode_B) return;
 		// if (DisableEdit_b) return;
 		// // 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
