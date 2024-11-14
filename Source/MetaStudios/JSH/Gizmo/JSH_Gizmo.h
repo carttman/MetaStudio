@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JSH_Translate_GizmoX.h"
 #include "GameFramework/Actor.h"
 #include "JSH_Gizmo.generated.h"
 
@@ -26,11 +27,22 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Translate_Box;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class AJSH_Translate_GizmoBox* Origin_Translate_Box;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Translate_X;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class AJSH_Translate_GizmoX* Origin_Translate_X;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Translate_Y;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class AJSH_Translate_GizmoY* Origin_Translate_Y;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Translate_Z;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class AJSH_Translate_GizmoZ* Origin_Translate_Z;
 	
 	// Sclae
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -109,6 +121,14 @@ public:
 	UPROPERTY()
 	AJSH_Player* OriginPlayer;
 
-	
+	UFUNCTION()
+	void BeginPlayerContorller(AJSH_PlayerController* temp);
 
+	UFUNCTION()
+	void Child_Actor_Detect();
+
+	TArray<AActor*> Tag_X;
+	TArray<AActor*> Tag_Y;
+	TArray<AActor*> Tag_Z;
+	TArray<AActor*> Tag_Box;
 };

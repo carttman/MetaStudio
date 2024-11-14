@@ -181,6 +181,7 @@ void AJSH_Player::BeginPlay()
 	// Record 함수를 끌고 오기 위한 GameInstance 
 	ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
 	CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+
 	
 	UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller00000"));
 	// 플레이어 컨트롤러
@@ -651,6 +652,7 @@ void AJSH_Player::NetMulti_CameraSpawn_Implementation()
 
 void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 {
+	UE_LOG(LogTemp, Warning, TEXT("hhhhhhhhhhhhhh"));
 	// 마우스 우클릭을 누르고 있고(Bool_ZoomMode = true) and Editor Mode가 아니라면 속도를 움직이는게 아니라 카메라 줌인 줌 아웃을 컨트롤
 	if (Bool_ZoomMode && !EditorMode_B) return;
 
