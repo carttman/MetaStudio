@@ -10,6 +10,7 @@
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Components/ArrowComponent.h"
 
 
 
@@ -40,6 +41,9 @@ ACarPawn::ACarPawn()
 
 	RidingPlayer = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("playerVisible"));
 	RidingPlayer->SetupAttachment(CarMesh);
+
+	LineTraceArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("LineTraceArrow"));\
+	LineTraceArrow->SetupAttachment(RootComponent);
 
 }
 
@@ -164,12 +168,31 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 		// DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
 
 		FVector newLocation = hitResult.ImpactPoint;
-		newLocation.Z += 30.0f;  
+		newLocation.Z += 50.0f;  
 		SetActorLocation(newLocation);
 		UE_LOG(LogTemp, Warning, TEXT("tttttttttttttttttttttt"))
+	}	
+	if (LineTraceArrow)
+	{
+		FVector startLocation2 = LineTraceArrow->GetComponentLocation();
+		FVector endLocation2 = startLocation2 + (LineTraceArrow->GetForwardVector() * 10000.0f); // Trace in the forward direction
+
+		FHitResult hitResult2;
+		FCollisionQueryParams queryParams2;
+		queryParams.AddIgnoredActor(this);
+
+		if (GetWorld()->LineTraceSingleByChannel(hitResult2, startLocation, endLocation, ECC_Visibility, queryParams2))
+		{
+			// DrawDebugLine(GetWorld(), startLocation2, endLocation2, FColor::Blue, false, 1.0f, 0, 20.0f);
+
+			FVector newLocation = hitResult2.ImpactPoint;
+			newLocation.Z += 50.0f;
+			SetActorLocation(newLocation);
+
+			UE_LOG(LogTemp, Warning, TEXT("Line trace hit from ArrowComponent"));
+		}
 	}
 	///////////////LineTrace//////////////////////
-
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
 	

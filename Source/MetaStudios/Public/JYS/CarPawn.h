@@ -41,6 +41,8 @@ public:
 	// bool°ª ¸ÖÆ¼
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY(EditAnywhere)
+	class UArrowComponent* LineTraceArrow;
 
 	bool CanPlayerEnterCar(AMetaStudiosCharacter* targetCharacter);
 
