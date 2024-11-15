@@ -216,7 +216,6 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 
 	//MoveStop = false;
 	direction.X = v.X;
-	direction.Normalize();
 
 	if (direction.X != 0.0f)
 	{
@@ -231,6 +230,7 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 	direction = ttt.TransformVector(direction);
 	direction.Z = 0;
 	direction.Normalize();
+
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
 
@@ -337,7 +337,7 @@ void ASpaceshipPawn::NetMulticast_StartFlyEffect_Implementation()
 	params.AddIgnoredActor(this);
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
 	{
-		DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 1.0f, 0, 5.0f);
+		// DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 1.0f, 0, 5.0f);
 		float targetZ = hitResult.Location.Z;
 		FVector currentLocation = GetActorLocation();
 

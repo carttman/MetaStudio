@@ -121,6 +121,7 @@ void ACarPawn::ExitCar()
 
 void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 {
+
 	FVector2D v = value.Get<FVector2D>();		
 	if( v.X <= 0.0f && MoveStop == false)
 	{			
@@ -133,7 +134,6 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 	
 	//MoveStop = false;
 	direction.X = v.X;
-	direction.Normalize();	
 	
 	if (direction.X != 0.0f)
 	{
@@ -306,7 +306,7 @@ void ACarPawn::Server_ExitCar_Implementation()
 void ACarPawn::NetMulticast_ExitCar_Implementation()
 {
 	if (player)
-	{
+	{ 
 		FVector carLoc = GetActorLocation();
 		FRotator carRot = GetActorRotation();
 
