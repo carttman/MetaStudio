@@ -259,7 +259,7 @@ void ASpaceshipPawn::OnMoveUp(const FInputActionValue& value)
 	// 수직 하강
 	currentLocation.Z += MovementSpeed * GetWorld()->GetDeltaSeconds();
 	SetActorLocation(currentLocation);
-
+	LastLandingPosZ = GetActorLocation().Z;
 	if (bLanded)
 	{
 		bLanded = false;
@@ -411,13 +411,16 @@ bool ASpaceshipPawn::CheckLanding()
 	FVector start = GetActorLocation();
 	FVector end = start - FVector(0, 0, 10000);
 
+	bool bHitResult = false;
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
 	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f, 0, 20.0f);
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
 	{
+		bHitResult = true;
 		DrawDebugLine(GetWorld(), start, end, FColor::Magenta, false, 1.0f, 0, 20.0f);
+		LastLandingPosZ = hitResult.ImpactPoint.Z;
 
 		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.ImpactPoint);
 		UE_LOG(LogTemp, Warning, TEXT("dist : %f - %f"), distanceToGround, LandingDistance)
@@ -437,6 +440,22 @@ bool ASpaceshipPawn::CheckLanding()
 			return true;
 		}
 	}
+
+	if (bHitResult == false && GetActorLocation().Z < LastLandingPosZ)
+	{
+		bCantMove = true;
+		bLanded = true;
+
+		Server_PlayAnimMontage(Anim->legDownMontage);
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+			Server_PlayAnimMontage(Anim->openDoorMontage);
+			}, 2, false);
+		Server_EndFlyEffect();
+		LastLandingPosZ = 1000000.0f;
+		return true;
+	}
+
 	return false;
 }
 
