@@ -490,13 +490,6 @@ void AJSH_Player::StartRecording()
 	
 	if (HasAuthority())
 	{
-		// FString RelativePath = FPaths::ProjectContentDir();
-		//
-		// FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
-		// IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*RelativePath);
-		// UE_LOG(LogTemp, Error, TEXT("RelativePath: %s"), *RelativePath);
-		// UE_LOG(LogTemp, Error, TEXT("FullPath: %s"), *FullPath);
-	
 		// Record 함수를 끌고 오기 위한 GameInstance 
 		ObsGamInstance = Cast<UJSH_OBSWebSocket>(GetGameInstance());
 		if (CHJ_Instance == nullptr)
@@ -515,7 +508,6 @@ void AJSH_Player::StartRecording()
 		if (JPlayerController)
 		{
 			JPlayerController->StartRecord();
-			NetMulti_StartRecording();
 		}
 		
 		if (!Record_b_On_Off)
@@ -542,10 +534,6 @@ void AJSH_Player::StartRecording()
 			Record_b_On_Off = false;
 		}
 	}
-	
-
-	
-	// NetMulti_StartRecording();
 }
 
 void AJSH_Player::NetMulti_StartRecording_Implementation()

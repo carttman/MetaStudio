@@ -115,21 +115,7 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
         OriginPlayer->Now_Click_Actor = this;
     }
     
-
-    // // 이전 위치 돌아가기 위해 저장해뒀던 값을 초기화 
-    // while (!OriginPlayer->PreviousLocations.empty())
-    // {
-    //     OriginPlayer->PreviousLocations.pop();
-    // }
-
-
     GizmoSpawn();
-
-    // else
-    // {
-    //     GizmoActor->SetActorHiddenInGame(false);
-    // }
-
     UE_LOG(LogTemp, Error, TEXT("Click"));
 }
 

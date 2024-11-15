@@ -76,6 +76,8 @@ void AJSH_PlayerController::NetMulti_Destroy_SaveEditorActor_Implementation()
 
 void AJSH_PlayerController::StartRecord()
 {
+	if (!HasAuthority()) return;
+
 		if (!Recording)
 		{
 			if (PH.IsValid())
@@ -175,7 +177,8 @@ void AJSH_PlayerController::ConvertMKVToMP4()
 		// FString Params2 = FString::Printf(TEXT("-i \"%s/%s.mkv\" -vcodec copy -acodec copy \"%s/%s.mp4\""), *WorkingDirectory, *VideoFileName, *WorkingDirectory, *VideoFileName);
 		// 위처럼 copy하면 mp4a 문제 생김
 	
-		FString Params2 = FString::Printf(TEXT("-i \"%s/ffmpeg/%s.mkv\" -vcodec h264 -acodec aac -strict experimental \"%s/ffmpeg/%s.mp4\""), *FullPath, *VideoFileName, *FullPath, *VideoFileName);
+		FString Params2 = FString::Printf(TEXT("-i \"%sffmpeg/%s.mkv\" -vcodec h264 -acodec aac -strict experimental \"%sffmpeg/%s.mp4\""), *FullPath, *VideoFileName, *FullPath, *VideoFileName);
+		//FString Params2 = FString::Printf(TEXT("-i \"%s/ffmpeg/%s.mkv\" -vcodec h264 -acodec aac -strict experimental \"%s/ffmpeg/%s.mp4\""), *FullPath, *VideoFileName, *FullPath, *VideoFileName);
 		//FString Params2 = FString::Printf(TEXT("-i \"C:/Users/Admin/Documents/GitHub/MetaStudio/MetaStudios/ffmpeg/A.mkv\" -vcodec h264 -acodec aac -strict experimental \"C:/Users/Admin/Documents/GitHub/MetaStudio/MetaStudios/ffmpeg/A.mp4\""));
 
 
