@@ -67,7 +67,6 @@ void ACarPawn::Tick(float DeltaTime)
 		ActivateThruster(false);
 	}
 
-	Server_UpdateTransform(GetActorLocation(), GetActorRotation());
 }
 
 // Called to bind functionality to input
@@ -197,6 +196,9 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 	direction = FVector::ZeroVector;
 	
 	Server_OnMyActionMove(false);
+
+	Server_UpdateTransform(GetActorLocation(), GetActorRotation());
+
 }
 
 void ACarPawn::Server_OnMyActionMove_Implementation(bool bMove)
