@@ -27,10 +27,10 @@ void UJSH_Record_UI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	// if (OriginPlayer)
-	// {
-	// 	Speed_Value  = OriginPlayer->MaxFlySpeed_C;
-	// }
+	if (OriginPlayer)
+	{
+		Speed_Value  = OriginPlayer->MaxFlySpeed_C;
+	}
 }
 
 
@@ -55,5 +55,5 @@ void UJSH_Record_UI::StopRecrod_Anim()
 
 void UJSH_Record_UI::Speed_Update(FText NewText)
 {
-	Speed->SetText(NewText);
+	Speed->SetText(FText::AsNumber(Speed_Value));
 }
