@@ -650,10 +650,16 @@ void AJSH_Player::FlyMode()
 {
 	// 메인 플랫폼 일떄 기능 LOCK
 	//if(!Bool_MainLock) return;
-	
-	NetMulti_FlyMode();
 
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	bUseControllerRotationPitch = true;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = true;
 
+	if (HasAuthority())
+	{
+		NetMulti_FlyMode();
+	}
 }
 void AJSH_Player::NetMulti_FlyMode_Implementation()
 {
@@ -661,133 +667,54 @@ void AJSH_Player::NetMulti_FlyMode_Implementation()
 	bUseControllerRotationPitch = true;
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = true;
-	
-	// if(!FlyMode_b_On_Off)
-	// {
-	// 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-	// 	bUseControllerRotationPitch = true;
-	// 	bUseControllerRotationYaw = true;
-	// 	bUseControllerRotationRoll = true;
-	// }
-	// @@ 캐릭터 없어짐 @@@
-	// else
-	// {
-	// 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-	// 	bUseControllerRotationPitch = false;
-	// 	bUseControllerRotationYaw = false;
-	// 	bUseControllerRotationRoll = false;
-	// }
-	// FlyMode_b_On_Off = !FlyMode_b_On_Off;
 }
 
 
 // (E) 위로 올라가는 - 레이 안 쏨
 void AJSH_Player::Fly_Up_Down(const FInputActionValue& Value)
 {
-	NetMulti_Fly_Up_Down(Value);
-}
-
-void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& Value)
-{
-	UE_LOG(LogTemp, Warning, TEXT("오잉"))
-	// @@ 캐릭터 없어짐 @@
-	// if (GetCharacterMovement()->IsFlying())
-	// {
-	// 	// 입력 값에서 Up/Down 액션 값 추출
-	// 	Fly_Zvalue = Value.Get<float>();
-	// 	UE_LOG(LogTemp, Warning, TEXT("처음: %f"), Fly_Zvalue)
-	// 	AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
-	//
-	// 	Fly_Off_Value = Fly_Off_Value + Fly_Zvalue;
-	//
-	// 	if (Fly_Off_Value <= -10)
-	// 	{
-	// 		FlyMode();
-	// 		Fly_Off_Value = 0;
-	// 	}
-	// }
-	// if (!FlyMode_b_On_Off)
-	// {
-	// 	FlyMode();	
-	// }
 	if (GetCharacterMovement()->IsFlying())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("f111"))
-	}
-	
-	if (GetCharacterMovement()->IsFlying())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("f222"))
 		if (!DisableEdit_b) return;
 
 		// 입력 값에서 Up/Down 액션 값 추출
 		Fly_Zvalue = Value.Get<float>();
-		UE_LOG(LogTemp, Warning, TEXT("처음: %f"), Fly_Zvalue)
 		AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
+
+		if (HasAuthority())
+		{
+			NetMulti_Fly_Up_Down(Fly_Zvalue);
+		}
 	}
+}
+
+void AJSH_Player::NetMulti_Fly_Up_Down_Implementation(const FInputActionValue& Value)
+{
+	AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
 }
 
 
 // (Q) 아래로 내려가는 -> 내려갈때 레이쏴서 일정 거리 가까워지면 FlyMode 종료 
 void AJSH_Player::Fly_Down_Ray(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("down"));
-	NetMulti_Fly_Down_Ray(Value);
+	if (GetCharacterMovement()->IsFlying())
+	{
+		// 입력 값에서 Up/Down 액션 값 추출
+		Fly_Zvalue = Value.Get<float>();
+		AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
+		if (HasAuthority())
+		{
+			NetMulti_Fly_Down_Ray(Fly_Zvalue);
+		}
+	}
+	
 }
 
 
 
 void AJSH_Player::NetMulti_Fly_Down_Ray_Implementation(const FInputActionValue& Value)
 {
-	
-	if (GetCharacterMovement()->IsFlying())
-	{
-		
-		// 입력 값에서 Up/Down 액션 값 추출
-		Fly_Zvalue = Value.Get<float>();
-		AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
-
-		//@@ 캐릭터 없어짐 @@@
-		// // 아래에 있는 물체와의 거리 체크
-		// FVector Start = GetActorLocation();
-		// FVector End = Start - FVector(0.f, 0.f, 1000.f);
-		
-		//@@ 캐릭터 없어짐 @@@
-		// FHitResult HitResult;
-		// FCollisionQueryParams Params;
-		// Params.AddIgnoredActor(this);  // 자기 자신은 충돌 제외
-		//
-		// bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
-
-		
-
-
-
-		// @@ 캐릭터 없어짐 @@
-		// if (bHit)
-		// {
-		// 	float DistanceToGround = HitResult.Distance;
-		//
-		// 	// Editor 모드가 아닐때 or Record Mode가 아닐때 Fly Mode를 종료
-		// 	if (!EditorMode_B & !Record_b_On_Off)
-		// 	{
-		// 		// 원하는 거리 임계값 설정
-		// 		if (DistanceToGround < 100.0f)
-		// 		{
-		// 			FlyMode(); 
-		// 		}
-		// 	}
-		// 	
-		// 	
-		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 5);
-		// }
-		// else
-		// {
-		// 	
-		// 	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
-		// }
-	}
-
+	AddMovementInput(FVector(0.f, 0.f, 1.f), Fly_Zvalue);
 }
 
 #pragma endregion
