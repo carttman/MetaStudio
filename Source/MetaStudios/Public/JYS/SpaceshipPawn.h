@@ -151,6 +151,8 @@ private:
 
 	FVector direction;
 
+	float LastLandingPosZ = 10000000.0f;
+
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 1500.0f;
 

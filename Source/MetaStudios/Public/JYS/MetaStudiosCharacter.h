@@ -204,10 +204,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly , Category = Pistol)
 	float GrabDistance = 300;
 
-
+	UFUNCTION()
+	void UsingBooster();
 private:
 	// 부스터 사용 여부
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = UsingBooster)
 	bool bIsBoosting = false;
 
 	// 부스터 힘

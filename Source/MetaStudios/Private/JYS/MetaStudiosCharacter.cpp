@@ -85,7 +85,10 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ManageBooster(DeltaTime);
+	if (HasAuthority())
+	{
+		ManageBooster(DeltaTime);
+	}
 }
 
 void AMetaStudiosCharacter::PossessedBy(AController* NewController)
@@ -105,6 +108,11 @@ void AMetaStudiosCharacter::BeginPlay()
 
 	Anim = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 
+}
+
+void AMetaStudiosCharacter::UsingBooster()
+{
+	ActivateBooster(bIsBoosting);
 }
 
 //////////////////////Animation/////////////////
@@ -176,7 +184,7 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::Look);
 
 		// Booster Toggle
-		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Triggered, this, &AMetaStudiosCharacter::ToggleBoosting);
+		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Started, this, &AMetaStudiosCharacter::ToggleBoosting);
 
 		EnhancedInputComponent->BindAction(BoosterAction, ETriggerEvent::Completed, this, &AMetaStudiosCharacter::ToggleBoosting_Complete);
 
@@ -229,12 +237,45 @@ void AMetaStudiosCharacter::ResetEnhancedInputSetting(APlayerController* PlayerC
 
 void AMetaStudiosCharacter::ManageBooster(float DeltaTime)
 {
-	Server_ManageBooster(DeltaTime);
+	//Server_ManageBooster(DeltaTime);
+	// bIsBoosting 활성화 + 현재 남은 부스터가 0 이상일때
+	if (bIsBoosting && BoosterAmount > 0.0f)
+	{
+		// 현재 부스터 - 20 * DeltaTime
+		BoosterAmount -= BoosterDrainRate * DeltaTime;
+
+
+		// 만약 현재 부스터 남은 양이 0 이하거나 같을 때
+		if (BoosterAmount <= 0.0f)
+		{
+			// 부스터 남은 양을 0으로 초기화
+			BoosterAmount = 0.0f;
+			bIsBoosting = false;
+			GravityScaleOff();
+		}
+
+		FVector HoverForce = FVector(GetVelocity().X, GetVelocity().Y, BoostStrength * DeltaTime);
+		LaunchCharacter(HoverForce, true, true);
+		ActivateBooster(bIsBoosting);
+	}
+	// 만약 부스터
+	if (activeBooster && !bIsBoosting && !GetCharacterMovement()->IsFalling())
+	{
+		// 현재 부스터 + 리필 부스터 양(10) * DeltaTime
+		BoosterAmount += BoosterRefillRate * DeltaTime;
+		// 만약 현재 부스터가 최대 부스터보다 크다면
+		if (BoosterAmount > MaxBoosterAmount)
+		{
+			// 현재 부스터를 최대 부스터로 초기화
+			BoosterAmount = MaxBoosterAmount;
+		}
+		ActivateBooster(!bIsBoosting);
+	}
 }
 
 void AMetaStudiosCharacter::Server_ManageBooster_Implementation(float DeltaTime)
 {
-	NetMulticast_ManageBooster(DeltaTime);
+	NetMulticast_ManageBooster_Implementation(DeltaTime);
 }
 
 void AMetaStudiosCharacter::NetMulticast_ManageBooster_Implementation(float DeltaTime)
@@ -286,20 +327,22 @@ void AMetaStudiosCharacter::Server_ToggleBoosting_Implementation(bool bMove)
 {
 	NetMulticast_ToggleBoosting();
 	MoveStop = bMove;
+	bIsBoosting = !bIsBoosting;
+	GravityScaleOff();
 }
 
 void AMetaStudiosCharacter::NetMulticast_ToggleBoosting_Implementation()
 {
-	// Only toggle if booster amount is not zero
-	if (BoosterAmount > 0)
-	{
-		bIsBoosting = !bIsBoosting;
-
-		if (bIsBoosting)
-		{
-			GravityScaleOff();
-		}
-	}
+	//// Only toggle if booster amount is not zero
+	//if (BoosterAmount > 0)
+	//{
+	//	bIsBoosting = !bIsBoosting;
+	//
+	//	if (bIsBoosting)
+	//	{
+	//		GravityScaleOff();
+	//	}
+	//}
 }
 
 void AMetaStudiosCharacter::ToggleBoosting_Complete()
@@ -309,7 +352,10 @@ void AMetaStudiosCharacter::ToggleBoosting_Complete()
 
 void AMetaStudiosCharacter::Server_ToggleBoosting_Complete_Implementation()
 {
-	NetMulticast_ToggleBoosting_Complete();
+	bIsBoosting = false;
+	ActivateBooster(bIsBoosting);
+	GravityScaleOn();
+	//NetMulticast_ToggleBoosting_Complete();
 }
 
 void AMetaStudiosCharacter::NetMulticast_ToggleBoosting_Complete_Implementation()
