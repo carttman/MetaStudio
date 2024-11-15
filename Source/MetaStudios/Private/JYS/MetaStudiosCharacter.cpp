@@ -84,6 +84,8 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 void AMetaStudiosCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	ManageBooster(DeltaTime);
 }
 
 void AMetaStudiosCharacter::PossessedBy(AController* NewController)

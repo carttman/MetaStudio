@@ -339,7 +339,7 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 		FVector playerSpawnLocation = carLoc + offset;
 
 		player->SetActorLocation(playerSpawnLocation);
-		player->SetActorRelativeRotation(carRot);
+		// player->SetActorRelativeRotation(carRot);
 
 		//characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
