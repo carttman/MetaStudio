@@ -525,8 +525,8 @@ public:
 	UPROPERTY(Replicated)
 	bool Bool_MainLock = true;
 
-	UPROPERTY(Replicated)
-	FString currgamemodename;
+	// UPROPERTY(Replicated)
+	// FString currgamemodename;
 	
 #pragma endregion
 

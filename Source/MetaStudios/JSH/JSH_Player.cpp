@@ -234,6 +234,8 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AJSH_Player, Bool_EditorActorDestroy);
 	DOREPLIFETIME(AJSH_Player, DisableEdit_b);
 	DOREPLIFETIME(AJSH_Player, DisableEdit2_b);
+	DOREPLIFETIME(AJSH_Player, CameraSpawn_b_On_Off);
+	DOREPLIFETIME(AJSH_Player, Bool_MainLock);
 }
 
 void AJSH_Player::Saved_PlayerController()
@@ -258,7 +260,7 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-			UE_LOG(LogTemp, Error, TEXT("director add mapping"));
+			//UE_LOG(LogTemp, Error, TEXT("director add mapping"));
 		}
 	}
 	
