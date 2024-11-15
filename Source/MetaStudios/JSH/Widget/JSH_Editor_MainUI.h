@@ -26,6 +26,16 @@ public:
 
 	UPROPERTY(meta=(BindWidget))
 	class UUserWidget* WBP_02;
+	
+	UPROPERTY(meta=(BindWidget))
+	class UUserWidget* WBP_04;
+
+	UPROPERTY(meta=(BindWidget))
+	class UUserWidget* WBP_05;
+	
+	UPROPERTY(meta=(BindWidget))
+	class UUserWidget* WBP_06;
+	
 
 	UPROPERTY(meta=(BindWidget))
 	class UImage* Window_Left;

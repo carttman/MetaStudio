@@ -198,12 +198,12 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
             UGameplayStatics::FinishSpawningActor(GizmoActor, ThisTransform);
 
             // // GizmoActor 스폰 논리
-            // if (GizmoActor != nullptr)
-            // {
-            //     UE_LOG(LogTemp, Error, TEXT("pak 7"));
-            //     //GizmoActor->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-            //     AttachToActor(GizmoActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-            // }
+            if (GizmoActor != nullptr)
+            {
+                UE_LOG(LogTemp, Error, TEXT("pak 7"));
+                //GizmoActor->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+               //GizmoActor->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
+            }
         }
     }
 }

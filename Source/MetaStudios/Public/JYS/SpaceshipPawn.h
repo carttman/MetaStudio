@@ -80,7 +80,7 @@ public:
 
 	void OnMyActionLook(const FInputActionValue& value);
 
-	float speed = 10000.0f;
+	float speed = 50000.0f;
 
 	UFUNCTION(Server, Unreliable)
 	void Server_UpdateTransform(FVector newLocation, FRotator newRotation);
@@ -152,7 +152,7 @@ private:
 	FVector direction;
 
 	UPROPERTY(EditAnywhere)
-	float MovementSpeed = 500.0f;
+	float MovementSpeed = 1500.0f;
 
 	////////////라인트레이스를 쏴서 일정 거리 이하가 됐을 때 착지 애니메이션 실행 및 자동 착지/////////////////////
 	UPROPERTY(EditAnywhere)

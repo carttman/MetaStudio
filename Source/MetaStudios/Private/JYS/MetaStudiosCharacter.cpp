@@ -457,6 +457,8 @@ void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation()
 		{
 			SpaceshipActor->player = this;
 			GetController()->Possess(SpaceshipActor);
+			// SpaceshipActor->SetActorRotation(SpaceshipActor->GetActorRotation());
+
 			UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn SpaceshipActor."));
 			NetMulticast_EnterSpaceship(SpaceshipActor);
 		}
