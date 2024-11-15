@@ -178,7 +178,7 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 
 	if (OriginPlayer && OriginPlayer->Editor_SpawnActor)
 	{
-		//SetActorTransform(OriginPlayer->Editor_SpawnActor->GetActorTransform());
+	// 	//SetActorTransform(OriginPlayer->Editor_SpawnActor->GetActorTransform());
 		SetActorLocation(OriginPlayer->Editor_SpawnActor->GetActorLocation());
 	}
 }
