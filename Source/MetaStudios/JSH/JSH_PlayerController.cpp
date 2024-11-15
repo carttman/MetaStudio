@@ -95,7 +95,7 @@ void AJSH_PlayerController::StartRecord()
 			
 			FString FilePath = FString::Printf(TEXT("%sffmpeg/%s"), *AutoPath, *VideoFileName);
 			FString ExecutablePath = FString::Printf(TEXT("%sffmpeg/bin/ffmpeg.exe"), *AutoPath);   // Path to ffmpeg.exe
-			FString Params = FString::Printf(TEXT("-f dshow -i audio=\"Microphone Array(Intel® Smart Sound Technology for Digital Microphones)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 2560x1600 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 %s.mkv"), *FilePath);
+			FString Params = FString::Printf(TEXT("-f dshow -i audio=\"Microphone Array(Intel® Smart Sound Technology for Digital Microphones)\" -f gdigrab -offset_x 0 -offset_y 0 -video_size 1920x1200 -framerate 30 -draw_mouse 1 -probesize 1000M -i desktop -c:v h264_nvenc -qp 0 %s.mkv"), *FilePath);
 			// FString Params = TEXT(" -y -rtbufsize 100M -f gdigrab -show_region 1 -offset_x 0 -offset_y 0 -video_size 2560x1600 -framerate 30 -probesize 10M -draw_mouse 1 -i desktop -f dshow -i audio=\"Microphone Array(Intel® Smart Sound Technology for Digital Microphones)\" -c:v h264_nvenc -r 30 -preset llhq -crf 25 -pix_fmt yuv420p \"output_with_mic.mp4\"");
 			
 			UE_LOG(LogTemp, Warning, TEXT("AutoPath: %s"), *AutoPath);
