@@ -159,6 +159,10 @@ class AJSH_Player : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_PreviousLocation;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_UI_OFF;
 	
 public:
 	AJSH_Player();
@@ -193,6 +197,7 @@ public:
 	UFUNCTION()
 	void Saved_PlayerController();
 
+	
 #pragma region Record
 
 	// 녹화 시작 / 종료
@@ -596,7 +601,8 @@ public:
 	void Esc();
 #pragma endregion
 
-
+	UFUNCTION()
+	void UI_Off();
 	
 };
 
