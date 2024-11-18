@@ -329,6 +329,10 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_Gizmo_RotateMode, ETriggerEvent::Started, this, &AJSH_Player::G_RotateMode);
 
 		EnhancedInputComponent->BindAction(IA_PreviousLocation, ETriggerEvent::Started, this, &AJSH_Player::Return_Previous_location);
+
+
+		// 4Key -> UI_Off
+		EnhancedInputComponent->BindAction(IA_UI_OFF, ETriggerEvent::Started, this, &AJSH_Player::UI_Off);
 	}
 	else
 	{
@@ -1597,6 +1601,18 @@ void AJSH_Player::Esc()
 		// // 클릭 중에 q나 tap누르면 튕기는 오류 때문에 + 잡고 있을 떄 누르면 모드 바껴도 원래 상태로 
 		// if (Gizmo_Clicking_forError) return;
 		// Editor_SpawnActor = nullptr;
+	}
+}
+
+void AJSH_Player::UI_Off()
+{
+	if (HasAuthority())
+	{
+		if (RecordUI_01)
+		{
+			RecordUI_01->RemoveFromParent();
+			RecordUI_01 = nullptr;  
+		}
 	}
 }
 
