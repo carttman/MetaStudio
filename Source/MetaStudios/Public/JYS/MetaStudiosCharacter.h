@@ -62,6 +62,9 @@ class AMetaStudiosCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* CameraMode;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Exit;
+
 
 public:
 	AMetaStudiosCharacter();
@@ -258,5 +261,6 @@ private:
 	UFUNCTION()
 	void PickUpAnim();
 
+	void ExitSession();
 };
 

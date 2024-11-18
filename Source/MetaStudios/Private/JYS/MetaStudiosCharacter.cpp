@@ -20,6 +20,7 @@
 #include "JYS/CarPawn.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "JYS/PlayerAnimInstance.h"
+#include <MetaStudios/CHJ/MainGameInstance.h>
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -149,6 +150,7 @@ void AMetaStudiosCharacter::PickUpAnim()
 	}
 }
 
+
 //////////////////////Input////////////////////////////////
 void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -197,6 +199,9 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		//// 우주선에서 앉았다가 일어나기 -> 컨트롤러 바뀌게////////
 		PlayerInputComponent->BindAction("EnterSpaceship", IE_Pressed, this, &AMetaStudiosCharacter::SelectAutoMobile);
 		//PlayerInputComponent->BindAction("EnterCar", IE_Pressed, this, &AMetaStudiosCharacter::EnterCar);
+
+			
+		EnhancedInputComponent->BindAction(IA_Exit, ETriggerEvent::Started, this, &AMetaStudiosCharacter::ExitSession);
 	}
 	else
 	{
@@ -653,4 +658,23 @@ void AMetaStudiosCharacter::DestroyObject()
 		// itemCount++;
 	}
 
+}
+
+void AMetaStudiosCharacter::ExitSession()
+{
+	//auto v = Value.Get<bool>();
+
+	auto gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
+	UE_LOG(LogTemp, Warning, TEXT("exit"));
+	
+	if (gi)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("exit"));
+		gi->ExitSession();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("non_exit"));
+
+	}
 }
