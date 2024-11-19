@@ -12,6 +12,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Components/ArrowComponent.h"
 #include "JYS/MetaStudiosCharacter.h"
+#include "Components/BoxComponent.h"
+#include "Blueprint/UserWidget.h"
 
 
 
@@ -43,9 +45,14 @@ ACarPawn::ACarPawn()
 	RidingPlayer = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("playerVisible"));
 	RidingPlayer->SetupAttachment(CarMesh);
 
-	LineTraceArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("LineTraceArrow"));\
+	LineTraceArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("LineTraceArrow"));
 	LineTraceArrow->SetupAttachment(RootComponent);
 
+	UIBox = CreateDefaultSubobject<UBoxComponent>(TEXT("UIBox"));
+	UIBox->SetupAttachment(CarMesh);
+
+	UIBox->SetGenerateOverlapEvents(true);
+	UIBox-> SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 }
 
 // Called when the game starts or when spawned
@@ -53,7 +60,13 @@ void ACarPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ActivateThruster(false);	
+	ActivateThruster(false);
+	
+	if (UIBox)
+	{
+		UIBox->OnComponentBeginOverlap.AddDynamic(this, &ACarPawn::OnUIBoxBeginOverlap);
+		UIBox->OnComponentEndOverlap.AddDynamic(this, &ACarPawn::OnUIBoxEndOverlap);
+	}
 }
 
 // Called every frame
@@ -206,6 +219,33 @@ void ACarPawn::OnMyActionLook(const FInputActionValue& value)
 	//{
 	//	//ApplyRoll(v.X * 0.5f);
 	//}
+}
+
+void ACarPawn::OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
+	{
+		if (WidgetClass && !ActiveWidget)
+		{
+			ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetClass);
+			if (ActiveWidget)
+			{
+				ActiveWidget->AddToViewport();
+			}
+		}
+	}
+}
+
+void ACarPawn::OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
+	{
+		if (ActiveWidget)
+		{
+			ActiveWidget->RemoveFromViewport();
+			ActiveWidget = nullptr;
+		}
+	}
 }
 
 void ACarPawn::ResetEnhancedInputSetting(APlayerController* pc)
