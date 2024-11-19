@@ -254,7 +254,7 @@ public:
 	UPROPERTY(Replicated)
 	bool PlayerVisible_b_On = true;
 
-	UPROPERTY()
+	UPROPERTY(replicated)
 	AJSH_PlayerController* JPlayerController;
 	
 #pragma endregion
@@ -367,7 +367,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AJSH_Editor_SpawnActor* Editor_SpawnActor;
 
 
@@ -450,9 +450,13 @@ public:
 	
 	
 	// Gizmo Mode
+	UPROPERTY(replicated)
 	bool FirstGizmode = false;
+	UPROPERTY(replicated)
 	bool Gizmo_TranslateMode = false;
+	UPROPERTY(replicated)
 	bool Gizmo_ScaleMode = false;
+	UPROPERTY(replicated)
 	bool Gizmo_RotateMode = false;
 
 	UFUNCTION()
@@ -480,16 +484,16 @@ public:
 	UPROPERTY()
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	float Lay_Distance = 0.0f;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool Gizmo_Selected = false;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool EnableEditSystem = false;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool Gizmo_Detecting = false;
 
 
@@ -498,7 +502,7 @@ public:
 	UFUNCTION()
 	void Gizmo_Click_End();
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool Gizmo_Clicking_forError = false;
 
 	UPROPERTY()
@@ -555,7 +559,7 @@ public:
 #pragma region Camera Control
 
 	// 카메라 줌
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool Bool_ZoomMode = false;
 	
 	UFUNCTION()

@@ -1,17 +1,16 @@
 #pragma once
 
 #include <stack>
-
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "Gizmo/JSH_Gizmo.h"
+#include "CoreMinimal.h"
+#include "GameFramework/Pawn.h"
 #include "JSH_Editor_SpawnActor.generated.h"
 
 // 순환참조 문제로, Include 말고
 class AJSH_PlayerController;
 
 UCLASS()
-class METASTUDIOS_API AJSH_Editor_SpawnActor : public AActor
+class METASTUDIOS_API AJSH_Editor_SpawnActor : public APawn
 {
 	GENERATED_BODY()
 	
@@ -33,7 +32,10 @@ public:
 
 	UFUNCTION()
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
-
+	UFUNCTION(Server, reliable)
+	void Server_NotifyActorOnClicked();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_NotifyActorOnClicked();
 
 
 	
@@ -105,3 +107,4 @@ public:
 	const int MaxLocations = 5;
 	
 };
+

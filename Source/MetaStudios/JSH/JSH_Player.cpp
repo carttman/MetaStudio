@@ -221,6 +221,7 @@ void AJSH_Player::Tick(float DeltaTime)
 }
 
 
+
 // 멀티 BOOL
 void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -237,6 +238,18 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AJSH_Player, DisableEdit2_b);
 	DOREPLIFETIME(AJSH_Player, CameraSpawn_b_On_Off);
 	DOREPLIFETIME(AJSH_Player, Bool_MainLock);
+	DOREPLIFETIME(AJSH_Player, Gizmo_Clicking_forError);
+	DOREPLIFETIME(AJSH_Player, FirstGizmode);
+	DOREPLIFETIME(AJSH_Player, Gizmo_TranslateMode);
+	DOREPLIFETIME(AJSH_Player, Gizmo_ScaleMode);
+	DOREPLIFETIME(AJSH_Player, Gizmo_RotateMode);
+	DOREPLIFETIME(AJSH_Player, Editor_SpawnActor);
+	DOREPLIFETIME(AJSH_Player, JPlayerController);
+	DOREPLIFETIME(AJSH_Player, Lay_Distance);
+	DOREPLIFETIME(AJSH_Player, Gizmo_Selected);
+	DOREPLIFETIME(AJSH_Player, EnableEditSystem);
+	DOREPLIFETIME(AJSH_Player, Gizmo_Detecting);
+	DOREPLIFETIME(AJSH_Player, Bool_ZoomMode);
 }
 
 void AJSH_Player::Saved_PlayerController()

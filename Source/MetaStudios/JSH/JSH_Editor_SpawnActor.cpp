@@ -34,6 +34,8 @@ AJSH_Editor_SpawnActor::AJSH_Editor_SpawnActor()
 
     //AssetMesh->OnClicked.AddDynamic(this, &AJSH_Editor_SpawnActor::OnMeshClicked);
 
+
+    // 기즈모 스폰을 위한
     static ConstructorHelpers::FClassFinder<AActor> GizmoBPClass(TEXT("/Game/JSH/BP/Gizmo/BP_Gizmo.BP_Gizmo_C"));
     if (GizmoBPClass.Succeeded())
     {
@@ -108,7 +110,6 @@ void AJSH_Editor_SpawnActor::NetMulti_Get_PlayerController_Implementation()
         JPlayerController->bEnableTouchEvents = false;
         // OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
     }
-
     UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("AJSH_Player"), OriginPlayer_Box);
     if(OriginPlayer_Box.Num() > 0)
     {
@@ -127,9 +128,20 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     //겹쳐져 있을 때에 기즈모가 클릭되고 스폰액터는 클릭 안 되도록
     if (OriginPlayer->Gizmo_Detecting) return;
 
-    UE_LOG(LogTemp, Error, TEXT("saved"));
+    Server_NotifyActorOnClicked();
+}
+
+
+void AJSH_Editor_SpawnActor::Server_NotifyActorOnClicked_Implementation()
+{
+    NetMulti_NotifyActorOnClicked();
+}
+
+void AJSH_Editor_SpawnActor::NetMulti_NotifyActorOnClicked_Implementation()
+{
     // 클릭 했을때 자신의 정보를 Player에 저장
     OriginPlayer->SaveEditorActor(this);
+    UE_LOG(LogTemp, Error, TEXT("saved"));
 
     
     // 이전 위치 돌아가는 함수 
@@ -146,8 +158,6 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     GizmoSpawn();
     UE_LOG(LogTemp, Error, TEXT("Click"));
 }
-
-
 
 
 
