@@ -101,6 +101,7 @@ public:
     UFUNCTION()
     void OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	// 가까이 가면 키 관련 UI 생성
 
 
 	void ResetEnhancedInputSetting(class APlayerController* pc);
