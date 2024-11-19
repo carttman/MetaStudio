@@ -89,7 +89,7 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	UE_LOG(LogTemp, Error, TEXT("Spaceship SetupPlayerInputComponent"));
+	
 	PlayerInputComponent->BindAction("ExitSpaceship", IE_Pressed, this, &ASpaceshipPawn::ExitSpaceship);
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -144,7 +144,6 @@ void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 {
 	if (HasAuthority())
 	{
-		//APlayerController* characterController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 		if (player)
 		{
 			FVector spaceshipLoc = GetActorLocation();
@@ -154,10 +153,9 @@ void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 			FVector playerSpawnLocation = spaceshipLoc + offset;
 
 			player->SetActorLocation(playerSpawnLocation);
-			player->SetActorRelativeRotation(spaceshipRot);
+			player->SetActorRotation(spaceshipRot);
 
 			GetController()->Possess(player);
-			UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn Player"));
 			//player->GetMesh()->SetVisibility(true);
 		}
 
@@ -176,7 +174,10 @@ void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 		FVector playerSpawnLocation = spaceshipLoc + offset;
 
 		player->SetActorLocation(playerSpawnLocation);
-		player->SetActorRelativeRotation(spaceshipRot);
+		if (HasAuthority())
+		{
+			player->SetActorRotation(spaceshipRot);
+		}
 
 		//characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
@@ -282,7 +283,6 @@ void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
 	// 수직 하강
 	currentLocation.Z -= MovementSpeed * GetWorld()->GetDeltaSeconds();
 	SetActorLocation(currentLocation);
-
 }
 
 void ASpaceshipPawn::ApplyRoll(float RollInput)

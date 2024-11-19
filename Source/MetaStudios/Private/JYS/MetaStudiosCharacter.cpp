@@ -211,8 +211,6 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 void AMetaStudiosCharacter::ResetEnhancedInputSetting(APlayerController* PlayerController)
 {
-	UE_LOG(LogTemp, Error, TEXT("ResetEnhancedInputSetting"));
-
 	if (PlayerController)
 	{
 		if (PlayerController->GetLocalPlayer() == nullptr)
@@ -503,12 +501,10 @@ void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation()
 		if (SpaceshipActor == nullptr)	return;
 
 		if (SpaceshipActor->CanPlayerEnter(this))
-		{
+		{			 
 			SpaceshipActor->player = this;
+			SpaceshipActor->SetActorRotation(SpaceshipActor->GetActorRotation());
 			GetController()->Possess(SpaceshipActor);
-			// SpaceshipActor->SetActorRotation(SpaceshipActor->GetActorRotation());
-
-			UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn SpaceshipActor."));
 			NetMulticast_EnterSpaceship(SpaceshipActor);
 		}
 	}
@@ -520,6 +516,7 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 	{
 		SpaceshipActor->player = this;
 		GetMesh()->SetVisibility(false);
+		SpaceshipActor->SetActorRotation(spaceshipActor->GetActorRotation());
 		SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
 	else
@@ -562,7 +559,6 @@ void AMetaStudiosCharacter::Server_EnterCar_Implementation()
 		{
 			CarActor->player = this;
 			GetController()->Possess(CarActor);
-			UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn SpaceshipActor."));
 			NetMulticast_EnterCar(CarActor);
 		}
 	}
@@ -617,8 +613,11 @@ void AMetaStudiosCharacter::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		AddControllerYawInput(-LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		if (!Controller->GetPawn()->IsA(ASpaceshipPawn::StaticClass()))
+		{
+			AddControllerYawInput(-LookAxisVector.X);
+			AddControllerPitchInput(LookAxisVector.Y);
+		}
 	}
 }
 
@@ -662,8 +661,6 @@ void AMetaStudiosCharacter::DestroyObject()
 
 void AMetaStudiosCharacter::ExitSession()
 {
-	//auto v = Value.Get<bool>();
-
 	auto gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
 	UE_LOG(LogTemp, Warning, TEXT("exit"));
 	

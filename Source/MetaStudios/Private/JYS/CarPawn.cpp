@@ -11,6 +11,7 @@
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Components/ArrowComponent.h"
+#include "JYS/MetaStudiosCharacter.h"
 
 
 
@@ -112,14 +113,6 @@ bool ACarPawn::CanPlayerEnterCar(AMetaStudiosCharacter* targetCharacter)
 
 	float distance = GetDistanceTo(targetCharacter);
 	return distance <= 1000.0f;
-}
-
-void ACarPawn::ExitCar()
-{
-	if (IsLocallyControlled())
-	{
-		Server_ExitCar();
-	}
 }
 
 void ACarPawn::OnMyActionMove(const FInputActionValue& value)
@@ -300,6 +293,14 @@ void ACarPawn::Server_UpdateTransform_Implementation(FVector newLocation, FRotat
 	SetActorLocationAndRotation(newLocation, newRotation);
 }
 
+void ACarPawn::ExitCar()
+{
+	if (IsLocallyControlled())
+	{
+		Server_ExitCar();
+	}
+}
+
 void ACarPawn::Server_ExitCar_Implementation()
 {
 	if (HasAuthority())
@@ -316,7 +317,6 @@ void ACarPawn::Server_ExitCar_Implementation()
 			player->SetActorRelativeRotation(carRot);
 
 			GetController()->Possess(player);
-			UE_LOG(LogTemp, Error, TEXT("Change Possess to spawn Player"));
 
 			FRotator rot = this->GetActorRotation();
 			rot.Roll = 0.0f;
@@ -339,7 +339,20 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 		FVector playerSpawnLocation = carLoc + offset;
 
 		player->SetActorLocation(playerSpawnLocation);
-		player->SetActorRelativeRotation(carRot);
+
+
+		/// ¿©±â¼­ Æ¨±è
+		if (HasAuthority())
+		{
+			player->SetActorRotation(carRot);
+			UE_LOG(LogTemp, Warning, TEXT("player->SetActorRotation(carRot)"))
+		}
+		else 
+		{
+			UE_LOG(LogTemp, Error, TEXT("!!!!player->SetActorRotation(carRot)"))
+		}
+		// player->SetActorRotation(carRot);
+
 
 		//characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
@@ -347,16 +360,31 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 
 		player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 
-		FRotator CurrentRotation = GetControlRotation();
+		// ³»·ÈÀ» ¶§ ¿ÀÅä¹ÙÀÌÀÇ RotationÀÌ 0.0f
+		AController* controller = GetController();
+		if (controller)
+		{
+			FRotator CurrentRotation = GetControlRotation();
+			if (CurrentRotation.Roll != 0.0f)
+			{
+				CurrentRotation.Roll = 0.0f;
+				controller->SetControlRotation(CurrentRotation);
+			}
+		}
 
-		float RollAmount = CurrentRotation.Roll;
-		if (RollAmount == 0.0f)	return;
+		//FRotator CurrentRotation = GetControlRotation();
 
-		CurrentRotation.Roll = 0.0f;
+		//float RollAmount = CurrentRotation.Roll;
+		//if (RollAmount == 0.0f)	return;
 
-		GetController()->SetControlRotation(CurrentRotation);
+		//CurrentRotation.Roll = 0.0f;
+
+		//GetController()->SetControlRotation(CurrentRotation);
 	}
-
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Player reference is null in NetMulticast_ExitCar_Implementation."));
+	}
 }
 
 
