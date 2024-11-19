@@ -35,6 +35,8 @@ public:
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 
 
+
+	
 	UFUNCTION()
 	void Get_PlayerController();
 	UFUNCTION(Server, reliable)
@@ -43,6 +45,8 @@ public:
 	void NetMulti_Get_PlayerController();
 
 
+	TArray<AActor*> OriginPlayer_Box;
+	
 	
 
 	UFUNCTION()
@@ -62,8 +66,16 @@ public:
 	UFUNCTION()
 	void GizmoSpawn();
 
-	FTransform ThisTransform;
+	UPROPERTY(EditDefaultsOnly, Category = "Gizmo")
+	TSubclassOf<AActor> GizmoClass;
+
 	
+	UFUNCTION()
+	void Gizmo_Spawn();
+
+	
+	FTransform ThisTransform;
+
 	AActor* GizmoActor = nullptr;
 
 	UPROPERTY()
