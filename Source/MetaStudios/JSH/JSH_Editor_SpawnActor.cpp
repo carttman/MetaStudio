@@ -89,6 +89,29 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
     // }
 }
 
+void AJSH_Editor_SpawnActor::Get_PlayerController()
+{
+    Server_Get_PlayerController();
+}
+
+void AJSH_Editor_SpawnActor::Server_Get_PlayerController_Implementation()
+{
+    NetMulti_Get_PlayerController();
+}
+
+
+void AJSH_Editor_SpawnActor::NetMulti_Get_PlayerController_Implementation()
+{
+    // 플레이어 컨트롤러
+    JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+    if (JPlayerController)
+    {
+        JPlayerController->bEnableTouchEvents = false;
+    }
+
+    OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+}
+
 
 
 void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
@@ -96,6 +119,7 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     Super::NotifyActorOnClicked(ButtonPressed);
 
     if (!JPlayerController) return;
+    
     //겹쳐져 있을 때에 기즈모가 클릭되고 스폰액터는 클릭 안 되도록
     if (OriginPlayer->Gizmo_Detecting) return;
 
@@ -118,6 +142,12 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     GizmoSpawn();
     UE_LOG(LogTemp, Error, TEXT("Click"));
 }
+
+
+
+
+
+
 
 void AJSH_Editor_SpawnActor::Onclicked()
 {

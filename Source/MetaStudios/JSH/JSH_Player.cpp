@@ -291,7 +291,7 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(IA_Camera_Spawn_Destroy, ETriggerEvent::Started, this, &AJSH_Player::CameraSpawn);
 		EnhancedInputComponent->BindAction(IA_Camera_Third_First, ETriggerEvent::Started, this, &AJSH_Player::Camera_Third_First_Change);
 
-		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Triggered, this, &AJSH_Player::DisableEdit);
+		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Started, this, &AJSH_Player::DisableEdit);
 		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Ongoing, this, &AJSH_Player::DisableEdit);
 		EnhancedInputComponent->BindAction(IA_EditMode, ETriggerEvent::Completed, this, &AJSH_Player::EnableEdit);
 
@@ -729,30 +729,24 @@ void AJSH_Player::EditorMode()
 
 	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
 	if(Gizmo_Clicking_forError) return;
-	
-	
-	NetMulti_EditorMode();
 
-	// if (!EditorMode_B)
-	// {
-	// 	// proto시연때 막아서
-	// 	EnableEdit();
-	// }
+	// 카메라 관련 세팅 초기화
+	CameraReset();
+
+	
+	Server_EditorMode();
+}
+
+void AJSH_Player::Server_EditorMode_Implementation()
+{
+	NetMulti_EditorMode();
 }
 
 void AJSH_Player::NetMulti_EditorMode_Implementation()
 {
-	// Editor Mode On
+	// Editor Mode 꺼져 있다면
 	if (!EditorMode_B)
 	{
-		// 카메라 확대, 축소, 회전 , 초기화
-		CameraReset();
-		
-		UE_LOG(LogTemp, Error, TEXT("EditorModeOn"));
-		
-		// FlyMode를 제어하는 bool 값 (Editor Mode 일때 항상 날아다니 도록)
-		EditorMode_B = true;
-
 		// 기즈모 모드 임시
 		if (!FirstGizmode)
 		{
@@ -762,75 +756,59 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 
 			FirstGizmode = true;
 		}
-		else
+
+		// 에디터 모드 상태 체크 함수 (먼저 켜줘야 EnableEdit()가 돌아갈 수 있음)
+		EditorMode_B = true;
+
+		if (IsLocallyControlled())
 		{
-			
-		}
-		
-		// proto시연때 막아서
-		if (HasAuthority())
-		{
-			EnableEdit();
+			EnableEdit();  // EditorMode_B == false 이면 돌아가지 않음
 		}
 	}
-	// Editor Mode Off
+	// Editor Mode 켜져 있다면
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("EditorMode Off"));
-		DisableEdit();
-		
-		// FlyMode를 제어하는 bool 값 (Editor Mode 일때 항상 날아다니 도록)
-		EditorMode_B = false;
-
 		// Gizmo 강제종료 문제
 		if (Editor_SpawnActor != nullptr)
 		{
 			Editor_SpawnActor->OriginGizmo->Destroy();
 			Editor_SpawnActor = nullptr;
-			
 		}
 
 		// Editor 모드 종료 시 저장된 EditorSpwanAcotr Name 삭제
 		// JPlayerController->Editor_SpawnActor = nullptr;
 		Editor_SpawnActor = nullptr; // 에디터 모드가 아닐떄 삭제 못하게
 		
-		if (HasAuthority() && !RecordUI_01)
+		//EditorMode_On_B = false;
+		if (IsLocallyControlled())
 		{
-			if (UI_Record_01)
+			DisableEdit();
+
+
+			if (!RecordUI_01 && UI_Record_01)
 			{
 				RecordUI_01 = CreateWidget<UUserWidget>(GetWorld(), UI_Record_01);
+				
 				if(RecordUI_01)
 				{
 					RecordUI_01->AddToViewport();
 					Origin_RecordUI = Cast<UJSH_Record_UI>(RecordUI_01);
 				}
 			}
-		}
 
+			UE_LOG(LogTemp, Warning, TEXT("`` delete"));
+		}
+		
+		EditorMode_B = false;
 	}
 }
 
 
 void AJSH_Player::EnableEdit()
 {
-	// Editor 모드에서 마우스를 누른 상태로 , Editor 모드를 껏을때 , 꺼지고 나서 마우스를 떼면 EnableEdit가 On되는 문제가 있어
-	// 이렇게 막아줌
+	// Editor 모드에서 마우스를 누른 상태로 , Editor 모드를 껏을때 , 꺼지고 나서 마우스를 떼면 EnableEdit가 On되는 문제가 있어 이렇게 막아줌
+	// + 에디터 모드가 아닐때 함수가 실행되지 않도록
 	if (!EditorMode_B) return;
-	
-	DisableEdit_b = false;
-	DisableEdit2_b = false;
-	
-	// 기즈모 Tick 제어를 위한 (Enable Edit 상태일 때 Ray 쏘도록)
-	EnableEditSystem = true;
-	
-	// 마우스 우클릭을 안 하고 있으면 , ZoomMode를 Flase로
-	Bool_ZoomMode = false;
-	UE_LOG(LogTemp, Error, TEXT("false"));
-	
-	// // Editor 모드에서 마우스를 누른 상태로 , Editor 모드를 껏을때 , 꺼지고 나서 마우스를 떼면 EnableEdit가 On되는 문제가 있어
-	// // 이렇게 막아줌
-	// if (!EditorMode_B) return;
-
 
 	
 	GetMovementComponent()->SetComponentTickEnabled(false);
@@ -855,13 +833,16 @@ void AJSH_Player::EnableEdit()
 		JPlayerController->SetInputMode(InputMode);
 	}
 
-	if (HasAuthority() && !PlayerMainUI)
+	
+	if (!PlayerMainUI)
 	{
+		// 촬영 UI 제거
 		if (RecordUI_01)
 		{
 			RecordUI_01->RemoveFromParent();
-			RecordUI_01 = nullptr;  // 포인터를 null로 설정
+			RecordUI_01 = nullptr;
 		}
+		// Editor UI 생성
 		if (UI_Editor_Main)
 		{
 			PlayerMainUI = CreateWidget<UUserWidget>(GetWorld(), UI_Editor_Main);
@@ -871,24 +852,30 @@ void AJSH_Player::EnableEdit()
 			}
 		}
 	}
+	
+	Server_EnableEdit();
 }
+
+void AJSH_Player::Server_EnableEdit_Implementation()
+{
+	NetMulti_EnableEdit();
+}
+
+void AJSH_Player::NetMulti_EnableEdit_Implementation()
+{
+	DisableEdit_b = false;
+	
+	// 기즈모 Tick 제어를 위한 (Enable Edit 상태일 때 Ray 쏘도록)
+	EnableEditSystem = true;
+	
+	// 마우스 우클릭을 안 하고 있으면 , ZoomMode를 Flase로
+	Bool_ZoomMode = false;
+}
+
 
 void AJSH_Player::DisableEdit()
 {
 	if (!EditorMode_B) return;
-
-	DisableEdit_b = true;
-	DisableEdit2_b = true;
-	
-	// 기즈모 Tick 제어를 위한 (Enable Edit 상태일 때 Ray 쏘도록)
-	EnableEditSystem = false;
-	
-	// 마우스 우클릭 하고 있으면, ZoomMode를 True로
-	if (!Bool_ZoomMode)
-	{
-		Bool_ZoomMode = true;
-		UE_LOG(LogTemp, Error, TEXT("true"));
-	}
 	
 	GetMovementComponent()->SetComponentTickEnabled(true);
 
@@ -904,16 +891,43 @@ void AJSH_Player::DisableEdit()
 	}
 
 		JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	if (HasAuthority())
+	
+	if (PlayerMainUI)
 	{
-		if (PlayerMainUI)
-		{
-			PlayerMainUI->RemoveFromParent();
-			PlayerMainUI = nullptr;  // 포인터를 null로 설정
-			UE_LOG(LogTemp, Warning, TEXT("UI null"));
-		}
+		PlayerMainUI->RemoveFromParent();
+		PlayerMainUI = nullptr;
 	}
+	
+	Server_DisableEdit();
 }
+
+void AJSH_Player::Server_DisableEdit_Implementation()
+{
+	NetMulti_DisableEdit();
+}
+
+void AJSH_Player::NetMulti_DisableEdit_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("``11"));
+	DisableEdit_b = true;
+	
+	// 기즈모 Tick 제어를 위한 (Enable Edit 상태일 때 Ray 쏘도록)
+	EnableEditSystem = false;
+	
+	// 마우스 우클릭 하고 있으면, ZoomMode를 True로
+	if (!Bool_ZoomMode)
+	{
+		Bool_ZoomMode = true;
+		UE_LOG(LogTemp, Error, TEXT("true"));
+	}
+	
+	//EditorMode_B = false;
+}
+
+
+
+
+
 
 void AJSH_Player::CLickAndDel()
 {
@@ -1537,6 +1551,7 @@ void AJSH_Player::CameraReset()
 	RecordCamera->SetFieldOfView(90.0f);
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
+	UE_LOG(LogTemp, Error, TEXT("CameraReset"));
 }
 
 // 마우스 감도 조절 , 줌 했을때 마우스(화면 회전)가 너무 빨라서 추가

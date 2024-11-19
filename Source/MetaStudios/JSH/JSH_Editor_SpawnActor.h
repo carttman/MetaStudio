@@ -34,6 +34,17 @@ public:
 	UFUNCTION()
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
 
+
+	UFUNCTION()
+	void Get_PlayerController();
+	UFUNCTION(Server, reliable)
+	void Server_Get_PlayerController();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Get_PlayerController();
+
+
+	
+
 	UFUNCTION()
 	void Onclicked();
 	UFUNCTION()

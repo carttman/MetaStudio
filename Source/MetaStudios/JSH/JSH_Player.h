@@ -306,6 +306,8 @@ public:
 
 	UFUNCTION()
 	void EditorMode();
+	UFUNCTION(Server, reliable)
+	void Server_EditorMode();
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_EditorMode();
 
@@ -315,12 +317,26 @@ public:
 
 	UFUNCTION()
 	void EnableEdit();
+	UFUNCTION(Server, reliable)
+	void Server_EnableEdit();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_EnableEdit();
+
+
+	
 	UFUNCTION()
 	void DisableEdit();
+	UFUNCTION(Server, reliable)
+	void Server_DisableEdit();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_DisableEdit();
+	
 
 	UPROPERTY(Replicated)
 	bool EditorMode_B = false;
 
+	UPROPERTY(Replicated)
+	bool EditorMode_On_B = false;
 
 	// UI
 	UPROPERTY(EditAnywhere, Category = "UI")
