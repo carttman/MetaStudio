@@ -97,6 +97,9 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	class UComboBoxString* CBS_PrivateCombo;
 
+	UPROPERTY(meta=(bindWidget))
+	class UComboBoxString* CBS_PlayerType;
+	
 	TArray<FString> MaxPlayerCount;
 	TArray<FString> FilmRoomValue;
 	
