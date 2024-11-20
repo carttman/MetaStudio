@@ -40,11 +40,13 @@ public:
 	
 	
 public:
-	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
-	// virtual void NotifyActorOnReleased(FKey ButtonReleased);
 
 	UFUNCTION()
 	void GOnClicked();
+
+
+	UFUNCTION()
+	void GOnClicking();
 	
 	
 	UPROPERTY()
