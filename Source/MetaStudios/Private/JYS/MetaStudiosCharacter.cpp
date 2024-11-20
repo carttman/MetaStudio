@@ -95,8 +95,7 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 
 void AMetaStudiosCharacter::PossessedBy(AController* NewController)
 {
-	Super::PossessedBy(NewController);
-
+	Super::PossessedBy(NewController);	
 }
 
 void AMetaStudiosCharacter::BeginPlay()
@@ -452,23 +451,25 @@ void AMetaStudiosCharacter::SelectAutoMobile()
 	if (spaceshipActor != nullptr && carActor != nullptr)
 	{
 		float spaceshipDist = GetDistanceTo(spaceshipActor);
-		float carDist = GetDistanceTo(carActor);
+		float carDist = GetDistanceTo(carActor);		
 
 		if (carDist < spaceshipDist)
 		{
+			GetController()->SetControlRotation(carActor->GetActorRotation());
 			Server_EnterCar();
 		}
 		else
 		{
+			GetController()->SetControlRotation(spaceshipActor->GetActorRotation());
 			Server_EnterSpaceship();
 		}
 	}
 	else
 	{
-		if (spaceshipActor != nullptr)
-			Server_EnterSpaceship();
-		else if (carActor != nullptr)
-			Server_EnterCar();
+		//if (spaceshipActor != nullptr)
+		//	Server_EnterSpaceship();
+		//else if (carActor != nullptr)
+		//	Server_EnterCar();
 	}
 }
 
@@ -481,6 +482,9 @@ void AMetaStudiosCharacter::EnterSpaceship()
 	if (carDist < spaceshipDist)
 		return;
 
+		
+
+		/*
 	if (IsLocallyControlled())
 	{
 		Server_EnterSpaceship();
@@ -492,6 +496,7 @@ void AMetaStudiosCharacter::EnterSpaceship()
 		spaceshipActor->ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), spaceshipActor->WidgetClass);
 		spaceshipActor->ActiveWidget->RemoveFromViewport();
 	}
+	*/
 }
 
 void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation()
@@ -508,10 +513,16 @@ void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation()
 
 		if (SpaceshipActor == nullptr)	return;
 
+		if (SpaceshipActor->player != nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Spaceship is already possessed by another player!"));
+			return;
+		}
+
 		if (SpaceshipActor->CanPlayerEnter(this))
 		{
 			SpaceshipActor->player = this;
-			SpaceshipActor->SetActorRotation(SpaceshipActor->GetActorRotation());
+			GetController()->SetControlRotation(SpaceshipActor->GetActorRotation());
 			GetController()->Possess(SpaceshipActor);
 			NetMulticast_EnterSpaceship(SpaceshipActor);
 		}
@@ -524,8 +535,11 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 	{
 		SpaceshipActor->player = this;
 		GetMesh()->SetVisibility(false);
-		SpaceshipActor->SetActorRotation(spaceshipActor->GetActorRotation());
-		SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+							
+		if( IsLocallyControlled())
+		{
+			SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+		}
 	}
 	else
 	{
@@ -564,9 +578,17 @@ void AMetaStudiosCharacter::Server_EnterCar_Implementation()
 
 		if (CarActor == nullptr)	return;
 
+		/// 한명만 Possess 되어 있게
+		if (CarActor->player != nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Car is already possessed by another player!"));
+			return;
+		}
+
 		if (CarActor->CanPlayerEnterCar(this))
 		{
-			CarActor->player = this;
+			CarActor->player = this;			
+			GetController()->SetControlRotation(CarActor->GetActorRotation());
 			GetController()->Possess(CarActor);
 
 			// Possess가 된 후 widget 사라지기
@@ -588,9 +610,13 @@ void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarAc
 		CarActor->player = this;
 		GetMesh()->SetVisibility(false);
 		CarActor->RidingPlayer->SetVisibility(true);
-		CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 
-		CarActor->SetActorRotation(CarActor->GetActorRotation());
+		if (IsLocallyControlled())
+		{
+			CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+		}
+
+		//CarActor->SetActorRotation(CarActor->GetActorRotation());
 	}
 	else
 	{

@@ -74,6 +74,7 @@ public:
 
 	void ResetEnhancedInputSetting(class APlayerController* pc);
 
+	UPROPERTY()
 	AMetaStudiosCharacter* player;
 
 	void OnMyActionMove(const FInputActionValue& value);

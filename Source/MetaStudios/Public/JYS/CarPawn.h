@@ -54,6 +54,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_ExitCar();
 
+	UPROPERTY()
 	AMetaStudiosCharacter* player;
 
 	void OnMyActionLook(const FInputActionValue& value);
@@ -70,6 +71,7 @@ public:
 
 
 	float carSpeed = 50000.0f;
+
 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
