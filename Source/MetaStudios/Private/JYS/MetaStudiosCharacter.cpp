@@ -21,6 +21,7 @@
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "JYS/PlayerAnimInstance.h"
 #include <MetaStudios/CHJ/MainGameInstance.h>
+#include "Blueprint/UserWidget.h"
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -200,7 +201,7 @@ void AMetaStudiosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		PlayerInputComponent->BindAction("EnterSpaceship", IE_Pressed, this, &AMetaStudiosCharacter::SelectAutoMobile);
 		//PlayerInputComponent->BindAction("EnterCar", IE_Pressed, this, &AMetaStudiosCharacter::EnterCar);
 
-			
+
 		EnhancedInputComponent->BindAction(IA_Exit, ETriggerEvent::Started, this, &AMetaStudiosCharacter::ExitSession);
 	}
 	else
@@ -484,6 +485,13 @@ void AMetaStudiosCharacter::EnterSpaceship()
 	{
 		Server_EnterSpaceship();
 	}
+
+	// Possess가 된 후 widget 사라지기
+	if (spaceshipActor->ActiveWidget)
+	{
+		spaceshipActor->ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), spaceshipActor->WidgetClass);
+		spaceshipActor->ActiveWidget->RemoveFromViewport();
+	}
 }
 
 void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation()
@@ -501,7 +509,7 @@ void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation()
 		if (SpaceshipActor == nullptr)	return;
 
 		if (SpaceshipActor->CanPlayerEnter(this))
-		{			 
+		{
 			SpaceshipActor->player = this;
 			SpaceshipActor->SetActorRotation(SpaceshipActor->GetActorRotation());
 			GetController()->Possess(SpaceshipActor);
@@ -539,6 +547,7 @@ void AMetaStudiosCharacter::EnterCar()
 	{
 		Server_EnterCar();
 	}
+
 }
 
 void AMetaStudiosCharacter::Server_EnterCar_Implementation()
@@ -559,8 +568,16 @@ void AMetaStudiosCharacter::Server_EnterCar_Implementation()
 		{
 			CarActor->player = this;
 			GetController()->Possess(CarActor);
+
+			// Possess가 된 후 widget 사라지기
+			spaceshipActor->ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), spaceshipActor->WidgetClass);
+			spaceshipActor->ActiveWidget->RemoveFromViewport();
+
+
 			NetMulticast_EnterCar(CarActor);
 		}
+
+
 	}
 }
 
@@ -665,7 +682,7 @@ void AMetaStudiosCharacter::ExitSession()
 {
 	auto gi = Cast<UMainGameInstance>(GetWorld()->GetGameInstance());
 	UE_LOG(LogTemp, Warning, TEXT("exit"));
-	
+
 	if (gi)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("exit"));

@@ -221,6 +221,7 @@ void ACarPawn::OnMyActionLook(const FInputActionValue& value)
 	//}
 }
 
+// 가까이 가면 키 관련 UI 생성
 void ACarPawn::OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
@@ -247,6 +248,7 @@ void ACarPawn::OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* Ot
 		}
 	}
 }
+// 가까이 가면 키 관련 UI 생성
 
 void ACarPawn::ResetEnhancedInputSetting(APlayerController* pc)
 {

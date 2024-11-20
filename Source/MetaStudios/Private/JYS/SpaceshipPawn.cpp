@@ -453,7 +453,7 @@ bool ASpaceshipPawn::CheckLanding()
 
 	if (!IsLocallyControlled())	return false;
 	FVector start = GetActorLocation();
-	FVector end = start - FVector(0, 0, 10000);
+	FVector end = start - FVector(0, 0, 100000000000);
 
 	bool bHitResult = false;
 	FHitResult hitResult;
