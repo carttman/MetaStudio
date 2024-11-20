@@ -47,7 +47,10 @@ void UFilmRoomLobbyWidget::NativeConstruct()
 	}
 	CBS_PlayerType->AddOption(FString(TEXT("감독")));
 	CBS_PlayerType->AddOption(FString(TEXT("플레이어")));
-	
+
+	CBS_PlayerCountCombo->SetSelectedIndex(0);
+	CBS_PrivateCombo->SetSelectedIndex(0);
+	CBS_PlayerType->SetSelectedIndex(0);
 }
 
 void UFilmRoomLobbyWidget::OnClickGoMenu()
