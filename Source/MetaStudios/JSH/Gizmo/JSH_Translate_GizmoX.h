@@ -43,10 +43,7 @@ public:
 
 	UFUNCTION()
 	void GOnClicked();
-
-
-	UFUNCTION()
-	void GOnClicking();
+	
 	
 	
 	UPROPERTY()

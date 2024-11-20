@@ -47,6 +47,7 @@ public:
 	void GOnClicked();
 	
 	
+	
 	UPROPERTY()
 	AJSH_Player* OriginPlayer;
 	

@@ -86,7 +86,6 @@ void AJSH_Translate_GizmoX::Tick(float DeltaTime)
 	{
 		GOnClicked();
 	}
-	
 }
 
 
@@ -103,12 +102,7 @@ void AJSH_Translate_GizmoX::GOnClicked()
 	{
 		OriginPlayer->Editor_SpawnActor->GizmoX_ON = true;
 	}
-
-	if (Clicked)
-	{
-		GOnClicking();
-		return;
-	}	
+	
 	
 	// 중복을 막기 위해 사전에 생성자에서 NoCollision 해줬던거를 변경
 	//Origin->SetCollisionProfileName(TEXT("BlockAllDynamic"));
@@ -171,10 +165,7 @@ void AJSH_Translate_GizmoX::GOnClicked()
 		StartActor_Location = StartMouselocation - StartGizmoLocation;
 		SelectedGizmo = true;
 	}
-}
 
-void AJSH_Translate_GizmoX::GOnClicking()
-{
 	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
 	if (Clicked)
 	{
@@ -184,6 +175,8 @@ void AJSH_Translate_GizmoX::GOnClicking()
 		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);		
 	}
 }
+
+
 
 
 // 오버랩 색상 변경

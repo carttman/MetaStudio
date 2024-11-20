@@ -119,6 +119,16 @@ public:
 
 	
 	const int MaxLocations = 5;
-	
+
+
+
+	/// Scale 변경 함수
+
+	UFUNCTION()
+	void Set_Scale_from_Gizmo(FVector Scale);
+	UFUNCTION(server, reliable)
+	void Server_Set_Scale_from_Gizmo(FVector Scale);
+	UFUNCTION(netmulticast, reliable)
+	void NetMulti_Set_Scale_from_Gizmo(FVector Scale);
 };
 

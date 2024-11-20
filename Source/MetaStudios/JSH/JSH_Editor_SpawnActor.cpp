@@ -6,11 +6,6 @@
 #include "DrawDebugHelpers.h"
 #include "JSH_PlayerController.h"
 #include "Engine/EngineTypes.h"
-#include "../JSH/Gizmo/JSH_Translate_GizmoX.h"
-#include "../JSH/Gizmo/JSH_Translate_GizmoY.h"
-#include "../JSH/Gizmo/JSH_Translate_GizmoZ.h"
-#include "../JSH/Gizmo/JSH_Scale_GizmoX.h"
-#include "GameFramework/GameModeBase.h"
 #include "Net/UnrealNetwork.h"
 
 // Constructor: Set default values
@@ -367,3 +362,22 @@ void AJSH_Editor_SpawnActor::ReturnPreviousLocation()
 
     // 값 초기화는 Editor Spawn Actor에서 해주고 있음 (새로 다른 actor 클릭했을 시)
 }
+
+
+
+void AJSH_Editor_SpawnActor::Set_Scale_from_Gizmo(FVector Scale)
+{
+    Server_Set_Scale_from_Gizmo(Scale);
+}
+
+void AJSH_Editor_SpawnActor::Server_Set_Scale_from_Gizmo_Implementation(FVector Scale)
+{
+    NetMulti_Set_Scale_from_Gizmo(Scale);
+}
+
+
+void AJSH_Editor_SpawnActor::NetMulti_Set_Scale_from_Gizmo_Implementation(FVector Scale)
+{
+    SetActorRelativeScale3D(Scale);
+}
+
