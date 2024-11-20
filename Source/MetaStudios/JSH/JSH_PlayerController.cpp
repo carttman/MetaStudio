@@ -184,6 +184,11 @@ void AJSH_PlayerController::ConvertMKVToMP4()
 		//FString Params2 = FString::Printf(TEXT("-i \"C:/Users/Admin/Documents/GitHub/MetaStudio/MetaStudios/ffmpeg/A.mkv\" -vcodec h264 -acodec aac -strict experimental \"C:/Users/Admin/Documents/GitHub/MetaStudio/MetaStudios/ffmpeg/A.mp4\""));
 
 
+		//FString Params2 = FString::Printf(TEXT("-i "%sffmpeg/%s.mkv" -vcodec h264 -acodec aac -strict experimental "%sffmpeg/%s.mp4""), FullPath,VideoFileName, FullPath,VideoFileName);
+		//FString Params2 = FString::Printf(TEXT("-i BY.mp4 -ss 0:00:40 -to 0:00:49 -vcodec h264 -acodec aac "%sffmpeg/UE_CutCut.mp4"), FullPath);
+		//FString Params2 = FString::Printf(TEXT("-i BY.mp4 -r 15 -loop 0 "%sffmpeg/output.gif"),FullPath);
+		//FString Params2 = FString::Printf(TEXT("-f concat -safe 0 -i mylist.txt -c copy output.mp4"));
+
 		
 		UE_LOG(LogTemp, Error, TEXT("Params2: %s"), *Params2);
 		
