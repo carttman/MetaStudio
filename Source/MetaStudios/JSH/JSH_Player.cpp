@@ -785,20 +785,15 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 	// Editor Mode 켜져 있다면
 	else
 	{
-		// Gizmo 강제종료 문제
-		if (Editor_SpawnActor != nullptr)
-		{
-			Editor_SpawnActor->OriginGizmo->Destroy();
-			Editor_SpawnActor = nullptr;
-		}
-
-		// Editor 모드 종료 시 저장된 EditorSpwanAcotr Name 삭제
-		// JPlayerController->Editor_SpawnActor = nullptr;
-		Editor_SpawnActor = nullptr; // 에디터 모드가 아닐떄 삭제 못하게
-		
 		//EditorMode_On_B = false;
 		if (IsLocallyControlled())
 		{
+			// Gizmo 강제종료 문제
+			if (Editor_SpawnActor != nullptr)
+			{
+				Editor_SpawnActor->OriginGizmo->Destroy();
+			}
+			
 			DisableEdit();
 
 
@@ -815,6 +810,9 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 
 			UE_LOG(LogTemp, Warning, TEXT("`` delete"));
 		}
+		// Editor 모드 종료 시 저장된 EditorSpwanAcotr Name 삭제
+		// JPlayerController->Editor_SpawnActor = nullptr;
+		Editor_SpawnActor = nullptr; // 에디터 모드가 아닐떄 삭제 못하게
 		
 		EditorMode_B = false;
 	}
