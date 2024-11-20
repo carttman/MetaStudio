@@ -264,15 +264,13 @@ void AJSH_Translate_GizmoY::Visible_and_Collision_Off()
 
 
 
-void AJSH_Translate_GizmoY::BeginPlayerContorller(AJSH_PlayerController* temp)
+void AJSH_Translate_GizmoY::BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control)
 {
-	if (!HasAuthority()) return;
-	
-	JPlayerController = temp;
-	//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	OriginPlayer = temp;
 	if (OriginPlayer)
 	{
 		OriginPlayer->Save_Gizmo_TY(this);
 	}
+
+	JPlayerController = control;
 }

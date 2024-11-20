@@ -5,12 +5,19 @@
 #include "CoreMinimal.h"
 #include "JSH_Translate_GizmoX.h"
 #include "GameFramework/Actor.h"
+#include "MetaStudios/JSH/JSH_PlayerController.h"
 #include "JSH_Gizmo.generated.h"
 
 
 // class AJSH_Editor_SpawnActor;
 class AJSH_PlayerController;
 class AJSH_Player;
+class AJSH_Translate_GizmoBox;
+class AJSH_Translate_GizmoX;
+class AJSH_Translate_GizmoY;
+class AJSH_Translate_GizmoZ;
+class AJSH_Scale_GizmoBox;
+class AJSH_Scale_GizmoX;
 
 UCLASS()
 class METASTUDIOS_API AJSH_Gizmo : public AActor
@@ -32,17 +39,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Translate_X;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	class AJSH_Translate_GizmoX* Origin_Translate_X;
+	AJSH_Translate_GizmoX* Origin_Translate_X;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Translate_Y;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	class AJSH_Translate_GizmoY* Origin_Translate_Y;
+	AJSH_Translate_GizmoY* Origin_Translate_Y;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Translate_Z;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	class AJSH_Translate_GizmoZ* Origin_Translate_Z;
+	 AJSH_Translate_GizmoZ* Origin_Translate_Z;
 	
 	// Sclae
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -127,6 +134,10 @@ public:
 
 	UFUNCTION()
 	void BeginPlayerContorller(AJSH_PlayerController* temp);
+
+	UFUNCTION()
+	void Begin_PlayerData(AJSH_Player* temp, AJSH_PlayerController* control);
+
 
 	UFUNCTION()
 	void Child_Actor_Detect();

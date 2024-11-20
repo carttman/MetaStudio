@@ -241,6 +241,25 @@ void AJSH_Gizmo::BeginPlayerContorller(AJSH_PlayerController* temp)
 	//AttachToActor(OriginPlayer->Editor_SpawnActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
+void AJSH_Gizmo::Begin_PlayerData(AJSH_Player* temp, AJSH_PlayerController* control)
+{
+	OriginPlayer = temp;
+	if (OriginPlayer)
+	{
+		OriginPlayer->Save_Gizmo_Parents(this);
+	}
+
+	JPlayerController = control;
+	
+	//처음 크기
+	InitialScale = GetActorScale3D();
+
+	Child_Actor_Detect();
+	//AttachToActor(OriginPlayer->Editor_SpawnActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+}
+
+
+
 void AJSH_Gizmo::Child_Actor_Detect()
 {
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Box"), Tag_Box);
@@ -249,7 +268,7 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		Origin_Translate_Box = Cast<AJSH_Translate_GizmoBox>(Tag_Box[0]);
 		if (Origin_Translate_Box != nullptr)
 		{
-			Origin_Translate_Box->BeginPlayerContorller(JPlayerController);
+			Origin_Translate_Box->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 	
@@ -259,7 +278,7 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		Origin_Translate_X = Cast<AJSH_Translate_GizmoX>(Tag_X[0]);
 		if (Origin_Translate_X != nullptr)
 		{
-			Origin_Translate_X->BeginPlayerContorller(JPlayerController);
+			Origin_Translate_X->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 
@@ -269,7 +288,7 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		Origin_Translate_Y = Cast<AJSH_Translate_GizmoY>(Tag_Y[0]);
 		if (Origin_Translate_Y != nullptr)
 		{
-			Origin_Translate_Y->BeginPlayerContorller(JPlayerController);
+			Origin_Translate_Y->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 
@@ -279,7 +298,7 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		Origin_Translate_Z = Cast<AJSH_Translate_GizmoZ>(Tag_Z[0]);
 		if (Origin_Translate_Z != nullptr)
 		{
-			Origin_Translate_Z->BeginPlayerContorller(JPlayerController);
+			Origin_Translate_Z->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 
@@ -291,7 +310,7 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		Origin_Scale_X = Cast<AJSH_Scale_GizmoX>(Tag_SX[0]);
 		if (Origin_Scale_X != nullptr)
 		{
-			Origin_Scale_X->BeginPlayerContorller(JPlayerController);
+			Origin_Scale_X->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 

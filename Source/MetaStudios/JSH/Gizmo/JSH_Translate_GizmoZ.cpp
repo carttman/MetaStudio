@@ -185,7 +185,7 @@ void AJSH_Translate_GizmoZ::BeginCursorOver()
 }
 
 void AJSH_Translate_GizmoZ::EndCursorOver()
-{
+ {
 	////Super::NotifyActorEndCursorOver();
 
 	if (!Clicked)
@@ -245,15 +245,13 @@ void AJSH_Translate_GizmoZ::Visible_and_Collision_Off()
 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
 }
 
-void AJSH_Translate_GizmoZ::BeginPlayerContorller(AJSH_PlayerController* temp)
+void AJSH_Translate_GizmoZ::BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control)
 {
-	if (!HasAuthority()) return;
-	
-	JPlayerController = temp;
-	//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	OriginPlayer = temp;
 	if (OriginPlayer)
 	{
 		OriginPlayer->Save_Gizmo_TZ(this);
 	}
+
+	JPlayerController = control;
 }

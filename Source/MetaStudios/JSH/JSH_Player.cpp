@@ -34,6 +34,7 @@
 #include "Gizmo/JSH_Scale_GizmoX.h"
 #include "Gizmo/JSH_Scale_GizmoY.h"
 #include "Gizmo/JSH_Scale_GizmoZ.h"
+#include "Gizmo/JSH_Translate_GizmoBox.h"
 #include "Gizmo/JSH_Translate_GizmoX.h"
 #include "Gizmo/JSH_Translate_GizmoY.h"
 #include "Gizmo/JSH_Translate_GizmoZ.h"
@@ -250,6 +251,9 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AJSH_Player, EnableEditSystem);
 	DOREPLIFETIME(AJSH_Player, Gizmo_Detecting);
 	DOREPLIFETIME(AJSH_Player, Bool_ZoomMode);
+	
+	DOREPLIFETIME(AJSH_Player, First_Clicked_SpawnActor);
+	DOREPLIFETIME(AJSH_Player, Recent_Clicked_SpawnActor);
 }
 
 void AJSH_Player::Saved_PlayerController()
@@ -949,8 +953,14 @@ void AJSH_Player::CLickAndDel()
 }
 
 
+
 // EditorActor를 클릭하면 그곳에서 자기 정보를 SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor) 여기로 전달 후 저장
 void AJSH_Player::SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor)
+{
+	Server_SaveEditorActor(ClickedActor);
+}
+
+void AJSH_Player::Server_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor* ClickedActor)
 {
 	NetMulti_SaveEditorActor_Implementation(ClickedActor);
 }
@@ -958,22 +968,20 @@ void AJSH_Player::SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor)
 void AJSH_Player::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor* ClickedActor)
 {
 	Editor_SpawnActor = ClickedActor;
-	UE_LOG(LogTemp, Error, TEXT("ss 111"));
+	
+
 	// 이전 위치 돌아가는 함수 
 	if (Recent_Clicked_SpawnActor == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("ss 22"));
 		Recent_Clicked_SpawnActor = ClickedActor;
 		//Recent_Clicked_SpawnActor->Onclicked();
 	}
 	else if (Recent_Clicked_SpawnActor != nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("ss 33"));
 		First_Clicked_SpawnActor = Recent_Clicked_SpawnActor;
 		First_Clicked_SpawnActor->Unclicked();
 		Recent_Clicked_SpawnActor = ClickedActor;
 		//Recent_Clicked_SpawnActor->Onclicked();
-		
 	}
 }
 
@@ -987,7 +995,6 @@ void AJSH_Player::NetMulti_SaveEditorActor_Implementation(AJSH_Editor_SpawnActor
 
 
 // Gizmo 정보 저장 ///
-
 void AJSH_Player::Save_Gizmo_Parents(AActor* Gizmo_Parents)
 {
 	Saved_Gizmo_Parents = Cast<AJSH_Gizmo>(Gizmo_Parents);

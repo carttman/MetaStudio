@@ -221,12 +221,6 @@ void AJSH_Translate_GizmoX::GOnClicked()
 	if (!CursorOveringGizmo) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON || OriginPlayer->Editor_SpawnActor->GizmoZ_ON || OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
 	
-	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-	if (OriginPlayer)
-	{
-		OriginPlayer->Save_Gizmo_TX(this);
-	}
 	
 	//// 다른 기즈모가 실행 중 이면 , 기능 실행되지 않도록 ////
 	
@@ -312,15 +306,15 @@ void AJSH_Translate_GizmoX::GOnClicked()
 void AJSH_Translate_GizmoX::BeginCursorOver()
 {
 	//Super::NotifyActorBeginCursorOver();
-	if (OriginPlayer == nullptr)
-	{
-		//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-		OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-		if (OriginPlayer)
-		{
-			OriginPlayer->Save_Gizmo_TX(this);
-		}
-	}
+	// if (OriginPlayer == nullptr)
+	// {
+	// 	//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	// 	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	// 	if (OriginPlayer)
+	// 	{
+	// 		OriginPlayer->Save_Gizmo_TX(this);
+	// 	}
+	// }
 	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
@@ -390,15 +384,13 @@ void AJSH_Translate_GizmoX::Visible_and_Collision_Off()
 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
 }
 
-void AJSH_Translate_GizmoX::BeginPlayerContorller(AJSH_PlayerController* temp)
+void AJSH_Translate_GizmoX::BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control)
 {
-	if (!HasAuthority()) return;
-
-	JPlayerController = temp;
-	//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	OriginPlayer = temp;
 	if (OriginPlayer)
 	{
 		OriginPlayer->Save_Gizmo_TX(this);
 	}
+
+	JPlayerController = control;
 }

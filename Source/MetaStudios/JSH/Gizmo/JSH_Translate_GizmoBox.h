@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "MetaStudios/JSH/JSH_PlayerController.h"
 #include "JSH_Translate_GizmoBox.generated.h"
 
 
@@ -12,6 +13,7 @@ class AJSH_Player;
 class AJSH_Translate_GizmoX;
 class AJSH_Translate_GizmoY;
 class AJSH_Translate_GizmoZ;
+class AJSH_Gizmo;
 
 UCLASS()
 class METASTUDIOS_API AJSH_Translate_GizmoBox : public AActor
@@ -129,7 +131,7 @@ public:
 	void Visible_and_Collision_Off();
 
 	UFUNCTION()
-	void BeginPlayerContorller(AJSH_PlayerController* temp);
+	void BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control);
 
 
 };

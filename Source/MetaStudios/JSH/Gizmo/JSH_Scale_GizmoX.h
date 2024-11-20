@@ -142,5 +142,5 @@ public:
 
 
 	UFUNCTION()
-	void BeginPlayerContorller(AJSH_PlayerController* temp);
+	void BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control);
 };

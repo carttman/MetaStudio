@@ -11,6 +11,7 @@
 #include "../JSH/Gizmo/JSH_Translate_GizmoZ.h"
 #include "../JSH/Gizmo/JSH_Scale_GizmoX.h"
 #include "GameFramework/GameModeBase.h"
+#include "Net/UnrealNetwork.h"
 
 // Constructor: Set default values
 AJSH_Editor_SpawnActor::AJSH_Editor_SpawnActor()
@@ -48,19 +49,29 @@ void AJSH_Editor_SpawnActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    // 플레이어 컨트롤러
-    JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-    if (JPlayerController)
-    {
-        JPlayerController->bEnableTouchEvents = false;
-       // OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-    }
-
     UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("AJSH_Player"), OriginPlayer_Box);
     if(OriginPlayer_Box.Num() > 0)
     {
         OriginPlayer = Cast<AJSH_Player>(OriginPlayer_Box[0]);
     }
+
+
+    // 플레이어 컨트롤러
+    JPlayerController = Cast<AJSH_PlayerController>(OriginPlayer->GetController());
+    if (JPlayerController)
+    {
+        JPlayerController->bEnableTouchEvents = false;
+        // OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+    }
+    
+    // // 플레이어 컨트롤러
+    // JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+    // if (JPlayerController)
+    // {
+    //     JPlayerController->bEnableTouchEvents = false;
+    //    // OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+    // }
+
 }
 
 // Called every frame
@@ -75,12 +86,17 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
         if (OriginPlayer->Editor_SpawnActor == this)
         {
             AssetMesh->SetRenderCustomDepth(true);
-            AssetMesh->SetCollisionProfileName(TEXT("NoCollision"));
+            
+            // 기즈모 트래킹 되는지 확인 필요
+            //AssetMesh->SetCollisionProfileName(TEXT("NoCollision"));
         }
         else
            {
             AssetMesh->SetRenderCustomDepth(false);
-            AssetMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+
+            // 기즈모 트래킹 되는지 확인 필요
+            //AssetMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+            
             // if (GizmoActor && IsValid(GizmoActor) && GizmoActor->GetWorld())
             // {
             //     GizmoActor->Destroy();
@@ -89,6 +105,26 @@ void AJSH_Editor_SpawnActor::Tick(float DeltaTime)
         }  
     }
 }
+
+void AJSH_Editor_SpawnActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, OriginPlayer);
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, OriginPlayer_Box);
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, JPlayerController);
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, GizmoClass);
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, ThisTransform);
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, GizmoActor);
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, OriginGizmo);
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, GizmoX_ON);
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, GizmoY_ON);
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, GizmoZ_ON);
+    DOREPLIFETIME(AJSH_Editor_SpawnActor, GizmoB_ON);
+}
+
+
 
 void AJSH_Editor_SpawnActor::Get_PlayerController()
 {
@@ -99,8 +135,6 @@ void AJSH_Editor_SpawnActor::Server_Get_PlayerController_Implementation()
 {
     NetMulti_Get_PlayerController();
 }
-
-
 void AJSH_Editor_SpawnActor::NetMulti_Get_PlayerController_Implementation()
 {
     // 플레이어 컨트롤러
@@ -119,6 +153,7 @@ void AJSH_Editor_SpawnActor::NetMulti_Get_PlayerController_Implementation()
 
 
 
+
 void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
 {
     Super::NotifyActorOnClicked(ButtonPressed);
@@ -129,6 +164,8 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     if (OriginPlayer->Gizmo_Detecting) return;
 
     Server_NotifyActorOnClicked();
+
+    GizmoSpawn();
 }
 
 
@@ -137,11 +174,11 @@ void AJSH_Editor_SpawnActor::Server_NotifyActorOnClicked_Implementation()
     NetMulti_NotifyActorOnClicked();
 }
 
+
 void AJSH_Editor_SpawnActor::NetMulti_NotifyActorOnClicked_Implementation()
 {
     // 클릭 했을때 자신의 정보를 Player에 저장
     OriginPlayer->SaveEditorActor(this);
-    UE_LOG(LogTemp, Error, TEXT("saved"));
 
     
     // 이전 위치 돌아가는 함수 
@@ -155,7 +192,6 @@ void AJSH_Editor_SpawnActor::NetMulti_NotifyActorOnClicked_Implementation()
         OriginPlayer->Now_Click_Actor = this;
     }
     
-    GizmoSpawn();
     UE_LOG(LogTemp, Error, TEXT("Click"));
 }
 
@@ -195,11 +231,19 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
     if (GizmoClass)
     {
         UE_LOG(LogTemp, Log, TEXT("GizmoClass 로드 성공"));
-
+        
         // GizmoActor: 블루프린트를 스폰합니다.
-        AActor* GizmoActor2 = GetWorld()->SpawnActor<AActor>(GizmoClass, ThisTransform2, SpawnParams);
+        GizmoActor = GetWorld()->SpawnActor<AActor>(GizmoClass, ThisTransform2, SpawnParams);
+        
+        OriginGizmo = Cast<AJSH_Gizmo>(GizmoActor);
+        // Gizmo 내부 컨트롤러 -> Gizmo 내부 Child Actor 찾기 -> 내부 child actor들 컨트롤러 로드 -> player에 정보 전달
+        //OriginGizmo->BeginPlayerContorller(JPlayerController);
+        
+        
+        OriginGizmo->Begin_PlayerData(OriginPlayer, JPlayerController);
 
-        if (GizmoActor2)
+        
+        if (GizmoActor)
         {
             UE_LOG(LogTemp, Log, TEXT("GizmoActor 스폰 성공"));
         }
@@ -271,6 +315,8 @@ void AJSH_Editor_SpawnActor::Gizmo_Spawn()
     //     }
     // }
 }
+
+
 
 void AJSH_Editor_SpawnActor::DestroyThis()
 {

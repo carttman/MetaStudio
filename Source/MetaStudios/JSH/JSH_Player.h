@@ -7,20 +7,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Gizmo/JSH_Gizmo.h"
-#include "Gizmo/JSH_Translate_GizmoBox.h"
-#include "Gizmo/JSH_Translate_GizmoZ.h"
 #include "Logging/LogMacros.h"
 #include "Widget/JSH_Record_UI.h"
 #include "JSH_Player.generated.h"
 
-
+class AJSH_Gizmo;
 class AJSH_Scale_GizmoBox;
 class AJSH_Scale_GizmoZ;
 class AJSH_Scale_GizmoY;
 class AJSH_Scale_GizmoX;
 class AJSH_Translate_GizmoY;
 class AJSH_Translate_GizmoX;
+class AJSH_Translate_GizmoZ;
+class AJSH_Translate_GizmoBox;
+class AJSH_PlayerController;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -28,8 +28,6 @@ class UInputAction;
 struct FInputActionValue;
 class AJSH_Editor_SpawnActor;
 
-// 순환참조 문제로, Include 말고
-class AJSH_PlayerController;
 
 
 //DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -364,6 +362,8 @@ public:
 	// EditorActor를 클릭하면 그곳에서 자기 정보를 SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor) 여기로 전달 후 저장
 	UFUNCTION()
 	void SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
+	UFUNCTION(Server, Reliable)
+	void Server_SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
 
@@ -371,9 +371,9 @@ public:
 	AJSH_Editor_SpawnActor* Editor_SpawnActor;
 
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AJSH_Editor_SpawnActor* First_Clicked_SpawnActor = nullptr;
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AJSH_Editor_SpawnActor* Recent_Clicked_SpawnActor = nullptr;
 
 	UPROPERTY(replicated)
@@ -537,7 +537,7 @@ public:
 	UPROPERTY()
 	AJSH_Editor_SpawnActor* Previous_Click_Actor;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AJSH_Editor_SpawnActor* Now_Click_Actor;
 	
 #pragma endregion
