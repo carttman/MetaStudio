@@ -14,13 +14,14 @@
 #include "JYS/MetaStudiosCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 
 // Sets default values
 ACarPawn::ACarPawn()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	DefaultScene = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComp"));
@@ -29,7 +30,7 @@ ACarPawn::ACarPawn()
 	CarMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CarMesh"));
 	CarMesh->SetupAttachment(DefaultScene);
 
-	
+
 	//SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	//SpringArm->SetupAttachment(CarMesh);
 	//SpringArm->TargetArmLength = 300.0f;
@@ -52,7 +53,7 @@ ACarPawn::ACarPawn()
 	UIBox->SetupAttachment(CarMesh);
 
 	UIBox->SetGenerateOverlapEvents(true);
-	UIBox-> SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	UIBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 }
 
 // Called when the game starts or when spawned
@@ -61,7 +62,7 @@ void ACarPawn::BeginPlay()
 	Super::BeginPlay();
 
 	ActivateThruster(false);
-	
+
 	if (UIBox)
 	{
 		UIBox->OnComponentBeginOverlap.AddDynamic(this, &ACarPawn::OnUIBoxBeginOverlap);
@@ -73,6 +74,48 @@ void ACarPawn::BeginPlay()
 void ACarPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (MoveStop == false)
+	{
+		///////////////LineTrace//////////////////////
+		FVector startLocation = GetActorLocation();
+		FVector endLocation = startLocation + -(GetActorUpVector() * 10000.0f); // Trace downwards
+		FHitResult hitResult;
+		FCollisionQueryParams queryParams;
+		queryParams.AddIgnoredActor(this);
+		
+		if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_Visibility, queryParams))
+		{
+			// DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
+
+			FVector newLocation = hitResult.ImpactPoint;
+			newLocation.Z += 50.0f;
+			SetActorLocation(newLocation);
+
+			//FRotator WorldRot = GetActorRotation();
+			//
+			//FRotator right = UKismetMathLibrary::MakeRotFromYZ(GetActorRightVector(), hitResult.ImpactNormal);
+			//
+			//FRotator forward = UKismetMathLibrary::MakeRotFromXZ(GetActorForwardVector(), hitResult.ImpactNormal);
+			//
+			//FRotator NewRot = UKismetMathLibrary::MakeRotator(forward.Roll, right.Pitch, WorldRot.Yaw);
+			//
+			//SetActorRotation(UKismetMathLibrary::RInterpTo(WorldRot, NewRot, DeltaTime, 1));
+
+			//FVector dir = FVector(0.0f, )
+			//FTransform FTform = FTransform(GetControlRotation());
+			//FTform.TransformVector(direction);
+			//
+			//FTransform ttt = FTransform(GetControlRotation());
+			//direction = 
+			//direction.Z = 0;
+			//direction.Normalize();
+
+
+			//float PosZ = GetActorLocation().Z;	
+			//UE_LOG(LogTemp, Warning, TEXT("Ground hit : %f : %f"), hitResult.ImpactPoint.Z, PosZ);
+		}
+	}
 
 	ActivateThruster(!MoveStop);
 	if (MoveStop == true)
@@ -100,7 +143,7 @@ void ACarPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 			}
 		}
 	}
-	
+
 	PlayerInputComponent->BindAction("ExitCar", IE_Pressed, this, &ACarPawn::ExitCar);
 
 
@@ -131,76 +174,82 @@ bool ACarPawn::CanPlayerEnterCar(AMetaStudiosCharacter* targetCharacter)
 void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 {
 
-	FVector2D v = value.Get<FVector2D>();		
-	if( v.X <= 0.0f && MoveStop == false)
-	{			
+	FVector2D v = value.Get<FVector2D>();
+	if (v.X <= 0.0f && MoveStop == false)
+	{
 		//MoveStop = true;
 		Server_OnMyActionMove(true);
 		return;
 	}
 
 	if (v.X <= 0.0f)	return;
-	
+
 	//MoveStop = false;
 	direction.X = v.X;
-	
+
 	if (direction.X != 0.0f)
 	{
 		ApplyRoll(v.Y);
-		UE_LOG(LogTemp, Warning, TEXT("direction.X != 0.0f"))
-	}	
+		//UE_LOG(LogTemp, Warning, TEXT("direction.X != 0.0f"))
+	}
 	else
 	{
 		ApplyRollBack();
-		UE_LOG(LogTemp, Warning, TEXT("ApplyRollBack"))
-
+		//UE_LOG(LogTemp, Warning, TEXT("ApplyRollBack"))
 	}
+
+
+
+	/////////////////LineTrace//////////////////////
+	//FVector startLocation = GetActorLocation();
+	//FVector endLocation = startLocation + -(FVector::UpVector * 10000.0f); // Trace downwards
+	//FHitResult hitResult;
+	//FCollisionQueryParams queryParams;
+	//queryParams.AddIgnoredActor(this);
+	//
+	//if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_Visibility, queryParams))
+	//{
+	//	// DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
+	//
+	//	FVector newLocation = hitResult.ImpactPoint;
+	//	newLocation.Z += 100.0f;  
+	//	SetActorLocation(newLocation);
+	//	float PosZ = GetActorLocation().Z;
+	//	UE_LOG(LogTemp, Warning, TEXT("Ground hit : %f : %f"), hitResult.ImpactPoint.Z, PosZ);
+	//}	
+	// 
+	//
+
+	//if (LineTraceArrow)
+	//{
+	//	FVector startLocation2 = LineTraceArrow->GetComponentLocation();
+	//	FVector endLocation2 = startLocation2 + (LineTraceArrow->GetForwardVector() * 10000.0f); // Trace in the forward //direction
+	//
+	//	FHitResult hitResult2;
+	//	FCollisionQueryParams queryParams2;
+	//	queryParams.AddIgnoredActor(this);
+	//
+	//	if (GetWorld()->LineTraceSingleByChannel(hitResult2, startLocation, endLocation, ECC_Visibility, queryParams2))
+	//	{
+	//		// DrawDebugLine(GetWorld(), startLocation2, endLocation2, FColor::Blue, false, 1.0f, 0, 20.0f);
+	//
+	//		FVector newLocation = hitResult2.ImpactPoint;
+	//		newLocation.Z += 50.0f;
+	//		SetActorLocation(newLocation);
+	//
+	//		UE_LOG(LogTemp, Warning, TEXT("Line trace hit from ArrowComponent"));
+	//	}
+	//}
+	///////////////LineTrace//////////////////////
 
 	FTransform ttt = FTransform(GetControlRotation());
 	direction = ttt.TransformVector(direction);
 	direction.Z = 0;
 	direction.Normalize();
 
-	///////////////LineTrace//////////////////////
-	FVector startLocation = GetActorLocation();
-	FVector endLocation = startLocation + -(FVector::UpVector * 10000.0f); // Trace downwards
-	FHitResult hitResult;
-	FCollisionQueryParams queryParams;
-	queryParams.AddIgnoredActor(this);
-
-	if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_Visibility, queryParams))
-	{
-		// DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
-
-		FVector newLocation = hitResult.ImpactPoint;
-		newLocation.Z += 50.0f;  
-		SetActorLocation(newLocation);
-		UE_LOG(LogTemp, Warning, TEXT("tttttttttttttttttttttt"))
-	}	
-	if (LineTraceArrow)
-	{
-		FVector startLocation2 = LineTraceArrow->GetComponentLocation();
-		FVector endLocation2 = startLocation2 + (LineTraceArrow->GetForwardVector() * 10000.0f); // Trace in the forward direction
-
-		FHitResult hitResult2;
-		FCollisionQueryParams queryParams2;
-		queryParams.AddIgnoredActor(this);
-
-		if (GetWorld()->LineTraceSingleByChannel(hitResult2, startLocation, endLocation, ECC_Visibility, queryParams2))
-		{
-			// DrawDebugLine(GetWorld(), startLocation2, endLocation2, FColor::Blue, false, 1.0f, 0, 20.0f);
-
-			FVector newLocation = hitResult2.ImpactPoint;
-			newLocation.Z += 50.0f;
-			SetActorLocation(newLocation);
-
-			UE_LOG(LogTemp, Warning, TEXT("Line trace hit from ArrowComponent"));
-		}
-	}
-	///////////////LineTrace//////////////////////
 	AddMovementInput(direction);
 	direction = FVector::ZeroVector;
-	
+
 	Server_OnMyActionMove(false);
 
 	Server_UpdateTransform(GetActorLocation(), GetActorRotation());
@@ -270,15 +319,15 @@ void ACarPawn::ResetEnhancedInputSetting(APlayerController* pc)
 
 void ACarPawn::ApplyRoll(float RollInput)
 {
-	FRotator CurrentRotation =  GetControlRotation();
+	FRotator CurrentRotation = GetControlRotation();
 
-	float RollAmount = RollInput * 45.0f; 
-	float YawAmount = RollInput * 45.0f;	
+	float RollAmount = RollInput * 45.0f;
+	float YawAmount = RollInput * 45.0f;
 
 	CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, RollAmount, GetWorld()->GetDeltaSeconds(), 3.0f);
 
 	float YawCur = CurrentRotation.Yaw;
-	
+
 	// P = P0 + vt
 	CurrentRotation.Yaw = YawCur + 50.0f * RollInput * GetWorld()->DeltaTimeSeconds;
 
@@ -292,7 +341,7 @@ void ACarPawn::ApplyRollBack()
 	float RollAmount = CurrentRotation.Roll;
 	//float YawAmount = CurrentRotation.Yaw;
 
-	if( RollAmount == 0.0f /*&& YawAmount == 0.0f*/ )	return;
+	if (RollAmount == 0.0f /*&& YawAmount == 0.0f*/)	return;
 
 	//CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, 0.0f, GetWorld()->GetDeltaSeconds(), 2.0f);
 	CurrentRotation.Roll = FMath::FInterpTo(CurrentRotation.Roll, 0.0f, GetWorld()->GetDeltaSeconds(), 3.0f);
@@ -302,10 +351,10 @@ void ACarPawn::ApplyRollBack()
 
 void ACarPawn::ActivateThruster(bool bActive)
 {
-	if(ActiveThruster == bActive )	return;
+	if (ActiveThruster == bActive)	return;
 	ActiveThruster = bActive;
 
-	if (ThrusterComponent )
+	if (ThrusterComponent)
 	{
 		if (bActive)
 		{
@@ -314,7 +363,7 @@ void ACarPawn::ActivateThruster(bool bActive)
 		else
 		{
 			ThrusterComponent->Deactivate();
-		}		
+		}
 	}
 
 	if (ThrusterComponent2)
@@ -345,35 +394,32 @@ void ACarPawn::ExitCar()
 
 void ACarPawn::Server_ExitCar_Implementation()
 {
-	if (HasAuthority())
-	{
-		if (player)
-		{
-			FVector carLoc = GetActorLocation();
-			FRotator carRot = GetActorRotation();
+	if (player == nullptr)	return;
 
-			FVector offset = carRot.RotateVector(FVector(200.0f, 200.0f, 0.0f));
-			FVector playerSpawnLocation = carLoc + offset;
+	FVector carLoc = GetActorLocation();
+	FRotator carRot = GetActorRotation();
 
-			player->SetActorLocation(playerSpawnLocation);
-			player->SetActorRelativeRotation(carRot);
+	FVector offset = carRot.RotateVector(FVector(200.0f, 200.0f, 0.0f));
+	FVector playerSpawnLocation = carLoc + offset;
 
-			GetController()->Possess(player);
+	player->SetActorLocation(playerSpawnLocation);
+	player->SetActorRelativeRotation(carRot);
 
-			FRotator rot = this->GetActorRotation();
-			rot.Roll = 0.0f;
-			this->SetActorRotation(rot);
-		}
+	GetController()->Possess(player);
 
-	}
+	FRotator rot = this->GetActorRotation();
+	rot.Roll = 0.0f;
+	this->SetActorRotation(rot);
+
 	NetMulticast_ExitCar();
 
+	player = nullptr;
 }
 
 void ACarPawn::NetMulticast_ExitCar_Implementation()
 {
 	if (player)
-	{ 
+	{
 		FVector carLoc = GetActorLocation();
 		FRotator carRot = GetActorRotation();
 
@@ -384,15 +430,15 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 
 
 		/// 여기서 튕김
-		if (HasAuthority())
-		{
-			player->SetActorRotation(carRot);
-			UE_LOG(LogTemp, Warning, TEXT("player->SetActorRotation(carRot)"))
-		}
-		else 
-		{
-			UE_LOG(LogTemp, Error, TEXT("!!!!player->SetActorRotation(carRot)"))
-		}
+		//if (HasAuthority())
+		//{
+		//	player->SetActorRotation(carRot);
+		//	UE_LOG(LogTemp, Warning, TEXT("player->SetActorRotation(carRot)"))
+		//}
+		//else 
+		//{
+		//	UE_LOG(LogTemp, Error, TEXT("!!!!player->SetActorRotation(carRot)"))
+		//}
 		// player->SetActorRotation(carRot);
 
 
@@ -400,17 +446,20 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 		player->GetMesh()->SetVisibility(true);
 		RidingPlayer->SetVisibility(false);
 
-		player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
-
-		// 내렸을 때 오토바이의 Rotation이 0.0f
-		AController* controller = GetController();
-		if (controller)
+		if (IsLocallyControlled())
 		{
-			FRotator CurrentRotation = GetControlRotation();
-			if (CurrentRotation.Roll != 0.0f)
+			player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+
+			// 내렸을 때 오토바이의 Rotation이 0.0f
+			AController* controller = GetController();
+			if (controller)
 			{
-				CurrentRotation.Roll = 0.0f;
-				controller->SetControlRotation(CurrentRotation);
+				FRotator CurrentRotation = GetControlRotation();
+				if (CurrentRotation.Roll != 0.0f)
+				{
+					CurrentRotation.Roll = 0.0f;
+					controller->SetControlRotation(CurrentRotation);
+				}
 			}
 		}
 
