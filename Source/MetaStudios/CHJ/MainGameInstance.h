@@ -87,5 +87,7 @@ public:
 	// Base64 인코딩으로 해결하고자함!
 	FString StringBase64Encode(const FString& str);
 	FString StringBase64Decode(const FString& str);
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString PlayerType = TEXT("디폴트");
 };

@@ -45,7 +45,12 @@ void UFilmRoomLobbyWidget::NativeConstruct()
 	{
 		CBS_PlayerCountCombo->AddOption(FString::FromInt(i));
 	}
-	
+	CBS_PlayerType->AddOption(FString(TEXT("감독")));
+	CBS_PlayerType->AddOption(FString(TEXT("플레이어")));
+
+	CBS_PlayerCountCombo->SetSelectedIndex(0);
+	CBS_PrivateCombo->SetSelectedIndex(0);
+	CBS_PlayerType->SetSelectedIndex(0);
 }
 
 void UFilmRoomLobbyWidget::OnClickGoMenu()
@@ -72,6 +77,8 @@ void UFilmRoomLobbyWidget::CR_OnClickCreateRoom()
 		return;
 	}
 	int32 count = FCString::Atoi(*CBS_PlayerCountCombo->GetSelectedOption());
+	gi->PlayerType = CBS_PlayerType->GetSelectedOption();
+	
 	gi->CreateMySession(roomName , count, 1);
 }
 

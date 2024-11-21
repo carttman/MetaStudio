@@ -44,6 +44,8 @@ void ULobbyWidget::NativeConstruct()
 	{
 		CBS_PlayerCountCombo->AddOption(FString::FromInt(i));
 	}
+	CBS_PlayerCountCombo->SetSelectedIndex(0);
+	CBS_PrivateCombo->SetSelectedIndex(0);
 }
 
 void ULobbyWidget::OnClickGoMenu()

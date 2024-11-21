@@ -74,6 +74,7 @@ public:
 
 	void ResetEnhancedInputSetting(class APlayerController* pc);
 
+	UPROPERTY()
 	AMetaStudiosCharacter* player;
 
 	void OnMyActionMove(const FInputActionValue& value);
@@ -105,6 +106,25 @@ public:
 
 
 	float DescentSpeed = 5.0f;
+
+	// 가까이 가면 키 관련 UI 생성
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UBoxComponent* UIBox;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> WidgetClass;
+
+	UUserWidget* ActiveWidget;
+
+	UFUNCTION()
+    void OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
+                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
+                             bool bFromSweep, const FHitResult& SweepResult);
+
+    UFUNCTION()
+    void OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	// 가까이 가면 키 관련 UI 생성
 
 	/////////////////Animation//////////////////////////////
 	
