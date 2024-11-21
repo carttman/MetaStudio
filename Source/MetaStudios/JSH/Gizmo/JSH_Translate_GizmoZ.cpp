@@ -11,6 +11,10 @@
 #include "JSH_Translate_GizmoY.h"
 #include "JSH_Translate_GizmoX.h"
 #include "JSH_Translate_GizmoBox.h"
+#include "JSH_Scale_GizmoX.h"
+#include "JSH_Scale_GizmoY.h"
+#include "JSH_Scale_GizmoZ.h"
+#include "JSH_Scale_GizmoBox.h"
 #include "Engine/EngineTypes.h" 
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
@@ -130,6 +134,10 @@ void AJSH_Translate_GizmoZ::GOnClicked()
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TX);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TY);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
 	Params.AddIgnoredActors(IgnoreGizmos);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
@@ -166,7 +174,8 @@ void AJSH_Translate_GizmoZ::GOnClicked()
 		// 생각 해 보니깐 레이를 쏠 필요도 없씀 ㅋㅌㅋㅌㅋ
 		End_Location = End;
 		NewLocation = FVector(StartGizmoLocation.X, StartGizmoLocation.Y, End_Location.Z - StartActor_Location.Z);
-		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);		
+		//OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
+		OriginPlayer->Editor_SpawnActor->Set_Location_from_Gizmo(NewLocation);
 	}
 }
 

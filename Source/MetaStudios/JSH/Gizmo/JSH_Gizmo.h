@@ -54,16 +54,23 @@ public:
 	// Sclae
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Scale_Box;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	AJSH_Scale_GizmoBox* Origin_Scale_Box;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Scale_X;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	class AJSH_Scale_GizmoX* Origin_Scale_X;
+	AJSH_Scale_GizmoX* Origin_Scale_X;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Scale_Y;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	AJSH_Scale_GizmoY* Origin_Scale_Y;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Scale_Z;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	AJSH_Scale_GizmoZ* Origin_Scale_Z;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -77,11 +84,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION()
-	void TranslateMode();
 
-	UFUNCTION()
-	void ScaleMode();
 	
 	
 	FVector2D MousePosition;

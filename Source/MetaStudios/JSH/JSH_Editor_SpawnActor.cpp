@@ -334,6 +334,7 @@ void AJSH_Editor_SpawnActor::AddPreviousLocation(const FVector& newLocation)
 
 
 
+
 void AJSH_Editor_SpawnActor::ReturnPreviousLocation()
 {
     if (!OriginPlayer->EditorMode_B) return;
@@ -362,6 +363,24 @@ void AJSH_Editor_SpawnActor::ReturnPreviousLocation()
 
     // 값 초기화는 Editor Spawn Actor에서 해주고 있음 (새로 다른 actor 클릭했을 시)
 }
+
+
+void AJSH_Editor_SpawnActor::Set_Location_from_Gizmo(FVector Location)
+{
+    Server_Set_Location_from_Gizmo(Location);
+}
+
+void AJSH_Editor_SpawnActor::Server_Set_Location_from_Gizmo_Implementation(FVector Location)
+{
+    NetMulti_Set_Location_from_Gizmo(Location);
+}
+
+void AJSH_Editor_SpawnActor::NetMulti_Set_Location_from_Gizmo_Implementation(FVector Location)
+{
+    SetActorLocation(Location);
+}
+
+
 
 
 

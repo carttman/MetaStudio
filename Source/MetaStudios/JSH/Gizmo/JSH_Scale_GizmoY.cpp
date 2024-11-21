@@ -2,18 +2,25 @@
 
 
 #include "../Gizmo/JSH_Scale_GizmoY.h"
-#include "MetaStudios/JSH/JSH_PlayerController.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
 #include "Components/PrimitiveComponent.h"
 #include "DrawDebugHelpers.h"
+#include "JSH_Translate_GizmoX.h"
+#include "JSH_Translate_GizmoY.h"
+#include "JSH_Translate_GizmoZ.h"
+#include "JSH_Translate_GizmoBox.h"
+#include "JSH_Scale_GizmoBox.h"
+#include "JSH_Scale_GizmoX.h"
+#include "JSH_Scale_GizmoZ.h"
 #include "Engine/EngineTypes.h" 
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
+
 
 // Sets default values
 AJSH_Scale_GizmoY::AJSH_Scale_GizmoY()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	// 기본 색상
@@ -23,6 +30,7 @@ AJSH_Scale_GizmoY::AJSH_Scale_GizmoY()
 	if (TMesh.Succeeded())
 	{
 		Origin->SetStaticMesh(TMesh.Object);
+		Origin->SetCollisionProfileName(TEXT("Gizmo"));
 		Origin->SetVisibility(false);
 		Origin->SetCollisionProfileName(TEXT("NoCollision"));
 	}
@@ -46,26 +54,15 @@ AJSH_Scale_GizmoY::AJSH_Scale_GizmoY()
 	{
 		GreenMaterial = GreenMaterialLoader.Object;
 	}
+	
+	Tags.Add(FName("Scale_Gizmo_Y"));
 }
+
 
 // Called when the game starts or when spawned
 void AJSH_Scale_GizmoY::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Error, TEXT("Component 2222"));
-	
-	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	if (JPlayerController)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Begin_ScaleX"));
-	}
-
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-	// if (OriginPlayer)
-	// {
-	// 	OriginPlayer->Save_Gizmo_TY(this);
-	// }
-	
 }
 
 // Called every frame
@@ -75,151 +72,134 @@ void AJSH_Scale_GizmoY::Tick(float DeltaTime)
 
 	
 	// Editor Mode 마우스 우클릭 시 초기화
-	if (OriginPlayer->DisableEdit_b)
+	if (OriginPlayer != nullptr)
 	{
-		HandleMouseReleaseOutsideActor();
-	}
-
-	
-	if (Clicked)
-	{
-		NotifyActorOnClicked();
-
-
-		if (JPlayerController->WasInputKeyJustReleased(EKeys::LeftMouseButton)) 
+		if (OriginPlayer->DisableEdit_b)
 		{
 			HandleMouseReleaseOutsideActor();
 		}
 	}
-
-
+	
+	if (Clicked)
+	{
+		GOnClicked();
+	}
 	
 }
 
 
+
+
 void AJSH_Scale_GizmoY::NotifyActorOnClicked(FKey ButtonPressed)
 {
+	Super::NotifyActorOnClicked(ButtonPressed);
+
+}
+
+void AJSH_Scale_GizmoY::GOnClicked()
+{
+	// Cursor에 오버랩 되었을때 True로 바뀌는 bool값임 , 커서에 마우스 올라가 있을때에만 클릭해도 실행되도록 (왜 넣었는지 기억 안남, 없어도 될듯 싶음)
 	if (!CursorOveringGizmo) return;
 	
-	Super::NotifyActorOnClicked(ButtonPressed);
 	
-
-	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON) return;
-	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
+	//// 다른 기즈모가 실행 중 이면 , 기능 실행되지 않도록 ////
+	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON || OriginPlayer->Editor_SpawnActor->GizmoZ_ON || OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
 	if (!OriginPlayer->Editor_SpawnActor->GizmoY_ON)
 	{
 		OriginPlayer->Editor_SpawnActor->GizmoY_ON = true;
 	}
 	
-	UE_LOG(LogTemp, Error, TEXT("y1"));
+
+	//// Gizmo와 Player간의 거리 구하기 (bHit되지 않았을때 최대 거리 point로 hitpoint 잡아야함) ////
 	if (OriginPlayer != nullptr)
 	{
-		// 두 개체의 현재 위치
 		FVector GizmoLocation = GetActorLocation();
 		FVector PlayerLocation = OriginPlayer->GetActorLocation();
-
-		// 두 개체 사이의 거리 계산
-		Lay_Distance = FVector::Dist(GizmoLocation, PlayerLocation);
-		if (Lay_Distance >= 4000.0f)
-		{
-			Lay_Distance = 4000.0f;
-		}
-	}
-
 	
-	// 마우스 2D -> 3D Vector 변환
+		Lay_Distance = FVector::Dist(GizmoLocation, PlayerLocation);
+		// 거리를 너무 늘리면, 꾹 누르고 있을때 , 너무 멀리 나아가 버림
+		Lay_Distance = FMath::Clamp(Lay_Distance, 0.0f, 4000.0f); 
+	}
+	
+	//// 마우스 2d Vector -> 3d Vector ////
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
 	{
 		JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
 	}
-	
+
+	///// Ray ////
 	Start = Mouse_WorldLocation;
-	End =  (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
+	End = (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
+
+	// 다 만들고 추가
+	TArray<AActor*> IgnoreGizmos;
 	
-	// FHitResult HitResult;
-	// FCollisionQueryParams Params;
-	//Params.AddIgnoredActor(OriginPlayer->Editor_SpawnActor);
-	// AActor* dd = Cast<AActor>(OriginPlayer->Saved_Gizmo_TX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TY);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
 	
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
+	Params.AddIgnoredActors(IgnoreGizmos);
 	
-	
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
-	if (bHit)
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
+	///// 처음 클릭했을때 값 저장하기 위한 함수 ////
+	if (bHit && !firstclick && !Clicked)
 	{
-		// 다른 축과 겹쳐졌을때 else랑 같이 들어오는 오류가 있씀 
-		//if (HitResult.GetActor() != this) return;
-	
-		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 0.3);
-		UE_LOG(LogTemp, Error, TEXT("y2"));
-		if (!firstclick && !Clicked)
-		{
-			Clicked = true;
-			firstclick = true;
-			
-			UE_LOG(LogTemp, Error, TEXT("y3"));
-			
-			// 처음 마우스 위치 저장
-			// Start_Mouse_WorldLocation = HitResult.Location.Y;
-			
-			StartMouselocation = HitResult.ImpactPoint;
-			StartGizmoLocation = OriginPlayer->Editor_SpawnActor->GizmoActor->GetActorLocation();
-			StartActor_Location = StartMouselocation - StartGizmoLocation;
-			//float GapY = StartMouselocation.Y - StartGizmoLocation.Y;
-			//UE_LOG(LogTemp, Error, TEXT("point %s"), *HitResult.ImpactPoint.ToString());
-			//UE_LOG(LogTemp, Error, TEXT("gizmo %s"), *StartGizmoLocation.ToString());
-			SelectedGizmo = true;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("y4"));
-			End_Location = HitResult.ImpactPoint;
-			//FVector see = StartMouselocation - End_Location;
-			
-			NewLocation = FVector(StartGizmoLocation.X, End_Location.Y - StartActor_Location.Y, StartGizmoLocation.Z);
-			OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
-			
-			//firstclick = false;
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("y5"));
-		End_Location = End;
+		Clicked = true;
+		firstclick = true;
 		
-		NewLocation = FVector(StartGizmoLocation.X, End_Location.Y - StartActor_Location.Y, StartGizmoLocation.Z);
-		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
-		//
-		// firstclick = false;
+		UE_LOG(LogTemp, Error, TEXT("y first"));
+		
+		// Store initial mouse and gizmo positions
+		//StartMouselocation = HitResult.ImpactPoint;
+		StartMouselocation = End;
+		Start_Scale = OriginPlayer->Editor_SpawnActor->GetActorRelativeScale3D();
+		
+		SelectedGizmo = true;
+	}
+	else if (!firstclick && !Clicked)
+	{
+		Clicked = true;
+		firstclick = true;
+		
+		// Store initial mouse and gizmo positions
+		StartMouselocation = End;
+		Start_Scale = OriginPlayer->Editor_SpawnActor->GetActorRelativeScale3D();
+		SelectedGizmo = true;
+	}
+
+	
+	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
+	if (Clicked)
+	{
+		End_Location = End;
+		//End_Scale = FVector(Start_Scale.X , Start_Scale.Y + (( End_Location.Y - StartMouselocation.Y) * 0.01), Start_Scale.Z);
+
+		// -값으로 가면 3d object 앞뒤가 뒤집혀 버어림
+		End_Scale = FVector(FMath::Abs(Start_Scale.X), FMath::Abs(Start_Scale.Y + ((End_Location.Y - StartMouselocation.Y) * 0.01)), FMath::Abs(Start_Scale.Z));
+		
+		//OriginPlayer->Editor_SpawnActor->SetActorRelativeScale3D(End_Scale);
+		OriginPlayer->Editor_SpawnActor->Set_Scale_from_Gizmo(End_Scale);
 	}
 }
 
-
-
-// void AJSH_Scale_GizmoY::NotifyActorOnReleased(FKey ButtonReleased)
-// {
-// 	Super::NotifyActorOnReleased(ButtonReleased);
-//
-// 	// Clicked = false;
-// 	// SelectedGizmo = false;
-// 	OriginColor();
-// }
-
-
 // 오버랩 색상 변경
-void AJSH_Scale_GizmoY::NotifyActorBeginCursorOver()
+void AJSH_Scale_GizmoY::BeginCursorOver()
 {
-	Super::NotifyActorBeginCursorOver();
-
 	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
+	if (OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
 	
 	SelectedColor();
 	CursorOveringGizmo = true;
 }
 
-void AJSH_Scale_GizmoY::NotifyActorEndCursorOver()
+void AJSH_Scale_GizmoY::EndCursorOver()
 {
-	Super::NotifyActorEndCursorOver();
+	////Super::NotifyActorEndCursorOver();
 
 	if (!Clicked)
 	{
@@ -231,14 +211,13 @@ void AJSH_Scale_GizmoY::NotifyActorEndCursorOver()
 
 void AJSH_Scale_GizmoY::OriginColor()
 {
+	// Gizmo가 클릭된 상태라면 , 마우스가 Gizmo 위에 있지 않아도 계속해서 노란색 유지하기 위해
 	if (SelectedGizmo) return;
 	
 	if (GreenMaterial)
 	{
 		Origin->SetMaterial(0, GreenMaterial);
 	}
-	// Selected->SetVisibility(false);
-	// Origin->SetVisibility(true);
 }
 
 void AJSH_Scale_GizmoY::SelectedColor()
@@ -247,8 +226,6 @@ void AJSH_Scale_GizmoY::SelectedColor()
 	{
 		Origin->SetMaterial(0, YellowMaterial);
 	}
-	// Selected->SetVisibility(true);
-	// Origin->SetVisibility(false);
 }
 
 
@@ -258,6 +235,36 @@ void AJSH_Scale_GizmoY::HandleMouseReleaseOutsideActor()
 	firstclick = false;
 	SelectedGizmo = false;
 	CursorOveringGizmo = false;
-	OriginPlayer->Editor_SpawnActor->GizmoY_ON = false;
+	if (OriginPlayer->Editor_SpawnActor != nullptr && OriginPlayer->Editor_SpawnActor->GizmoY_ON != false)
+	{
+		OriginPlayer->Editor_SpawnActor->GizmoY_ON = false;
+	}
 	OriginColor();
+
+	// Else문 반복 실행을 막기 위해
+	// Origin->SetCollisionProfileName(TEXT("NoCollision"));
+}
+
+
+//// Player쪽에서 Gizmo Mode 바꿀때 조정해줌  ////
+void AJSH_Scale_GizmoY::Visible_and_Collision_On()
+{
+	Origin->SetVisibility(true);
+	Origin->SetCollisionProfileName(TEXT("Gizmo"));
+}
+void AJSH_Scale_GizmoY::Visible_and_Collision_Off()
+{
+	Origin->SetVisibility(false);
+	Origin->SetCollisionProfileName(TEXT("NoCollision"));
+}
+
+void AJSH_Scale_GizmoY::BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control)
+{
+	OriginPlayer = temp;
+	if (OriginPlayer)
+	{
+		OriginPlayer->Save_Gizmo_SY(this);
+	}
+
+	JPlayerController = control;
 }

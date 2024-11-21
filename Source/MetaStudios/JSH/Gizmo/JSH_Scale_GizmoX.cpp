@@ -8,6 +8,13 @@
 #include "Engine/World.h"
 #include "Components/PrimitiveComponent.h"
 #include "DrawDebugHelpers.h"
+#include "JSH_Translate_GizmoX.h"
+#include "JSH_Translate_GizmoY.h"
+#include "JSH_Translate_GizmoZ.h"
+#include "JSH_Translate_GizmoBox.h"
+#include "JSH_Scale_GizmoBox.h"
+#include "JSH_Scale_GizmoY.h"
+#include "JSH_Scale_GizmoZ.h"
 #include "Engine/EngineTypes.h" 
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
@@ -127,11 +134,17 @@ void AJSH_Scale_GizmoX::GOnClicked()
 	End = (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
 
 	// 다 만들고 추가
-	//TArray<AActor*> IgnoreGizmos;
-	//IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
-	// IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
-	// IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
-	//Params.AddIgnoredActors(IgnoreGizmos);
+	TArray<AActor*> IgnoreGizmos;
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TY);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
+	
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
+	
+	Params.AddIgnoredActors(IgnoreGizmos);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
 	///// 처음 클릭했을때 값 저장하기 위한 함수 ////
@@ -165,7 +178,10 @@ void AJSH_Scale_GizmoX::GOnClicked()
 	if (Clicked)
 	{
 		End_Location = End;
-		End_Scale = FVector(Start_Scale.X + (( End_Location.X - StartMouselocation.X) * 0.01), Start_Scale.Y, Start_Scale.Z);
+		//End_Scale = FVector(Start_Scale.X + (( End_Location.X - StartMouselocation.X) * 0.01), Start_Scale.Y, Start_Scale.Z);
+
+		// -값으로 가면 3d object 앞뒤가 뒤집혀 버어림
+		End_Scale = FVector(FMath::Abs(Start_Scale.X + ((End_Location.X - StartMouselocation.X) * 0.01)), FMath::Abs(Start_Scale.Y), FMath::Abs(Start_Scale.Z));
 		//OriginPlayer->Editor_SpawnActor->SetActorRelativeScale3D(End_Scale);
 		OriginPlayer->Editor_SpawnActor->Set_Scale_from_Gizmo(End_Scale);
 	}

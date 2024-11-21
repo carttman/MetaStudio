@@ -122,8 +122,18 @@ public:
 
 
 
-	/// Scale 변경 함수
 
+
+	/// Location 변경 함수
+	UFUNCTION()
+	void Set_Location_from_Gizmo(FVector Location);
+	UFUNCTION(server, reliable)
+	void Server_Set_Location_from_Gizmo(FVector Location);
+	UFUNCTION(netmulticast, reliable)
+	void NetMulti_Set_Location_from_Gizmo(FVector Location);
+
+	
+	/// Scale 변경 함수
 	UFUNCTION()
 	void Set_Scale_from_Gizmo(FVector Scale);
 	UFUNCTION(server, reliable)

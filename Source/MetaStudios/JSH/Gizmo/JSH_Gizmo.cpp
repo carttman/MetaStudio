@@ -3,7 +3,10 @@
 
 #include "../Gizmo/JSH_Gizmo.h"
 
+#include "JSH_Scale_GizmoBox.h"
 #include "JSH_Scale_GizmoX.h"
+#include "JSH_Scale_GizmoY.h"
+#include "JSH_Scale_GizmoZ.h"
 #include "../Gizmo/JSH_Translate_GizmoBox.h"
 #include "../Gizmo/JSH_Translate_GizmoX.h"
 #include "../Gizmo/JSH_Translate_GizmoY.h"
@@ -123,7 +126,7 @@ AJSH_Gizmo::AJSH_Gizmo()
 	
 	Scale_Z = CreateDefaultSubobject<UChildActorComponent>(TEXT("Scale_Z"));
 	Scale_Z->SetupAttachment(Scale_Box);
-	UClass* Scale_Z_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Scale_X/BP_ScaleGizmo_X.BP_ScaleGizmo_Z_C"));
+	UClass* Scale_Z_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Scale_Z/BP_ScaleGizmo_Z.BP_ScaleGizmo_Z_C"));
 	if (Scale_Z_Class)
 	{
 		Scale_Z->SetChildActorClass(Scale_Z_Class);
@@ -183,43 +186,6 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 	}
 }
 
-
-#pragma region  Mode
-void AJSH_Gizmo::TranslateMode()
-{
-	// Translate On
-	Translate_Box->SetVisibility(true);
-	Translate_X->SetVisibility(true);
-	Translate_Y->SetVisibility(true);
-	Translate_Z->SetVisibility(true);
-	
-	// Scale Off
-	Scale_Box->SetVisibility(false);
-	Scale_X->SetVisibility(false);
-	Scale_Y->SetVisibility(false);
-	Scale_Z->SetVisibility(false);
-}
-
-
-
-void AJSH_Gizmo::ScaleMode()
-{
-	// Translate Off
-	Translate_Box->SetVisibility(false);
-	Translate_X->SetVisibility(false);
-	Translate_Y->SetVisibility(false);
-	Translate_Z->SetVisibility(false);
-	
-	// Scale On
-	Scale_Box->SetVisibility(true);
-	Scale_X->SetVisibility(true);
-	Scale_Y->SetVisibility(true);
-	Scale_Z->SetVisibility(true);
-}
-
-
-
-#pragma endregion
 
 
 
@@ -311,6 +277,36 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		if (Origin_Scale_X != nullptr)
 		{
 			Origin_Scale_X->BeginPlayer(OriginPlayer, JPlayerController);
+		}
+	}
+
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Scale_Gizmo_Y"), Tag_SY);
+	if(Tag_SY.Num() > 0)
+	{
+		Origin_Scale_Y = Cast<AJSH_Scale_GizmoY>(Tag_SY[0]);
+		if (Origin_Scale_Y != nullptr)
+		{
+			Origin_Scale_Y->BeginPlayer(OriginPlayer, JPlayerController);
+		}
+	}
+
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Scale_Gizmo_Z"), Tag_SZ);
+	if(Tag_SZ.Num() > 0)
+	{
+		Origin_Scale_Z = Cast<AJSH_Scale_GizmoZ>(Tag_SZ[0]);
+		if (Origin_Scale_Z != nullptr)
+		{
+			Origin_Scale_Z->BeginPlayer(OriginPlayer, JPlayerController);
+		}
+	}
+	
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Scale_Gizmo_Box"), Tag_SBox);
+	if(Tag_SBox.Num() > 0)
+	{
+		Origin_Scale_Box = Cast<AJSH_Scale_GizmoBox>(Tag_SBox[0]);
+		if (Origin_Scale_Box != nullptr)
+		{
+			Origin_Scale_Box->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 
