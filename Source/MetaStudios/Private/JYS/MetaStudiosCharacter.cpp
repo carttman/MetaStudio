@@ -95,15 +95,43 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 
 void AMetaStudiosCharacter::PossessedBy(AController* NewController)
 {
-	Super::PossessedBy(NewController);	
+	Super::PossessedBy(NewController);
 }
 
 void AMetaStudiosCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	spaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
-	carActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
+	////수정////////////////////////////////////
+	TArray<AActor*> foundSpaceships;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpaceshipPawn::StaticClass(), foundSpaceships);
+
+	if (foundSpaceships.Num() > 0)
+	{
+		for (int i = 0; i < foundSpaceships.Num(); ++i)
+		{
+			if (foundSpaceships[i] == nullptr)	continue;
+			ListShip.Add(Cast<ASpaceshipPawn>(foundSpaceships[i]));
+		}
+		//spaceshipActor = Cast<ASpaceshipPawn>(foundSpaceships[0]);
+	}
+
+	TArray<AActor*> foundCars;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACarPawn::StaticClass(), foundCars);
+
+	if (foundCars.Num() > 0)
+	{
+		for (int i = 0; i < foundCars.Num(); ++i)
+		{
+			if (foundCars[i] == nullptr)	continue;
+			ListCar.Add(Cast<ACarPawn>(foundCars[i]));
+		}
+		//carActor = Cast<ACarPawn>(foundCars[0]);
+	}
+
+
+	// spaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
+	// carActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
 
 	ActivateBooster(false);
 
@@ -448,10 +476,53 @@ void AMetaStudiosCharacter::NetMulticast_ChangeCameraMode_Implementation()
 void AMetaStudiosCharacter::SelectAutoMobile()
 {
 	if (!IsLocallyControlled())	return;
+	if (ListShip.Num() <= 0 && ListCar.Num() <= 0)	return;
+
+	float distMinShip = 999999.0f;
+	float distMinCar = 999999.0f;
+	int selIdxShip = -1;
+	int selIdxCar = -1;
+
+	// Ship중 아무도 안타고 있고 가장 가까운 애
+	for (int i = 0; i < ListShip.Num(); ++i)
+	{
+		float distCur = GetDistanceTo(ListShip[i]);
+		if (distMinShip < distCur)	continue;
+		if( ListShip[i]->bExistRider == true )	continue;
+		distMinShip = distCur;
+		selIdxShip = i;
+	}
+
+	// Car중 아무도 안타고 있고 가장 가까운 애
+	for (int i = 0; i < ListCar.Num(); ++i)
+	{
+		float distCur = GetDistanceTo(ListCar[i]);
+		if (distMinCar < distCur)	continue;
+		if (ListCar[i]->bExistRider == true)	continue;
+		distMinCar = distCur;
+		selIdxCar = i;
+	}
+
+	if (selIdxShip == -1 && selIdxCar == -1)	return;
+
+	if (distMinShip < distMinCar)
+	{
+		spaceshipActor = ListShip[selIdxShip];
+		GetController()->SetControlRotation(spaceshipActor->GetActorRotation());
+		Server_EnterSpaceship(spaceshipActor);
+	}
+	else
+	{
+		carActor = ListCar[selIdxCar];
+		GetController()->SetControlRotation(carActor->GetActorRotation());
+		Server_EnterCar(carActor);
+	}
+
+	/*
 	if (spaceshipActor != nullptr && carActor != nullptr)
 	{
 		float spaceshipDist = GetDistanceTo(spaceshipActor);
-		float carDist = GetDistanceTo(carActor);		
+		float carDist = GetDistanceTo(carActor);
 
 		if (carDist < spaceshipDist)
 		{
@@ -471,49 +542,41 @@ void AMetaStudiosCharacter::SelectAutoMobile()
 		//else if (carActor != nullptr)
 		//	Server_EnterCar();
 	}
-}
-
-//////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
-void AMetaStudiosCharacter::EnterSpaceship()
-{
-	float spaceshipDist = GetDistanceTo(spaceshipActor);
-	float carDist = GetDistanceTo(carActor);
-
-	if (carDist < spaceshipDist)
-		return;
-
-		
-
-		/*
-	if (IsLocallyControlled())
-	{
-		Server_EnterSpaceship();
-	}
-
-	// Possess가 된 후 widget 사라지기
-	if (spaceshipActor->ActiveWidget)
-	{
-		spaceshipActor->ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), spaceshipActor->WidgetClass);
-		spaceshipActor->ActiveWidget->RemoveFromViewport();
-	}
 	*/
 }
 
-void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation()
+//////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
+//void AMetaStudiosCharacter::EnterSpaceship()
+//{
+//	float spaceshipDist = GetDistanceTo(spaceshipActor);
+//	float carDist = GetDistanceTo(carActor);
+//
+//	if (carDist < spaceshipDist)
+//		return;
+//
+//
+//	if (IsLocallyControlled())
+//	{
+//		Server_EnterSpaceship();
+//	}
+//
+//	// Possess가 된 후 widget 사라지기
+//	if (spaceshipActor->ActiveWidget)
+//	{
+//		spaceshipActor->ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), spaceshipActor->WidgetClass);
+//		spaceshipActor->ActiveWidget->RemoveFromViewport();
+//	}
+//}
+
+void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation(class AActor* TargetActor)
 {
 	if (HasAuthority())
 	{
-		ASpaceshipPawn* SpaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
-		if (SpaceshipActor == nullptr)
-		{
-			FActorSpawnParameters SpawnParams;
-			SpaceshipActor = GetWorld()->SpawnActor<ASpaceshipPawn>(SpaceshipPawnFactory, SpawnParams);
-			UE_LOG(LogTemp, Error, TEXT("Failed to find or spawn SpaceshipActor."));
-		}
+		if (TargetActor == nullptr)	return;
 
+		ASpaceshipPawn* SpaceshipActor = Cast<ASpaceshipPawn>(TargetActor);
 		if (SpaceshipActor == nullptr)	return;
-
-		if (SpaceshipActor->player != nullptr)
+		if (SpaceshipActor->bExistRider == true)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Spaceship is already possessed by another player!"));
 			return;
@@ -522,10 +585,35 @@ void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation()
 		if (SpaceshipActor->CanPlayerEnter(this))
 		{
 			SpaceshipActor->player = this;
+			SpaceshipActor->bExistRider = true;
 			GetController()->SetControlRotation(SpaceshipActor->GetActorRotation());
 			GetController()->Possess(SpaceshipActor);
 			NetMulticast_EnterSpaceship(SpaceshipActor);
 		}
+
+		//ASpaceshipPawn* SpaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
+		//if (SpaceshipActor == nullptr)
+		//{
+		//	FActorSpawnParameters SpawnParams;
+		//	SpaceshipActor = GetWorld()->SpawnActor<ASpaceshipPawn>(SpaceshipPawnFactory, SpawnParams);
+		//	UE_LOG(LogTemp, Error, TEXT("Failed to find or spawn SpaceshipActor."));
+		//}
+		//
+		//if (SpaceshipActor == nullptr)	return;
+		//
+		//if (SpaceshipActor->player != nullptr)
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("Spaceship is already possessed by another player!"));
+		//	return;
+		//}
+		//
+		//if (SpaceshipActor->CanPlayerEnter(this))
+		//{
+		//	SpaceshipActor->player = this;
+		//	GetController()->SetControlRotation(SpaceshipActor->GetActorRotation());
+		//	GetController()->Possess(SpaceshipActor);
+		//	NetMulticast_EnterSpaceship(SpaceshipActor);
+		//}
 	}
 }
 
@@ -534,11 +622,17 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 	if (SpaceshipActor)
 	{
 		SpaceshipActor->player = this;
+		SpaceshipActor->bExistRider = true;
 		GetMesh()->SetVisibility(false);
-							
-		if( IsLocallyControlled())
+
+		if (IsLocallyControlled())
 		{
 			SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+			// Possess가 된 후 widget 사라지기
+			if (SpaceshipActor->ActiveWidget != nullptr)
+			{
+				SpaceshipActor->ActiveWidget->RemoveFromViewport();
+			}
 		}
 	}
 	else
@@ -548,38 +642,31 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 }
 
 /// 자동차랑 플레이어랑 컨트롤러 바꾸기
-void AMetaStudiosCharacter::EnterCar()
-{
+//void AMetaStudiosCharacter::EnterCar()
+//{
+//
+//	float spaceshipDist = GetDistanceTo(spaceshipActor);
+//	float carDist = GetDistanceTo(carActor);
+//
+//	if (carDist >= spaceshipDist)
+//		return;
+//
+//	if (IsLocallyControlled())
+//	{
+//		Server_EnterCar();
+//	}
+//
+//}
 
-	float spaceshipDist = GetDistanceTo(spaceshipActor);
-	float carDist = GetDistanceTo(carActor);
-
-	if (carDist >= spaceshipDist)
-		return;
-
-	if (IsLocallyControlled())
-	{
-		Server_EnterCar();
-	}
-
-}
-
-void AMetaStudiosCharacter::Server_EnterCar_Implementation()
+void AMetaStudiosCharacter::Server_EnterCar_Implementation(class AActor* TargetActor)
 {
 	if (HasAuthority())
 	{
-		ACarPawn* CarActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
-		if (CarActor == nullptr)
-		{
-			FActorSpawnParameters SpawnParams;
-			CarActor = GetWorld()->SpawnActor<ACarPawn>(CarPawnFactory, SpawnParams);
-			UE_LOG(LogTemp, Error, TEXT("Failed to find or spawn SpaceshipActor."));
-		}
+		if (TargetActor == nullptr)	return;
 
+		ACarPawn* CarActor = Cast<ACarPawn>(TargetActor);
 		if (CarActor == nullptr)	return;
-
-		/// 한명만 Possess 되어 있게
-		if (CarActor->player != nullptr)
+		if (CarActor->bExistRider == true)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Car is already possessed by another player!"));
 			return;
@@ -587,19 +674,44 @@ void AMetaStudiosCharacter::Server_EnterCar_Implementation()
 
 		if (CarActor->CanPlayerEnterCar(this))
 		{
-			CarActor->player = this;			
+			CarActor->player = this;
+			CarActor->bExistRider = true;
 			GetController()->SetControlRotation(CarActor->GetActorRotation());
 			GetController()->Possess(CarActor);
-
-			// Possess가 된 후 widget 사라지기
-			spaceshipActor->ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), spaceshipActor->WidgetClass);
-			spaceshipActor->ActiveWidget->RemoveFromViewport();
-
-
 			NetMulticast_EnterCar(CarActor);
 		}
 
 
+		//ACarPawn* CarActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
+		//if (CarActor == nullptr)
+		//{
+		//	FActorSpawnParameters SpawnParams;
+		//	CarActor = GetWorld()->SpawnActor<ACarPawn>(CarPawnFactory, SpawnParams);
+		//	UE_LOG(LogTemp, Error, TEXT("Failed to find or spawn SpaceshipActor."));
+		//}
+		//
+		//if (CarActor == nullptr)	return;
+		//
+		///// 한명만 Possess 되어 있게
+		//if (CarActor->player != nullptr)
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("Car is already possessed by another player!"));
+		//	return;
+		//}
+		//
+		//if (CarActor->CanPlayerEnterCar(this))
+		//{
+		//	CarActor->player = this;
+		//	GetController()->SetControlRotation(CarActor->GetActorRotation());
+		//	GetController()->Possess(CarActor);
+		//
+		//	// Possess가 된 후 widget 사라지기
+		//	spaceshipActor->ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), spaceshipActor->WidgetClass);
+		//	spaceshipActor->ActiveWidget->RemoveFromViewport();
+		//
+		//
+		//	NetMulticast_EnterCar(CarActor);
+		//}
 	}
 }
 
@@ -608,12 +720,18 @@ void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarAc
 	if (CarActor)
 	{
 		CarActor->player = this;
+		CarActor->bExistRider = true;
 		GetMesh()->SetVisibility(false);
 		CarActor->RidingPlayer->SetVisibility(true);
 
 		if (IsLocallyControlled())
 		{
 			CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+			// Possess가 된 후 widget 사라지기
+			if (CarActor->ActiveWidget != nullptr)
+			{
+				CarActor->ActiveWidget->RemoveFromViewport();
+			}
 		}
 
 		//CarActor->SetActorRotation(CarActor->GetActorRotation());
@@ -720,3 +838,53 @@ void AMetaStudiosCharacter::ExitSession()
 
 	}
 }
+
+void AMetaStudiosCharacter::AddVehicle(class AActor* target)
+{
+	if( target == nullptr )	return;
+	
+	ASpaceshipPawn* SpaceShip = Cast<ASpaceshipPawn>(target);
+	if (SpaceShip != nullptr)
+	{
+		ListShip.Add(SpaceShip);
+		return;
+	}
+	
+	ACarPawn* Car = Cast<ACarPawn>(target);
+	if (Car != nullptr)
+	{
+		ListCar.Add(Car);
+		return;
+	}	
+}
+
+void AMetaStudiosCharacter::DeleteVehicle(AActor* target)
+{
+	if( ListShip.Remove(Cast<ASpaceshipPawn>(target)) >= 0 )	return;
+	ListCar.Remove(Cast<ACarPawn>(target));
+}
+
+//void AMetaStudiosCharacter::AddVehicle(class ASpaceshipPawn* target)
+//{
+//	if (target == nullptr)	return;
+//	ListShip.Add(Cast<ASpaceshipPawn>(target));
+//}
+//
+//void AMetaStudiosCharacter::AddVehicle(class ACarPawn* target)
+//{
+//	if (target == nullptr)	return;
+//	ListCar.Add(Cast<ACarPawn>(target));
+//}
+//
+//void AMetaStudiosCharacter::DeleteVehicle(class ASpaceshipPawn* target)
+//{
+//	if (target == nullptr)	return;
+//	ListShip.Remove(target);
+//}
+//
+//void AMetaStudiosCharacter::DeleteVehicle(class ACarPawn* target)
+//{
+//	if (target == nullptr)	return;
+//	ListCar.Remove(target);
+//}
+

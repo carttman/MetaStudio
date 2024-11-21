@@ -78,19 +78,25 @@ void ACarPawn::Tick(float DeltaTime)
 	if (MoveStop == false)
 	{
 		///////////////LineTrace//////////////////////
-		FVector startLocation = GetActorLocation();
-		FVector endLocation = startLocation + -(GetActorUpVector() * 10000.0f); // Trace downwards
+		//FVector startLocation = GetActorLocation();
+		FVector startLocation = LineTraceArrow->GetComponentLocation();
+		//FVector endLocation = startLocation + -(GetActorUpVector() * 10000.0f); // Trace downwards
+		FVector endLocation = startLocation + (LineTraceArrow->GetForwardVector() * 10000.0f); // Trace downwards
 		FHitResult hitResult;
 		FCollisionQueryParams queryParams;
 		queryParams.AddIgnoredActor(this);
+
+		//DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
 		
 		if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_Visibility, queryParams))
 		{
 			// DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
 
+			FVector locCharacter = GetActorLocation();			
 			FVector newLocation = hitResult.ImpactPoint;
 			newLocation.Z += 50.0f;
-			SetActorLocation(newLocation);
+			locCharacter.Z = newLocation.Z + 50.0f;
+			SetActorLocation(locCharacter);
 
 			//FRotator WorldRot = GetActorRotation();
 			//
@@ -112,8 +118,8 @@ void ACarPawn::Tick(float DeltaTime)
 			//direction.Normalize();
 
 
-			//float PosZ = GetActorLocation().Z;	
-			//UE_LOG(LogTemp, Warning, TEXT("Ground hit : %f : %f"), hitResult.ImpactPoint.Z, PosZ);
+			float PosZ = GetActorLocation().Z;	
+			UE_LOG(LogTemp, Warning, TEXT("Ground hit : %f : %f"), hitResult.ImpactPoint.Z, PosZ);
 		}
 	}
 
@@ -413,7 +419,7 @@ void ACarPawn::Server_ExitCar_Implementation()
 
 	NetMulticast_ExitCar();
 
-	player = nullptr;
+	bExistRider = false;
 }
 
 void ACarPawn::NetMulticast_ExitCar_Implementation()
@@ -445,7 +451,7 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 		//characterController->Possess(player);
 		player->GetMesh()->SetVisibility(true);
 		RidingPlayer->SetVisibility(false);
-
+		bExistRider = false;
 		if (IsLocallyControlled())
 		{
 			player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
