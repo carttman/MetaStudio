@@ -140,5 +140,6 @@ public:
 	void Server_Set_Scale_from_Gizmo(FVector Scale);
 	UFUNCTION(netmulticast, reliable)
 	void NetMulti_Set_Scale_from_Gizmo(FVector Scale);
+	
 };
 

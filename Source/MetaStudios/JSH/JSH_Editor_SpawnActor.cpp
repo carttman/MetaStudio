@@ -20,7 +20,7 @@ AJSH_Editor_SpawnActor::AJSH_Editor_SpawnActor()
     AssetMesh->SetupAttachment(RootComponent);
     AssetMesh->SetRenderCustomDepth(false);
 
-
+    
     // ConstructorHelpers::FObjectFinder<UStaticMesh> TMesh(TEXT("/Script/Engine.StaticMesh'/Game/JSH/Asset/Teenieping/chachaping.chachaping'"));
     // if (TMesh.Succeeded())
     // {
@@ -157,6 +157,8 @@ void AJSH_Editor_SpawnActor::NotifyActorOnClicked(FKey ButtonPressed)
     
     //겹쳐져 있을 때에 기즈모가 클릭되고 스폰액터는 클릭 안 되도록
     if (OriginPlayer->Gizmo_Detecting) return;
+    
+    if (OriginPlayer->Editor_SpawnActor == this) return;
 
     Server_NotifyActorOnClicked();
 
@@ -214,8 +216,13 @@ void AJSH_Editor_SpawnActor::Unclicked()
 
 void AJSH_Editor_SpawnActor::GizmoSpawn()
 {
-    // ThisTransform: 현재 actor의 위치로 설정합니다.
-    FTransform ThisTransform2 = this->GetActorTransform();
+    // ThisTransform: 현재 actor의 위치로 설정
+    //FTransform ThisTransform2 = this->GetActorTransform();
+
+    // 기즈모를 통해 actor의 크기를 조정하고, 다른 actor 선택 후 크기 조정했던 actor 재 선택 시 transform으로 spawn하니깐
+    // 기즈모 크기도 같이 늘어나는 문제 때문에 , location이랑 rotaion 만으로 해야할 듯
+    FVector ThisLocation = this->GetActorLocation();
+    FRotator Thisrotator = this->GetActorRotation();
 
     // Spawn parameters 설정
     FActorSpawnParameters SpawnParams;
@@ -228,14 +235,19 @@ void AJSH_Editor_SpawnActor::GizmoSpawn()
         UE_LOG(LogTemp, Log, TEXT("GizmoClass 로드 성공"));
         
         // GizmoActor: 블루프린트를 스폰합니다.
-        GizmoActor = GetWorld()->SpawnActor<AActor>(GizmoClass, ThisTransform2, SpawnParams);
+        GizmoActor = GetWorld()->SpawnActor<AActor>(GizmoClass, ThisLocation, Thisrotator, SpawnParams);
         
         OriginGizmo = Cast<AJSH_Gizmo>(GizmoActor);
         // Gizmo 내부 컨트롤러 -> Gizmo 내부 Child Actor 찾기 -> 내부 child actor들 컨트롤러 로드 -> player에 정보 전달
         //OriginGizmo->BeginPlayerContorller(JPlayerController);
         
-        
         OriginGizmo->Begin_PlayerData(OriginPlayer, JPlayerController);
+
+        
+
+        // OriginGizmo를 this에 첨부합니다.
+        //OriginGizmo->AttachToComponent(RootComponent,  FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
 
         
         if (GizmoActor)

@@ -71,6 +71,19 @@ public:
 	UChildActorComponent* Scale_Z;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	AJSH_Scale_GizmoZ* Origin_Scale_Z;
+
+
+	// Rotate
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	USceneComponent* Rotate_Box;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	AJSH_Rotate_GizmoX* Origin_Rotate_Box;
+
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UChildActorComponent* Rotate_X;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	AJSH_Rotate_GizmoX* Origin_Rotate_X;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -154,4 +167,8 @@ public:
 	TArray<AActor*> Tag_SY;
 	TArray<AActor*> Tag_SZ;
 	TArray<AActor*> Tag_SBox;
+	
+	TArray<AActor*> Tag_RX;
+	TArray<AActor*> Tag_RY;
+	TArray<AActor*> Tag_RZ;
 };

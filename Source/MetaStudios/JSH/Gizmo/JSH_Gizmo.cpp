@@ -134,6 +134,23 @@ AJSH_Gizmo::AJSH_Gizmo()
 		Scale_Z->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
 		//Scale_Z->SetVisibility(false);
 	}
+
+
+	
+	////// Rotate /////
+	Rotate_Box = CreateDefaultSubobject<USceneComponent>(TEXT("Rotate_Box"));
+	Rotate_Box->SetupAttachment(RootScence);
+	
+	
+	Rotate_X = CreateDefaultSubobject<UChildActorComponent>(TEXT("Rotate_X"));
+	Rotate_X->SetupAttachment(Rotate_Box);
+	UClass* Rotate_X_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Rotate/BP_RotateGizmo_X.BP_RotateGizmo_X_C"));
+	if (Rotate_X_Class)
+	{
+		Rotate_X->SetChildActorClass(Rotate_X_Class);
+		Rotate_X->SetRelativeLocationAndRotation(FVector(0.0, 0, 0), FRotator(0, -90.f, 90.f));
+		Rotate_X->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
+	}
 }
 
 // Called when the game starts or when spawned
@@ -176,12 +193,13 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 	
 			Translate_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
 			Scale_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
+			Rotate_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
 		}
 	}
 
 	if (OriginPlayer && OriginPlayer->Editor_SpawnActor)
 	{
-	// 	//SetActorTransform(OriginPlayer->Editor_SpawnActor->GetActorTransform());
+		//SetActorTransform(OriginPlayer->Editor_SpawnActor->GetActorTransform());
 		SetActorLocation(OriginPlayer->Editor_SpawnActor->GetActorLocation());
 	}
 }
@@ -310,6 +328,19 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		}
 	}
 
+
+	// Rotate
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Rotate_Gizmo_X"), Tag_RX);
+	if(Tag_RX.Num() > 0)
+	{
+		Origin_Rotate_X = Cast<AJSH_Rotate_GizmoX>(Tag_RX[0]);
+		if (Origin_Rotate_X != nullptr)
+		{
+			Origin_Rotate_X->BeginPlayer(OriginPlayer, JPlayerController);
+		}
+	}
+
+	
 	//UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Y"), Tag_Y);
 }
 

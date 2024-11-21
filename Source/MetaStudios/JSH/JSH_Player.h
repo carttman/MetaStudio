@@ -7,6 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Gizmo/JSH_Rotate_GizmoX.h"
 #include "Logging/LogMacros.h"
 #include "Widget/JSH_Record_UI.h"
 #include "JSH_Player.generated.h"
@@ -446,6 +447,11 @@ public:
 	void Save_Gizmo_SB(AActor* Gizmo_SB);
 	UPROPERTY()
 	AJSH_Scale_GizmoBox* Saved_Gizmo_SB;
+
+	UFUNCTION()
+	void Save_Gizmo_RX(AActor* Gizmo_RX);
+	UPROPERTY()
+	AJSH_Rotate_GizmoX* Saved_Gizmo_RX;
 
 	
 	

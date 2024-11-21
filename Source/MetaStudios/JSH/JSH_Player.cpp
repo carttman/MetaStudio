@@ -150,24 +150,33 @@ AJSH_Player::AJSH_Player()
 	Root_Camera01->SetRelativeLocation(FVector(70.f, -74.f, -265.f));
 	Root_Camera01->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 	Root_Camera01->SetRelativeScale3D(FVector(1.5f, 1.5f, 1.5f));
+	Root_Camera01->SetCastShadow(false);
 	
 	Camera02 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera02"));
 	Camera02->SetupAttachment(Root_Camera01);
-
+	Camera02->SetCastShadow(false);
+	
 	Camera03 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera03"));
 	Camera03->SetupAttachment(Root_Camera01);
-
+	Camera03->SetCastShadow(false);
+	
 	Camera04 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera04"));
 	Camera04->SetupAttachment(Root_Camera01);
-
+	Camera04->SetCastShadow(false);
+	
 	Camera05 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera05"));
 	Camera05->SetupAttachment(Root_Camera01);
-
+	Camera05->SetCastShadow(false);
+	
 	Camera06 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera06"));
 	Camera06->SetupAttachment(Root_Camera01);
+	Camera06->SetCastShadow(false);
 
 	Camera07 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Camera07"));
 	Camera07->SetupAttachment(Root_Camera01);
+	Camera07->SetCastShadow(false);
+
+	
 }
 #pragma endregion
 
@@ -1036,6 +1045,15 @@ void AJSH_Player::Save_Gizmo_SB(AActor* Gizmo_SB)
 }
 
 
+// Rotate 정보 저장
+void AJSH_Player::Save_Gizmo_RX(AActor* Gizmo_RX)
+{
+	Saved_Gizmo_RX = Cast<AJSH_Rotate_GizmoX>(Gizmo_RX);
+}
+
+
+
+
 void AJSH_Player::EditorAcotorDestroy()
 {
 	NetMulti_EditorAcotorDestroy();
@@ -1066,6 +1084,7 @@ void AJSH_Player::G_SelecteMode()
 	if (Editor_SpawnActor == nullptr) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr) return;
 
 	
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
@@ -1086,6 +1105,9 @@ void AJSH_Player::G_SelecteMode()
 	Saved_Gizmo_SY->Visible_and_Collision_Off();
 	Saved_Gizmo_SZ->Visible_and_Collision_Off();
 	Saved_Gizmo_SB->Visible_and_Collision_Off();
+
+	
+	Saved_Gizmo_RX->Visible_and_Collision_Off();
 	
 }
 
@@ -1116,7 +1138,11 @@ void AJSH_Player::G_TranslateMode()
 	Saved_Gizmo_SY->Visible_and_Collision_Off();
 	Saved_Gizmo_SZ->Visible_and_Collision_Off();
 	Saved_Gizmo_SB->Visible_and_Collision_Off();
+
+	Saved_Gizmo_RX->Visible_and_Collision_Off();
 }
+
+
 
 
 void AJSH_Player::G_RotateMode()
@@ -1147,6 +1173,8 @@ void AJSH_Player::G_RotateMode()
 	Saved_Gizmo_SY->Visible_and_Collision_Off();
 	Saved_Gizmo_SZ->Visible_and_Collision_Off();
 	Saved_Gizmo_SB->Visible_and_Collision_Off();
+
+	Saved_Gizmo_RX->Visible_and_Collision_On();
 }
 
 
@@ -1176,6 +1204,9 @@ void AJSH_Player::G_SclaeMode()
 	Saved_Gizmo_SY->Visible_and_Collision_On();
 	Saved_Gizmo_SZ->Visible_and_Collision_On();
 	Saved_Gizmo_SB->Visible_and_Collision_On();
+
+
+	Saved_Gizmo_RX->Visible_and_Collision_Off();
 }
 
 
@@ -1303,6 +1334,21 @@ void AJSH_Player::Gizmo_Detect()
 				Saved_Gizmo_SZ->EndCursorOver();
 			}
 		}
+
+
+		// Rotate
+
+		if (Saved_Gizmo_RX != nullptr)
+		{
+			if (HitResult.GetActor()  == Saved_Gizmo_RX)
+			{
+				Saved_Gizmo_RX->BeginCursorOver();
+
+				//Saved_Gizmo_SX->EndCursorOver();
+				//Saved_Gizmo_SY->EndCursorOver();
+				//Saved_Gizmo_SZ->EndCursorOver();
+			}
+		}
 	}
 	else
 	{
@@ -1344,6 +1390,13 @@ void AJSH_Player::Gizmo_Detect()
 		if (Saved_Gizmo_SB != nullptr)
 		{
 			Saved_Gizmo_SB->EndCursorOver();
+		}
+
+
+		// Rotate
+		if (Saved_Gizmo_RX != nullptr)
+		{
+			Saved_Gizmo_RX->EndCursorOver();
 		}
 	}
 }
@@ -1436,6 +1489,17 @@ void AJSH_Player::Gizmo_Click()
 		}
 	}
 	
+	// Rotate
+	if (Saved_Gizmo_RX != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_RX)
+		{
+			Saved_Gizmo_RX->GOnClicked();
+			Clicked_B = true;
+		}
+	}
+
+
 	
 	// Last Location 저장
 	if (Editor_SpawnActor != nullptr)
@@ -1453,6 +1517,7 @@ void AJSH_Player::Gizmo_Click_End()
 	{
 		if (Gizmo_TranslateMode) Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
 		else if (Gizmo_ScaleMode) Saved_Gizmo_SX->HandleMouseReleaseOutsideActor();
+		else if (Gizmo_RotateMode) Saved_Gizmo_RX->HandleMouseReleaseOutsideActor();
 	}
 	if (Clicked_Y)
 	{

@@ -98,7 +98,8 @@ public:
 	FVector StartGizmoLocation;
 	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
-
+	
+	
 	UPROPERTY()
 	FVector Start_Scale;
 	UPROPERTY()

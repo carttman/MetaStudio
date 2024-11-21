@@ -4,32 +4,42 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "MetaStudios/JSH/JSH_PlayerController.h"
-#include "JSH_Translate_GizmoBox.generated.h"
-
+#include "JSH_Rotate_GizmoX.generated.h"
 
 class AJSH_PlayerController;
 class AJSH_Player;
-class AJSH_Translate_GizmoX;
-class AJSH_Translate_GizmoY;
-class AJSH_Translate_GizmoZ;
-class AJSH_Gizmo;
+
+
 
 UCLASS()
-class METASTUDIOS_API AJSH_Translate_GizmoBox : public AActor
+class METASTUDIOS_API AJSH_Rotate_GizmoX : public AActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
+	USceneComponent* Root_Scene;
+	
+	UPROPERTY()
 	UStaticMeshComponent* Origin;
+	UPROPERTY()
+	UStaticMeshComponent* Origin2;
+	UPROPERTY()
+	UStaticMeshComponent* Origin3;
+	UPROPERTY()
+	UStaticMeshComponent* Origin4;
+
+	
 	UPROPERTY()
 	UMaterial* YellowMaterial;
 	UPROPERTY()
-	UMaterial* WhiteMaterial;
+	UMaterial* RedMaterial;
+	
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
+	// UStaticMeshComponent* Selected;
 	
 public:	
 	// Sets default values for this actor's properties
-	AJSH_Translate_GizmoBox();
+	AJSH_Rotate_GizmoX();
 
 protected:
 	// Called when the game starts or when spawned
@@ -38,11 +48,15 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	
+	
+public:
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
+	// virtual void NotifyActorOnReleased(FKey ButtonReleased);
 
 	UFUNCTION()
 	void GOnClicked();
+	
 	
 	
 	UPROPERTY()
@@ -66,16 +80,9 @@ public:
 	UPROPERTY()
 	FVector NoHit_End_Location = End;
 	UPROPERTY()
-	FVector GizmoLocation;
-	UPROPERTY()
-	FVector PlayerLocation;
-	UPROPERTY()
 	float Lay_Distance = 0.0f;
 	UPROPERTY()
-	float Const_Lay_Distance = 0.0f;
-	UPROPERTY()
 	bool firstclick = false;
-	
 	UPROPERTY()
 	FVector StartActor_Location;
 	UPROPERTY()
@@ -86,6 +93,14 @@ public:
 	FVector StartGizmoLocation;
 	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
+
+	UPROPERTY()
+	FVector Start_Scale;
+	UPROPERTY()
+	FVector End_Scale;
+	
+	UPROPERTY()
+	float XDifference;
 
 	// Gizmo 처음 클릭 확인을 위한 
 	UPROPERTY()
@@ -125,7 +140,7 @@ public:
 	// void FindAndStoreGizmoActors(UWorld* WorldContext);
 	// //TArray<class AJSH_Translate_GizmoY*> FoundGizmoActors;
 	// UPROPERTY()
-	// AJSH_Translate_GizmoX* Gizmo_X;
+	// AJSH_Scale_GizmoX* Gizmo_X;
 	// UPROPERTY()
 	// AJSH_Translate_GizmoY* Gizmo_Y;
 
@@ -137,8 +152,7 @@ public:
 	UFUNCTION()
 	void Visible_and_Collision_Off();
 
+
 	UFUNCTION()
 	void BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control);
-
-
 };

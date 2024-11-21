@@ -15,6 +15,7 @@
 #include "JSH_Scale_GizmoY.h"
 #include "JSH_Scale_GizmoZ.h"
 #include "JSH_Scale_GizmoBox.h"
+#include "JSH_Rotate_GizmoX.h"
 #include "Kismet/GameplayStatics.h"
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
@@ -153,10 +154,13 @@ void AJSH_Translate_GizmoY::GOnClicked()
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TX);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TZ);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
+	
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SX);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
+	
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RX);
 	Params.AddIgnoredActors(IgnoreGizmos);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
