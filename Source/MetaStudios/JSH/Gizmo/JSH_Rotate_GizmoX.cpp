@@ -169,8 +169,11 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
 	{
 		JPlayerController->DeprojectMousePositionToWorld(Mouse_WorldLocation, Mouse_WorldDirection);
+
+		JPlayerController->GetMousePosition(MouseX, MouseY);
 	}
 
+	
 	///// Ray ////
 	Start = Mouse_WorldLocation;
 	End = (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
@@ -182,11 +185,11 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TZ);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
 	
-	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SX);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
-	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
-	
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SX);
+
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RX);
 	Params.AddIgnoredActors(IgnoreGizmos);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
@@ -201,7 +204,11 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 		// Store initial mouse and gizmo positions
 		//StartMouselocation = HitResult.ImpactPoint;
 		StartMouselocation = End;
-		Start_Scale = OriginPlayer->Editor_SpawnActor->GetActorRelativeScale3D();
+		
+		StartMouselocation_2D_X = MouseX;
+		StartMouselocation_2D_Y = MouseY;
+		
+		Start_Rotate = OriginPlayer->Editor_SpawnActor->GetActorRotation();
 		
 		SelectedGizmo = true;
 	}
@@ -212,7 +219,11 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 		
 		// Store initial mouse and gizmo positions
 		StartMouselocation = End;
-		Start_Scale = OriginPlayer->Editor_SpawnActor->GetActorRelativeScale3D();
+		
+		StartMouselocation_2D_X = MouseX;
+		StartMouselocation_2D_Y = MouseY;
+		
+		Start_Rotate = OriginPlayer->Editor_SpawnActor->GetActorRotation();
 		SelectedGizmo = true;
 	}
 
@@ -221,14 +232,20 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 	if (Clicked)
 	{
 		End_Location = End;
-		//End_Scale = FVector(Start_Scale.X + (( End_Location.X - StartMouselocation.X) * 0.01), Start_Scale.Y, Start_Scale.Z);
 
-		// -값으로 가면 3d object 앞뒤가 뒤집혀 버어림
-		End_Scale = FVector(FMath::Abs(Start_Scale.X + ((End_Location.X - StartMouselocation.X) * 0.01)), FMath::Abs(Start_Scale.Y), FMath::Abs(Start_Scale.Z));
-		//OriginPlayer->Editor_SpawnActor->SetActorRelativeScale3D(End_Scale);
-		OriginPlayer->Editor_SpawnActor->Set_Scale_from_Gizmo(End_Scale);
+		EndMouselocation_2D_X = MouseX;
+		EndMouselocation_2D_Y = MouseY;
+		
+		End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * - 0.1) + ((EndMouselocation_2D_X - StartMouselocation_2D_X) * -0.1);
+		
+		End_Rotate = FRotator(Start_Rotate.Pitch, Start_Rotate.Yaw, Start_Rotate.Roll + End_variation);
+
+		OriginPlayer->Editor_SpawnActor->Set_Rotate_from_Gizmo(End_Rotate);
 	}
 }
+
+
+
 
 // 오버랩 색상 변경
 void AJSH_Rotate_GizmoX::BeginCursorOver()

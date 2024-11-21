@@ -377,6 +377,8 @@ void AJSH_Editor_SpawnActor::ReturnPreviousLocation()
 }
 
 
+
+// Location 멀티
 void AJSH_Editor_SpawnActor::Set_Location_from_Gizmo(FVector Location)
 {
     Server_Set_Location_from_Gizmo(Location);
@@ -393,9 +395,7 @@ void AJSH_Editor_SpawnActor::NetMulti_Set_Location_from_Gizmo_Implementation(FVe
 }
 
 
-
-
-
+// Scale 멀티
 void AJSH_Editor_SpawnActor::Set_Scale_from_Gizmo(FVector Scale)
 {
     Server_Set_Scale_from_Gizmo(Scale);
@@ -406,9 +406,28 @@ void AJSH_Editor_SpawnActor::Server_Set_Scale_from_Gizmo_Implementation(FVector 
     NetMulti_Set_Scale_from_Gizmo(Scale);
 }
 
-
 void AJSH_Editor_SpawnActor::NetMulti_Set_Scale_from_Gizmo_Implementation(FVector Scale)
 {
     SetActorRelativeScale3D(Scale);
+}
+
+
+
+// Rotate 멀티
+void AJSH_Editor_SpawnActor::Set_Rotate_from_Gizmo(FRotator Rotate)
+{
+    Server_Rotate_from_Gizmo(Rotate);
+}
+
+
+void AJSH_Editor_SpawnActor::Server_Rotate_from_Gizmo_Implementation(FRotator Rotate)
+{
+    NetMulti_Rotate_from_Gizmo(Rotate);
+}
+
+
+void AJSH_Editor_SpawnActor::NetMulti_Rotate_from_Gizmo_Implementation(FRotator Rotate)
+{
+    SetActorRotation(Rotate);
 }
 

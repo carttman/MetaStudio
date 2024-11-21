@@ -95,9 +95,25 @@ public:
 	AJSH_PlayerController* JPlayerController;
 
 	UPROPERTY()
-	FVector Start_Scale;
+	float MouseX;
 	UPROPERTY()
-	FVector End_Scale;
+	float MouseY;
+	UPROPERTY()
+	float StartMouselocation_2D_X;
+	UPROPERTY()
+	float StartMouselocation_2D_Y;
+	UPROPERTY()
+	float EndMouselocation_2D_X;
+	UPROPERTY()
+	float EndMouselocation_2D_Y;
+	UPROPERTY()
+	float End_variation;
+
+	
+	UPROPERTY()
+	FRotator Start_Rotate;
+	UPROPERTY()
+	FRotator End_Rotate;
 	
 	UPROPERTY()
 	float XDifference;

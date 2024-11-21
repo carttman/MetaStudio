@@ -140,6 +140,15 @@ public:
 	void Server_Set_Scale_from_Gizmo(FVector Scale);
 	UFUNCTION(netmulticast, reliable)
 	void NetMulti_Set_Scale_from_Gizmo(FVector Scale);
+
+
+	/// Rotate 변경 함수
+	UFUNCTION()
+	void Set_Rotate_from_Gizmo(FRotator Rotate);
+	UFUNCTION(server, reliable)
+	void Server_Rotate_from_Gizmo(FRotator Rotate);
+	UFUNCTION(netmulticast, reliable)
+	void NetMulti_Rotate_from_Gizmo(FRotator Rotate);
 	
 };
 
