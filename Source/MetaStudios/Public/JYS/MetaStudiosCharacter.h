@@ -129,10 +129,10 @@ public:
 
 	void SelectAutoMobile();
 	// 플레이어랑 우주선 컨트롤러 바꾸기
-	void EnterSpaceship();
+	//void EnterSpaceship();
 
 	UFUNCTION(Server, Reliable)
-	void Server_EnterSpaceship();
+	void Server_EnterSpaceship(class AActor* TargetActor);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_EnterSpaceship(class ASpaceshipPawn* SpaceshipActor);
@@ -143,10 +143,10 @@ public:
 	APlayerController* MetaController;
 
 	//// 플레이어랑 자동차랑 컨트롤러 바꾸기
-	void EnterCar();
+	//void EnterCar();
 
 	UFUNCTION(Server, Reliable)
-	void Server_EnterCar();
+	void Server_EnterCar(class AActor* TargetActor);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_EnterCar(class ACarPawn* CarActor);
@@ -262,5 +262,31 @@ private:
 	void PickUpAnim();
 
 	void ExitSession();
+
+
+
+	// 차 목록
+	UPROPERTY()
+	TArray<ACarPawn*>	ListCar;
+	// 우주선 목록
+	UPROPERTY()
+	TArray<ASpaceshipPawn*>	ListShip;	
+
+	
+	// 차목록에  add해주는거
+	// 우주선 목록에 add해주는거
+	UFUNCTION()
+	void AddVehicle(class AActor* target);
+	//void AddVehicle(class ASpaceshipPawn* target);
+	//UFUNCTION()
+	//void AddVehicle(class ACarPawn* target);
+	
+	UFUNCTION()
+	void DeleteVehicle(class AActor* target);
+	//void DeleteVehicle(class ASpaceshipPawn* target);
+	//UFUNCTION()
+	//void DeleteVehicle(class ACarPawn* target);
+
+
 };
 

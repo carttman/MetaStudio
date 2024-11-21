@@ -56,6 +56,9 @@ public:
 
 	UPROPERTY()
 	AMetaStudiosCharacter* player;
+	
+	UPROPERTY()
+	bool bExistRider = false;
 
 	void OnMyActionLook(const FInputActionValue& value);
 

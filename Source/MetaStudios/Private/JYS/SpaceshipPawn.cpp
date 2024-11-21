@@ -104,7 +104,7 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	
+
 	PlayerInputComponent->BindAction("ExitSpaceship", IE_Pressed, this, &ASpaceshipPawn::ExitSpaceship);
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -157,25 +157,21 @@ void ASpaceshipPawn::ExitSpaceship()
 
 void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 {
-	if (HasAuthority())
-	{
-		if (player)
-		{
-			FVector spaceshipLoc = GetActorLocation();
-			FRotator spaceshipRot = GetActorRotation();
+	if (player == nullptr)	return;
 
-			FVector offset = spaceshipRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
-			FVector playerSpawnLocation = spaceshipLoc + offset;
+	FVector spaceshipLoc = GetActorLocation();
+	FRotator spaceshipRot = GetActorRotation();
 
-			player->SetActorLocation(playerSpawnLocation);
-			player->SetActorRotation(spaceshipRot);
+	FVector offset = spaceshipRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
+	FVector playerSpawnLocation = spaceshipLoc + offset;
 
-			GetController()->Possess(player);
-			//player->GetMesh()->SetVisibility(true);
-		}
+	player->SetActorLocation(playerSpawnLocation);
+	player->SetActorRotation(spaceshipRot);
 
-	}
+	GetController()->Possess(player);
+	//player->GetMesh()->SetVisibility(true);
 	NetMulticast_ExitSpaceship();
+	bExistRider = false;
 }
 
 void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
@@ -200,6 +196,7 @@ void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 
 		player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
+	bExistRider = false;
 }
 
 void ASpaceshipPawn::ResetEnhancedInputSetting(class APlayerController* pc)
@@ -228,7 +225,7 @@ void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 		return;
 	}
 
-	if( v.X <= 0.0f )	return;
+	if (v.X <= 0.0f)	return;
 
 	//MoveStop = false;
 	direction.X = v.X;
@@ -469,20 +466,20 @@ bool ASpaceshipPawn::CheckLanding()
 		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.ImpactPoint);
 		UE_LOG(LogTemp, Warning, TEXT("dist : %f - %f"), distanceToGround, LandingDistance)
 
-		if (distanceToGround < LandingDistance)
-		{
-			bCantMove = true;
-			bLanded = true;
+			if (distanceToGround < LandingDistance)
+			{
+				bCantMove = true;
+				bLanded = true;
 
-			Server_PlayAnimMontage(Anim->legDownMontage);
-			FTimerHandle handle;
-			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
-				Server_PlayAnimMontage(Anim->openDoorMontage);
-				}, 2, false);
-			Server_EndFlyEffect();
+				Server_PlayAnimMontage(Anim->legDownMontage);
+				FTimerHandle handle;
+				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+					Server_PlayAnimMontage(Anim->openDoorMontage);
+					}, 2, false);
+				Server_EndFlyEffect();
 
-			return true;
-		}
+				return true;
+			}
 	}
 
 	if (bHitResult == false && GetActorLocation().Z < LastLandingPosZ)
@@ -536,16 +533,16 @@ void ASpaceshipPawn::MoveUpAnim()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("MoveUpAnim"))
 
-		if (Anim)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("legUpAnimMontage"))
-			Server_CloseDoorMontageSetting();
-			Server_PlayAnimMontage(Anim->closeDoorMontage);
-			FTimerHandle handle;
-			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
-				Server_PlayAnimMontage(Anim->legUpMontage, 1, TEXT("LegUpStartSection")); 
-				}, 1, false);
-		}
+			if (Anim)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("legUpAnimMontage"))
+					Server_CloseDoorMontageSetting();
+				Server_PlayAnimMontage(Anim->closeDoorMontage);
+				FTimerHandle handle;
+				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+					Server_PlayAnimMontage(Anim->legUpMontage, 1, TEXT("LegUpStartSection"));
+					}, 1, false);
+			}
 	}
 }
 
