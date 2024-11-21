@@ -77,6 +77,9 @@ public:
 	UPROPERTY()
 	AMetaStudiosCharacter* player;
 
+	UPROPERTY()
+	bool bExistRider = false;
+
 	void OnMyActionMove(const FInputActionValue& value);
 
 	void OnMyActionLook(const FInputActionValue& value);
