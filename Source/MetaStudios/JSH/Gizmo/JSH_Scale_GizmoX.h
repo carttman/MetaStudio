@@ -11,6 +11,7 @@ class AJSH_PlayerController;
 class AJSH_Player;
 class AJSH_Translate_GizmoZ;
 class AJSH_Translate_GizmoY;
+class AJSH_Translate_GizmoBox;
 
 UCLASS()
 class METASTUDIOS_API AJSH_Scale_GizmoX : public AActor
@@ -19,6 +20,7 @@ class METASTUDIOS_API AJSH_Scale_GizmoX : public AActor
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Origin;
+	UPROPERTY()
 	UMaterial* YellowMaterial;
 	UPROPERTY()
 	UMaterial* RedMaterial;
@@ -45,6 +47,7 @@ public:
 
 	UFUNCTION()
 	void GOnClicked();
+	
 	
 	
 	UPROPERTY()
@@ -142,5 +145,5 @@ public:
 
 
 	UFUNCTION()
-	void BeginPlayerContorller(AJSH_PlayerController* temp);
+	void BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control);
 };

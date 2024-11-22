@@ -11,6 +11,11 @@
 #include "JSH_Translate_GizmoY.h"
 #include "JSH_Translate_GizmoX.h"
 #include "JSH_Translate_GizmoZ.h"
+#include "JSH_Scale_GizmoX.h"
+#include "JSH_Scale_GizmoY.h"
+#include "JSH_Scale_GizmoZ.h"
+#include "JSH_Scale_GizmoBox.h"
+#include "JSH_Rotate_GizmoX.h"
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
 // Sets default values
@@ -49,6 +54,7 @@ AJSH_Translate_GizmoBox::AJSH_Translate_GizmoBox()
 		WhiteMaterial = BlueMaterialLoader.Object;
 	}
 
+	Tags.Add(FName("Tranlate_Gizmo_Box"));
 }
 
 
@@ -69,12 +75,9 @@ void AJSH_Translate_GizmoBox::Tick(float DeltaTime)
 
 	
 	// Editor Mode 마우스 우클릭 시 초기화
-	if (OriginPlayer != nullptr)
+	if (OriginPlayer != nullptr && OriginPlayer->DisableEdit_b)
 	{
-		if (OriginPlayer->DisableEdit_b)
-		{
-			HandleMouseReleaseOutsideActor();
-		}
+		HandleMouseReleaseOutsideActor();
 	}
 	
 
@@ -111,17 +114,17 @@ void AJSH_Translate_GizmoBox::GOnClicked()
 	
 	UE_LOG(LogTemp, Error, TEXT("b1"));
 
-	//// Gizmo와 Player간의 거리 구하기 (bHit되지 않았을때 최대 거리 point로 hitpoint 잡아야함) ////
 	if (OriginPlayer != nullptr)
 	{
-		FVector GizmoLocation = GetActorLocation();
-		FVector PlayerLocation = OriginPlayer->GetActorLocation();
-	
+		GizmoLocation = GetActorLocation();
+		PlayerLocation = OriginPlayer->GetActorLocation();
+
 		Lay_Distance = FVector::Dist(GizmoLocation, PlayerLocation);
-		// 거리를 너무 늘리면, 꾹 누르고 있을때 , 너무 멀리 나아가 버림
-		Lay_Distance = FMath::Clamp(Lay_Distance, 0.0f, 4000.0f); 
+		Const_Lay_Distance = FVector::Dist(GizmoLocation, PlayerLocation);
+		// 거리를 너무 늘리면, 꾹 누르고 있을때, 너무 멀리 나아가 버림
+		Lay_Distance = FMath::Clamp(Lay_Distance, Lay_Distance, Lay_Distance);
 	}
-	
+
 	//// 마우스 2d Vector -> 3d Vector ////
 	if (JPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y))
 	{
@@ -130,13 +133,20 @@ void AJSH_Translate_GizmoBox::GOnClicked()
 
 	///// Ray ////
 	Start = Mouse_WorldLocation;
-	End = (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
-
+	End = Mouse_WorldLocation + (Mouse_WorldDirection * Lay_Distance);
+	
 
 	TArray<AActor*> IgnoreGizmos;
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TX);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TZ);
-	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TY);
+	
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
+
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RX);
 	Params.AddIgnoredActors(IgnoreGizmos);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
@@ -170,10 +180,13 @@ void AJSH_Translate_GizmoBox::GOnClicked()
 	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
 	if (Clicked)
 	{
-		// 생각 해 보니깐 레이를 쏠 필요도 없씀 ㅋㅌㅋㅌㅋ
 		End_Location = End;
 		NewLocation = FVector(End_Location.X - StartActor_Location.X, End_Location.Y - StartActor_Location.Y, End_Location.Z - StartActor_Location.Z);
-		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);		
+
+		FVector CurrentLocation = OriginPlayer->Editor_SpawnActor->GetActorLocation();
+		FVector InterpolatedLocation = FMath::VInterpTo(CurrentLocation, NewLocation, GetWorld()->GetDeltaSeconds(), 10.0f);
+
+		OriginPlayer->Editor_SpawnActor->Set_Location_from_Gizmo(InterpolatedLocation);
 	}
 }
 
@@ -254,13 +267,13 @@ void AJSH_Translate_GizmoBox::Visible_and_Collision_Off()
 
 
 
-void AJSH_Translate_GizmoBox::BeginPlayerContorller(AJSH_PlayerController* temp)
+void AJSH_Translate_GizmoBox::BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control)
 {
-	JPlayerController = temp;
-	//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	OriginPlayer = temp;
 	if (OriginPlayer)
 	{
 		OriginPlayer->Save_Gizmo_TB(this);
 	}
+
+	JPlayerController = control;
 }

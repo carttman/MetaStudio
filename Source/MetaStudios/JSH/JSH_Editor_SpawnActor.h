@@ -1,17 +1,17 @@
 #pragma once
 
 #include <stack>
-
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "Gizmo/JSH_Gizmo.h"
+#include "CoreMinimal.h"
+#include "GameFramework/Pawn.h"
 #include "JSH_Editor_SpawnActor.generated.h"
 
 // 순환참조 문제로, Include 말고
 class AJSH_PlayerController;
+class AJSH_Gizmo;
 
 UCLASS()
-class METASTUDIOS_API AJSH_Editor_SpawnActor : public AActor
+class METASTUDIOS_API AJSH_Editor_SpawnActor : public APawn
 {
 	GENERATED_BODY()
 	
@@ -30,32 +30,63 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+
 
 	UFUNCTION()
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
+	UFUNCTION(Server, reliable)
+	void Server_NotifyActorOnClicked();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_NotifyActorOnClicked();
+
+
+	
+	UFUNCTION()
+	void Get_PlayerController();
+	UFUNCTION(Server, reliable)
+	void Server_Get_PlayerController();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_Get_PlayerController();
+
+
+	UPROPERTY(Replicated)
+	TArray<AActor*> OriginPlayer_Box;
+	
+	
 
 	UFUNCTION()
 	void Onclicked();
 	UFUNCTION()
 	void Unclicked();
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AJSH_PlayerController* JPlayerController;
 	
 
 	// Director에 자신의 정보를 저장하기 위해서
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	class AJSH_Player* OriginPlayer;
 
 
 	UFUNCTION()
 	void GizmoSpawn();
 
-	FTransform ThisTransform;
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Gizmo")
+	TSubclassOf<AActor> GizmoClass;
+
 	
+	UFUNCTION()
+	void Gizmo_Spawn();
+
+	UPROPERTY(Replicated)
+	FTransform ThisTransform;
+
+	UPROPERTY(Replicated)
 	AActor* GizmoActor = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AJSH_Gizmo* OriginGizmo;
 	
 	UFUNCTION()
@@ -63,9 +94,13 @@ public:
 
 
 	// Gizmo 중복 선택 막기
+	UPROPERTY(Replicated)
 	bool GizmoX_ON = false;
+	UPROPERTY(Replicated)
 	bool GizmoY_ON = false;
+	UPROPERTY(Replicated)
 	bool GizmoZ_ON = false;
+	UPROPERTY(Replicated)
 	bool GizmoB_ON = false;
 
 
@@ -77,8 +112,43 @@ public:
 	void ReturnPreviousLocation();
 	UFUNCTION()
 	void AddPreviousLocation(const FVector& newLocation);
+
 	
 	std::stack<FVector> PreviousLocations;
+
+
+	
 	const int MaxLocations = 5;
+
+
+
+
+
+	/// Location 변경 함수
+	UFUNCTION()
+	void Set_Location_from_Gizmo(FVector Location);
+	UFUNCTION(server, reliable)
+	void Server_Set_Location_from_Gizmo(FVector Location);
+	UFUNCTION(netmulticast, reliable)
+	void NetMulti_Set_Location_from_Gizmo(FVector Location);
+
+	
+	/// Scale 변경 함수
+	UFUNCTION()
+	void Set_Scale_from_Gizmo(FVector Scale);
+	UFUNCTION(server, reliable)
+	void Server_Set_Scale_from_Gizmo(FVector Scale);
+	UFUNCTION(netmulticast, reliable)
+	void NetMulti_Set_Scale_from_Gizmo(FVector Scale);
+
+
+	/// Rotate 변경 함수
+	UFUNCTION()
+	void Set_Rotate_from_Gizmo(FRotator Rotate);
+	UFUNCTION(server, reliable)
+	void Server_Rotate_from_Gizmo(FRotator Rotate);
+	UFUNCTION(netmulticast, reliable)
+	void NetMulti_Rotate_from_Gizmo(FRotator Rotate);
 	
 };
+
