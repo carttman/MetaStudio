@@ -263,7 +263,10 @@ void UMainGameInstance::OnMyDestroySessionComplete(FName SessionName , bool bWas
 
 void UMainGameInstance::OnNetworkFailure(UWorld* World , UNetDriver* NetDriver , ENetworkFailure::Type FailureType , const FString& ErrorString)
 {
-	UE_LOG(LogTemp, Error, TEXT("%s"), *ErrorString);
+	UE_LOG(LogTemp, Warning, TEXT("%s %hs"), *ErrorString, "DestroySessionDestroySessionDestroySession");
+
+	// 방퇴장 요청
+	SessionInterface->DestroySession(FName(MySessionName));
 }
 
 #pragma region 인코딩
