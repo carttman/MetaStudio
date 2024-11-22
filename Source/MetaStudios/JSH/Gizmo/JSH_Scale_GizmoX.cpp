@@ -8,6 +8,14 @@
 #include "Engine/World.h"
 #include "Components/PrimitiveComponent.h"
 #include "DrawDebugHelpers.h"
+#include "JSH_Translate_GizmoX.h"
+#include "JSH_Translate_GizmoY.h"
+#include "JSH_Translate_GizmoZ.h"
+#include "JSH_Translate_GizmoBox.h"
+#include "JSH_Scale_GizmoBox.h"
+#include "JSH_Scale_GizmoY.h"
+#include "JSH_Scale_GizmoZ.h"
+#include "JSH_Rotate_GizmoX.h"
 #include "Engine/EngineTypes.h" 
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
@@ -95,13 +103,7 @@ void AJSH_Scale_GizmoX::GOnClicked()
 {
 	// Cursor에 오버랩 되었을때 True로 바뀌는 bool값임 , 커서에 마우스 올라가 있을때에만 클릭해도 실행되도록 (왜 넣었는지 기억 안남, 없어도 될듯 싶음)
 	if (!CursorOveringGizmo) return;
-
-	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-	if (OriginPlayer)
-	{
-		OriginPlayer->Save_Gizmo_SX(this);
-	}
+	
 	
 	//// 다른 기즈모가 실행 중 이면 , 기능 실행되지 않도록 ////
 	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON || OriginPlayer->Editor_SpawnActor->GizmoZ_ON || OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
@@ -109,9 +111,7 @@ void AJSH_Scale_GizmoX::GOnClicked()
 	{
 		OriginPlayer->Editor_SpawnActor->GizmoX_ON = true;
 	}
-
 	
-	UE_LOG(LogTemp, Error, TEXT("X1"));
 
 	//// Gizmo와 Player간의 거리 구하기 (bHit되지 않았을때 최대 거리 point로 hitpoint 잡아야함) ////
 	if (OriginPlayer != nullptr)
@@ -135,11 +135,18 @@ void AJSH_Scale_GizmoX::GOnClicked()
 	End = (Mouse_WorldDirection * Lay_Distance) + Mouse_WorldLocation;
 
 	// 다 만들고 추가
-	//TArray<AActor*> IgnoreGizmos;
-	//IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
-	// IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
-	// IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
-	//Params.AddIgnoredActors(IgnoreGizmos);
+	TArray<AActor*> IgnoreGizmos;
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TY);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
+	
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
+
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RX);
+	Params.AddIgnoredActors(IgnoreGizmos);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
 	///// 처음 클릭했을때 값 저장하기 위한 함수 ////
@@ -168,28 +175,23 @@ void AJSH_Scale_GizmoX::GOnClicked()
 		SelectedGizmo = true;
 	}
 
+	
 	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
 	if (Clicked)
 	{
 		End_Location = End;
-		End_Scale = FVector(Start_Scale.X + (( End_Location.X - StartMouselocation.X) * 0.01), Start_Scale.Y, Start_Scale.Z);
-		OriginPlayer->Editor_SpawnActor->SetActorRelativeScale3D(End_Scale);		
+		//End_Scale = FVector(Start_Scale.X + (( End_Location.X - StartMouselocation.X) * 0.01), Start_Scale.Y, Start_Scale.Z);
+
+		// -값으로 가면 3d object 앞뒤가 뒤집혀 버어림
+		End_Scale = FVector(FMath::Abs(Start_Scale.X + ((End_Location.X - StartMouselocation.X) * 0.01)), FMath::Abs(Start_Scale.Y), FMath::Abs(Start_Scale.Z));
+		//OriginPlayer->Editor_SpawnActor->SetActorRelativeScale3D(End_Scale);
+		OriginPlayer->Editor_SpawnActor->Set_Scale_from_Gizmo(End_Scale);
 	}
 }
 
 // 오버랩 색상 변경
 void AJSH_Scale_GizmoX::BeginCursorOver()
 {
-	//Super::NotifyActorBeginCursorOver();
-	if (OriginPlayer == nullptr)
-	{
-		//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-		OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-		if (OriginPlayer)
-		{
-			OriginPlayer->Save_Gizmo_SX(this);
-		}
-	}
 	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
@@ -259,15 +261,13 @@ void AJSH_Scale_GizmoX::Visible_and_Collision_Off()
 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
 }
 
-void AJSH_Scale_GizmoX::BeginPlayerContorller(AJSH_PlayerController* temp)
+void AJSH_Scale_GizmoX::BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control)
 {
-	if (!HasAuthority()) return;
-
-	JPlayerController = temp;
-	//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	OriginPlayer = temp;
 	if (OriginPlayer)
 	{
 		OriginPlayer->Save_Gizmo_SX(this);
 	}
+
+	JPlayerController = control;
 }

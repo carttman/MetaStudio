@@ -4,21 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "JSH_Translate_GizmoX.generated.h"
-
+#include "JSH_Rotate_GizmoX.generated.h"
 
 class AJSH_PlayerController;
 class AJSH_Player;
-class AJSH_Translate_GizmoZ;
-class AJSH_Translate_GizmoY;
+
+
 
 UCLASS()
-class METASTUDIOS_API AJSH_Translate_GizmoX : public AActor
+class METASTUDIOS_API AJSH_Rotate_GizmoX : public AActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Body, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
+	USceneComponent* Root_Scene;
+	
+	UPROPERTY()
 	UStaticMeshComponent* Origin;
+	UPROPERTY()
+	UStaticMeshComponent* Origin2;
+	UPROPERTY()
+	UStaticMeshComponent* Origin3;
+	UPROPERTY()
+	UStaticMeshComponent* Origin4;
+
+	
+	UPROPERTY()
 	UMaterial* YellowMaterial;
 	UPROPERTY()
 	UMaterial* RedMaterial;
@@ -28,7 +39,7 @@ class METASTUDIOS_API AJSH_Translate_GizmoX : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AJSH_Translate_GizmoX();
+	AJSH_Rotate_GizmoX();
 
 protected:
 	// Called when the game starts or when spawned
@@ -40,6 +51,8 @@ public:
 	
 	
 public:
+	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
+	// virtual void NotifyActorOnReleased(FKey ButtonReleased);
 
 	UFUNCTION()
 	void GOnClicked();
@@ -81,6 +94,30 @@ public:
 	UPROPERTY()
 	AJSH_PlayerController* JPlayerController;
 
+	UPROPERTY()
+	float MouseX;
+	UPROPERTY()
+	float MouseY;
+	UPROPERTY()
+	float StartMouselocation_2D_X;
+	UPROPERTY()
+	float StartMouselocation_2D_Y;
+	UPROPERTY()
+	float EndMouselocation_2D_X;
+	UPROPERTY()
+	float EndMouselocation_2D_Y;
+	UPROPERTY()
+	float End_variation;
+
+	
+	UPROPERTY()
+	FRotator Start_Rotate;
+	UPROPERTY()
+	FRotator End_Rotate;
+	
+	UPROPERTY()
+	float XDifference;
+
 	// Gizmo 처음 클릭 확인을 위한 
 	UPROPERTY()
 	bool Clicked = false;
@@ -119,7 +156,7 @@ public:
 	// void FindAndStoreGizmoActors(UWorld* WorldContext);
 	// //TArray<class AJSH_Translate_GizmoY*> FoundGizmoActors;
 	// UPROPERTY()
-	// AJSH_Translate_GizmoX* Gizmo_X;
+	// AJSH_Scale_GizmoX* Gizmo_X;
 	// UPROPERTY()
 	// AJSH_Translate_GizmoY* Gizmo_Y;
 
@@ -133,5 +170,5 @@ public:
 
 
 	UFUNCTION()
-	void BeginPlayer(AJSH_Player* tempm, AJSH_PlayerController* control);
+	void BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control);
 };

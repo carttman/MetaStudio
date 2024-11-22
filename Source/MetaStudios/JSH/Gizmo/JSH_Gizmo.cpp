@@ -3,7 +3,10 @@
 
 #include "../Gizmo/JSH_Gizmo.h"
 
+#include "JSH_Scale_GizmoBox.h"
 #include "JSH_Scale_GizmoX.h"
+#include "JSH_Scale_GizmoY.h"
+#include "JSH_Scale_GizmoZ.h"
 #include "../Gizmo/JSH_Translate_GizmoBox.h"
 #include "../Gizmo/JSH_Translate_GizmoX.h"
 #include "../Gizmo/JSH_Translate_GizmoY.h"
@@ -123,13 +126,30 @@ AJSH_Gizmo::AJSH_Gizmo()
 	
 	Scale_Z = CreateDefaultSubobject<UChildActorComponent>(TEXT("Scale_Z"));
 	Scale_Z->SetupAttachment(Scale_Box);
-	UClass* Scale_Z_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Scale_X/BP_ScaleGizmo_X.BP_ScaleGizmo_Z_C"));
+	UClass* Scale_Z_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Scale_Z/BP_ScaleGizmo_Z.BP_ScaleGizmo_Z_C"));
 	if (Scale_Z_Class)
 	{
 		Scale_Z->SetChildActorClass(Scale_Z_Class);
 		Scale_Z->SetRelativeLocationAndRotation(FVector(0, 0, 8.0), FRotator(90.0, 0, 0));
 		Scale_Z->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
 		//Scale_Z->SetVisibility(false);
+	}
+
+
+	
+	////// Rotate /////
+	Rotate_Box = CreateDefaultSubobject<USceneComponent>(TEXT("Rotate_Box"));
+	Rotate_Box->SetupAttachment(RootScence);
+	
+	
+	Rotate_X = CreateDefaultSubobject<UChildActorComponent>(TEXT("Rotate_X"));
+	Rotate_X->SetupAttachment(Rotate_Box);
+	UClass* Rotate_X_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Rotate/BP_RotateGizmo_X.BP_RotateGizmo_X_C"));
+	if (Rotate_X_Class)
+	{
+		Rotate_X->SetChildActorClass(Rotate_X_Class);
+		Rotate_X->SetRelativeLocationAndRotation(FVector(0.0, 0, 0), FRotator(0, -90.f, 90.f));
+		Rotate_X->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
 	}
 }
 
@@ -173,53 +193,17 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 	
 			Translate_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
 			Scale_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
+			Rotate_Box->SetRelativeScale3D(InitialScale * ScaleFactor);
 		}
 	}
 
 	if (OriginPlayer && OriginPlayer->Editor_SpawnActor)
 	{
-	// 	//SetActorTransform(OriginPlayer->Editor_SpawnActor->GetActorTransform());
+		//SetActorTransform(OriginPlayer->Editor_SpawnActor->GetActorTransform());
 		SetActorLocation(OriginPlayer->Editor_SpawnActor->GetActorLocation());
 	}
 }
 
-
-#pragma region  Mode
-void AJSH_Gizmo::TranslateMode()
-{
-	// Translate On
-	Translate_Box->SetVisibility(true);
-	Translate_X->SetVisibility(true);
-	Translate_Y->SetVisibility(true);
-	Translate_Z->SetVisibility(true);
-	
-	// Scale Off
-	Scale_Box->SetVisibility(false);
-	Scale_X->SetVisibility(false);
-	Scale_Y->SetVisibility(false);
-	Scale_Z->SetVisibility(false);
-}
-
-
-
-void AJSH_Gizmo::ScaleMode()
-{
-	// Translate Off
-	Translate_Box->SetVisibility(false);
-	Translate_X->SetVisibility(false);
-	Translate_Y->SetVisibility(false);
-	Translate_Z->SetVisibility(false);
-	
-	// Scale On
-	Scale_Box->SetVisibility(true);
-	Scale_X->SetVisibility(true);
-	Scale_Y->SetVisibility(true);
-	Scale_Z->SetVisibility(true);
-}
-
-
-
-#pragma endregion
 
 
 
@@ -241,6 +225,25 @@ void AJSH_Gizmo::BeginPlayerContorller(AJSH_PlayerController* temp)
 	//AttachToActor(OriginPlayer->Editor_SpawnActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
+void AJSH_Gizmo::Begin_PlayerData(AJSH_Player* temp, AJSH_PlayerController* control)
+{
+	OriginPlayer = temp;
+	if (OriginPlayer)
+	{
+		OriginPlayer->Save_Gizmo_Parents(this);
+	}
+
+	JPlayerController = control;
+	
+	//처음 크기
+	InitialScale = GetActorScale3D();
+
+	Child_Actor_Detect();
+	//AttachToActor(OriginPlayer->Editor_SpawnActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+}
+
+
+
 void AJSH_Gizmo::Child_Actor_Detect()
 {
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Box"), Tag_Box);
@@ -249,7 +252,7 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		Origin_Translate_Box = Cast<AJSH_Translate_GizmoBox>(Tag_Box[0]);
 		if (Origin_Translate_Box != nullptr)
 		{
-			Origin_Translate_Box->BeginPlayerContorller(JPlayerController);
+			Origin_Translate_Box->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 	
@@ -259,7 +262,7 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		Origin_Translate_X = Cast<AJSH_Translate_GizmoX>(Tag_X[0]);
 		if (Origin_Translate_X != nullptr)
 		{
-			Origin_Translate_X->BeginPlayerContorller(JPlayerController);
+			Origin_Translate_X->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 
@@ -269,7 +272,7 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		Origin_Translate_Y = Cast<AJSH_Translate_GizmoY>(Tag_Y[0]);
 		if (Origin_Translate_Y != nullptr)
 		{
-			Origin_Translate_Y->BeginPlayerContorller(JPlayerController);
+			Origin_Translate_Y->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 
@@ -279,7 +282,7 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		Origin_Translate_Z = Cast<AJSH_Translate_GizmoZ>(Tag_Z[0]);
 		if (Origin_Translate_Z != nullptr)
 		{
-			Origin_Translate_Z->BeginPlayerContorller(JPlayerController);
+			Origin_Translate_Z->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 
@@ -291,10 +294,53 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		Origin_Scale_X = Cast<AJSH_Scale_GizmoX>(Tag_SX[0]);
 		if (Origin_Scale_X != nullptr)
 		{
-			Origin_Scale_X->BeginPlayerContorller(JPlayerController);
+			Origin_Scale_X->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Scale_Gizmo_Y"), Tag_SY);
+	if(Tag_SY.Num() > 0)
+	{
+		Origin_Scale_Y = Cast<AJSH_Scale_GizmoY>(Tag_SY[0]);
+		if (Origin_Scale_Y != nullptr)
+		{
+			Origin_Scale_Y->BeginPlayer(OriginPlayer, JPlayerController);
+		}
+	}
+
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Scale_Gizmo_Z"), Tag_SZ);
+	if(Tag_SZ.Num() > 0)
+	{
+		Origin_Scale_Z = Cast<AJSH_Scale_GizmoZ>(Tag_SZ[0]);
+		if (Origin_Scale_Z != nullptr)
+		{
+			Origin_Scale_Z->BeginPlayer(OriginPlayer, JPlayerController);
+		}
+	}
+	
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Scale_Gizmo_Box"), Tag_SBox);
+	if(Tag_SBox.Num() > 0)
+	{
+		Origin_Scale_Box = Cast<AJSH_Scale_GizmoBox>(Tag_SBox[0]);
+		if (Origin_Scale_Box != nullptr)
+		{
+			Origin_Scale_Box->BeginPlayer(OriginPlayer, JPlayerController);
+		}
+	}
+
+
+	// Rotate
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Rotate_Gizmo_X"), Tag_RX);
+	if(Tag_RX.Num() > 0)
+	{
+		Origin_Rotate_X = Cast<AJSH_Rotate_GizmoX>(Tag_RX[0]);
+		if (Origin_Rotate_X != nullptr)
+		{
+			Origin_Rotate_X->BeginPlayer(OriginPlayer, JPlayerController);
+		}
+	}
+
+	
 	//UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Tranlate_Gizmo_Y"), Tag_Y);
 }
 
