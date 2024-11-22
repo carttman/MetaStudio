@@ -10,7 +10,8 @@ class AJSH_PlayerController;
 class AJSH_Player;
 class AJSH_Translate_GizmoX;
 class AJSH_Translate_GizmoZ;
-
+class AJSH_Translate_GizmoBox;
+class AJSH_Gizmo;
 UCLASS()
 class METASTUDIOS_API AJSH_Translate_GizmoY : public AActor
 {
@@ -134,6 +135,6 @@ public:
 
 	
 	UFUNCTION()
-	void BeginPlayerContorller(AJSH_PlayerController* temp);
+	void BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control);
 
 };

@@ -10,6 +10,9 @@
 /**
  * 
  */
+
+class AJSH_Player;
+
 UCLASS()
 class METASTUDIOS_API AJSH_PlayerController : public APlayerController
 {
@@ -30,7 +33,7 @@ public:
 
 
 	//// Record System /// ====================================================
-	class AJSH_Player* DirectorPlayer;
+	AJSH_Player* DirectorPlayer;
 	
 	void StartRecord();
 	
