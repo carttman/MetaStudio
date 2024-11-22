@@ -48,16 +48,18 @@ void AJSH_Editor_SpawnActor::BeginPlay()
     if(OriginPlayer_Box.Num() > 0)
     {
         OriginPlayer = Cast<AJSH_Player>(OriginPlayer_Box[0]);
+
+        // 플레이어 컨트롤러
+        JPlayerController = Cast<AJSH_PlayerController>(OriginPlayer->GetController());
+        if (JPlayerController)
+        {
+            JPlayerController->bEnableTouchEvents = false;
+            // OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+        }
     }
 
 
-    // 플레이어 컨트롤러
-    JPlayerController = Cast<AJSH_PlayerController>(OriginPlayer->GetController());
-    if (JPlayerController)
-    {
-        JPlayerController->bEnableTouchEvents = false;
-        // OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
-    }
+
     
     // // 플레이어 컨트롤러
     // JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());

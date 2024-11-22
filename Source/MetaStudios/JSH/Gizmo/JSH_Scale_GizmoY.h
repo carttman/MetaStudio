@@ -7,6 +7,7 @@
 #include "JSH_Scale_GizmoY.generated.h"
 
 class AJSH_PlayerController;
+class AJSH_Player;
 class AJSH_Translate_GizmoX;
 class AJSH_Translate_GizmoZ;
 class AJSH_Translate_GizmoBox;

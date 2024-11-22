@@ -1,8 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-
-#include "../Gizmo/JSH_Scale_GizmoZ.h"
+#include "../Gizmo/JSH_Scale_GizmoY.h"
 #include "MetaStudios/JSH/JSH_PlayerController.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
@@ -14,7 +13,7 @@
 #include "JSH_Translate_GizmoBox.h"
 #include "JSH_Scale_GizmoBox.h"
 #include "JSH_Scale_GizmoX.h"
-#include "../Gizmo/JSH_Scale_GizmoY.h"
+#include "JSH_Scale_GizmoZ.h"
 #include "JSH_Rotate_GizmoX.h"
 #include "Engine/EngineTypes.h" 
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"

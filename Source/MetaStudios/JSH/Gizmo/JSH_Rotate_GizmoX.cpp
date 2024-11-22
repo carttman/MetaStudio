@@ -77,7 +77,7 @@ AJSH_Rotate_GizmoX::AJSH_Rotate_GizmoX()
 		Origin4->SetCollisionProfileName(TEXT("NoCollision"));
 	}
 
-	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/T_Red.T_Red'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Red.MM_Rotate_Red'"));
 	if (OriginMaterial.Succeeded())
 	{
 		Origin->SetMaterial(0, OriginMaterial.Object);
@@ -87,13 +87,13 @@ AJSH_Rotate_GizmoX::AJSH_Rotate_GizmoX()
 	}
 
 
-	ConstructorHelpers::FObjectFinder<UMaterial> YellowMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/T_Red_Yellow.T_Red_Yellow'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> YellowMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Red_Yellow.MM_Rotate_Red_Yellow'"));
 	if (YellowMaterialLoader.Succeeded())
 	{
 		YellowMaterial = YellowMaterialLoader.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UMaterial> RedMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/T_Red.T_Red'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> RedMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Red.MM_Rotate_Red'"));
 	if (RedMaterialLoader.Succeeded())
 	{
 		RedMaterial = RedMaterialLoader.Object;
@@ -191,7 +191,8 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RX);
 	Params.AddIgnoredActors(IgnoreGizmos);
-	
+
+
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
 	///// 처음 클릭했을때 값 저장하기 위한 함수 ////
 	if (bHit && !firstclick && !Clicked)
@@ -236,7 +237,7 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 		EndMouselocation_2D_X = MouseX;
 		EndMouselocation_2D_Y = MouseY;
 		
-		End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * - 0.1) + ((EndMouselocation_2D_X - StartMouselocation_2D_X) * -0.1);
+		End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * - 0.1) + ((EndMouselocation_2D_X - StartMouselocation_2D_X) * 0.1);
 		
 		End_Rotate = FRotator(Start_Rotate.Pitch, Start_Rotate.Yaw, Start_Rotate.Roll + End_variation);
 
