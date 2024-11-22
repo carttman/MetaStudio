@@ -75,7 +75,7 @@ void UFirebaseComponent::OnAnonymousLoginComplete(FHttpRequestPtr Request, FHttp
 
         if (FJsonSerializer::Deserialize(Reader, JsonObject))
         {
-            FString IDToken = JsonObject->GetStringField("idToken");
+            FString IDToken = JsonObject->GetStringField(TEXT("idToken"));
             
             // 이 ID 토큰을 저장하고 이후 Firebase Storage 요청에 사용합니다.
             AnonymousID = IDToken;

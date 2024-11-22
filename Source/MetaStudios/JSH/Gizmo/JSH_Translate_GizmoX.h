@@ -40,11 +40,10 @@ public:
 	
 	
 public:
-	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton);
-	// virtual void NotifyActorOnReleased(FKey ButtonReleased);
 
 	UFUNCTION()
 	void GOnClicked();
+	
 	
 	
 	UPROPERTY()
@@ -134,5 +133,5 @@ public:
 
 
 	UFUNCTION()
-	void BeginPlayerContorller(AJSH_PlayerController* temp);
+	void BeginPlayer(AJSH_Player* tempm, AJSH_PlayerController* control);
 };

@@ -11,6 +11,11 @@
 #include "JSH_Translate_GizmoZ.h"
 #include "JSH_Translate_GizmoX.h"
 #include "JSH_Translate_GizmoBox.h"
+#include "JSH_Scale_GizmoX.h"
+#include "JSH_Scale_GizmoY.h"
+#include "JSH_Scale_GizmoZ.h"
+#include "JSH_Scale_GizmoBox.h"
+#include "JSH_Rotate_GizmoX.h"
 #include "Kismet/GameplayStatics.h"
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
@@ -50,6 +55,8 @@ AJSH_Translate_GizmoY::AJSH_Translate_GizmoY()
 	{
 		GreenMaterial = GreenMaterialLoader.Object;
 	}
+	
+	Tags.Add(FName("Scale_Gizmo_Y"));
 }
 
 // Called when the game starts or when spawned
@@ -147,6 +154,13 @@ void AJSH_Translate_GizmoY::GOnClicked()
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TX);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TZ);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_TB);
+	
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
+	
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RX);
 	Params.AddIgnoredActors(IgnoreGizmos);
 	
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
@@ -183,7 +197,8 @@ void AJSH_Translate_GizmoY::GOnClicked()
 		// 생각 해 보니깐 레이를 쏠 필요도 없씀 ㅋㅌㅋㅌㅋ
 		End_Location = End;
 		NewLocation = FVector(StartGizmoLocation.X, End_Location.Y - StartActor_Location.Y, StartGizmoLocation.Z);
-		OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);		
+		//OriginPlayer->Editor_SpawnActor->SetActorLocation(NewLocation);
+		OriginPlayer->Editor_SpawnActor->Set_Location_from_Gizmo(NewLocation);
 	}
 }
 
@@ -264,15 +279,13 @@ void AJSH_Translate_GizmoY::Visible_and_Collision_Off()
 
 
 
-void AJSH_Translate_GizmoY::BeginPlayerContorller(AJSH_PlayerController* temp)
+void AJSH_Translate_GizmoY::BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control)
 {
-	if (!HasAuthority()) return;
-	
-	JPlayerController = temp;
-	//JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	OriginPlayer = Cast<AJSH_Player>(JPlayerController->GetPawn());
+	OriginPlayer = temp;
 	if (OriginPlayer)
 	{
 		OriginPlayer->Save_Gizmo_TY(this);
 	}
+
+	JPlayerController = control;
 }

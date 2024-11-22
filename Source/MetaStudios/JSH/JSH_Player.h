@@ -7,20 +7,21 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Gizmo/JSH_Gizmo.h"
-#include "Gizmo/JSH_Translate_GizmoBox.h"
-#include "Gizmo/JSH_Translate_GizmoZ.h"
+#include "Gizmo/JSH_Rotate_GizmoX.h"
 #include "Logging/LogMacros.h"
 #include "Widget/JSH_Record_UI.h"
 #include "JSH_Player.generated.h"
 
-
+class AJSH_Gizmo;
 class AJSH_Scale_GizmoBox;
 class AJSH_Scale_GizmoZ;
 class AJSH_Scale_GizmoY;
 class AJSH_Scale_GizmoX;
 class AJSH_Translate_GizmoY;
 class AJSH_Translate_GizmoX;
+class AJSH_Translate_GizmoZ;
+class AJSH_Translate_GizmoBox;
+class AJSH_PlayerController;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -28,8 +29,6 @@ class UInputAction;
 struct FInputActionValue;
 class AJSH_Editor_SpawnActor;
 
-// 순환참조 문제로, Include 말고
-class AJSH_PlayerController;
 
 
 //DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -254,7 +253,7 @@ public:
 	UPROPERTY(Replicated)
 	bool PlayerVisible_b_On = true;
 
-	UPROPERTY()
+	UPROPERTY(replicated)
 	AJSH_PlayerController* JPlayerController;
 	
 #pragma endregion
@@ -306,6 +305,8 @@ public:
 
 	UFUNCTION()
 	void EditorMode();
+	UFUNCTION(Server, reliable)
+	void Server_EditorMode();
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_EditorMode();
 
@@ -315,12 +316,26 @@ public:
 
 	UFUNCTION()
 	void EnableEdit();
+	UFUNCTION(Server, reliable)
+	void Server_EnableEdit();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_EnableEdit();
+
+
+	
 	UFUNCTION()
 	void DisableEdit();
+	UFUNCTION(Server, reliable)
+	void Server_DisableEdit();
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulti_DisableEdit();
+	
 
 	UPROPERTY(Replicated)
 	bool EditorMode_B = false;
 
+	UPROPERTY(Replicated)
+	bool EditorMode_On_B = false;
 
 	// UI
 	UPROPERTY(EditAnywhere, Category = "UI")
@@ -348,16 +363,18 @@ public:
 	// EditorActor를 클릭하면 그곳에서 자기 정보를 SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor) 여기로 전달 후 저장
 	UFUNCTION()
 	void SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
+	UFUNCTION(Server, Reliable)
+	void Server_SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulti_SaveEditorActor(AJSH_Editor_SpawnActor* ClickedActor);
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AJSH_Editor_SpawnActor* Editor_SpawnActor;
 
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AJSH_Editor_SpawnActor* First_Clicked_SpawnActor = nullptr;
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AJSH_Editor_SpawnActor* Recent_Clicked_SpawnActor = nullptr;
 
 	UPROPERTY(replicated)
@@ -431,12 +448,21 @@ public:
 	UPROPERTY()
 	AJSH_Scale_GizmoBox* Saved_Gizmo_SB;
 
+	UFUNCTION()
+	void Save_Gizmo_RX(AActor* Gizmo_RX);
+	UPROPERTY()
+	AJSH_Rotate_GizmoX* Saved_Gizmo_RX;
+
 	
 	
 	// Gizmo Mode
+	UPROPERTY(replicated)
 	bool FirstGizmode = false;
+	UPROPERTY(replicated)
 	bool Gizmo_TranslateMode = false;
+	UPROPERTY(replicated)
 	bool Gizmo_ScaleMode = false;
+	UPROPERTY(replicated)
 	bool Gizmo_RotateMode = false;
 
 	UFUNCTION()
@@ -464,16 +490,16 @@ public:
 	UPROPERTY()
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	float Lay_Distance = 0.0f;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool Gizmo_Selected = false;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool EnableEditSystem = false;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool Gizmo_Detecting = false;
 
 
@@ -482,7 +508,7 @@ public:
 	UFUNCTION()
 	void Gizmo_Click_End();
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool Gizmo_Clicking_forError = false;
 
 	UPROPERTY()
@@ -517,7 +543,7 @@ public:
 	UPROPERTY()
 	AJSH_Editor_SpawnActor* Previous_Click_Actor;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	AJSH_Editor_SpawnActor* Now_Click_Actor;
 	
 #pragma endregion
@@ -539,7 +565,7 @@ public:
 #pragma region Camera Control
 
 	// 카메라 줌
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool Bool_ZoomMode = false;
 	
 	UFUNCTION()
