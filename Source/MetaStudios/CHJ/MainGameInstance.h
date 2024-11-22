@@ -83,7 +83,7 @@ public:
 	// 방퇴장 응답
 	void OnMyDestroySessionComplete(FName SessionName , bool bWasSuccessful);
 	
-
+	void OnNetworkFailure(UWorld* World , UNetDriver* NetDriver , ENetworkFailure::Type FailureType , const FString& ErrorString);
 	// 스팀으로 한글이름 방을 만들어서 조회하면 한글이 깨지는 이슈
 	// Base64 인코딩으로 해결하고자함!
 	FString StringBase64Encode(const FString& str);

@@ -30,6 +30,13 @@ void UMainGameInstance::Init()
 	// 바인딩 =================================================================================================================
 
 	}
+	// 게임 엔진이 유효한 경우
+	if ( GEngine )
+	{
+		// 네트워크 실패 이벤트에 대한 핸들러 등록
+		// 네트워크 연결 실패 시 OnNetworkFailure 함수가 호출되도록 설정
+		GEngine->OnNetworkFailure().AddUObject(this , &UMainGameInstance::OnNetworkFailure);
+	}
 
 	//PRINTLOG(TEXT("Network Start!!"));
 	//FTimerHandle handle;
@@ -252,6 +259,11 @@ void UMainGameInstance::OnMyDestroySessionComplete(FName SessionName , bool bWas
 		pc->ClientTravel(TEXT("/Game/SYM/MainLobby.MainLobby"), ETravelType::TRAVEL_Absolute);
 		
 	}
+}
+
+void UMainGameInstance::OnNetworkFailure(UWorld* World , UNetDriver* NetDriver , ENetworkFailure::Type FailureType , const FString& ErrorString)
+{
+	UE_LOG(LogTemp, Error, TEXT("%s"), *ErrorString);
 }
 
 #pragma region 인코딩
