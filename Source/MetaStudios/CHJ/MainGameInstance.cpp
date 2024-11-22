@@ -235,6 +235,7 @@ void UMainGameInstance::ServerRPCExitSession_Implementation()
 
 void UMainGameInstance::MulticastRPCExitSession_Implementation()
 {
+	
 	// 방퇴장 요청
 	SessionInterface->DestroySession(FName(MySessionName));
 }
@@ -247,7 +248,9 @@ void UMainGameInstance::OnMyDestroySessionComplete(FName SessionName , bool bWas
 	{
 		// 클라이언트가 로비로 여행을 가고싶다.
 		auto* pc = GetWorld()->GetFirstPlayerController();
+		
 		pc->ClientTravel(TEXT("/Game/SYM/MainLobby.MainLobby"), ETravelType::TRAVEL_Absolute);
+		
 	}
 }
 

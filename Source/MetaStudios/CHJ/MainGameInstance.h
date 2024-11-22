@@ -82,6 +82,7 @@ public:
 	void MulticastRPCExitSession();
 	// 방퇴장 응답
 	void OnMyDestroySessionComplete(FName SessionName , bool bWasSuccessful);
+	
 
 	// 스팀으로 한글이름 방을 만들어서 조회하면 한글이 깨지는 이슈
 	// Base64 인코딩으로 해결하고자함!
@@ -90,4 +91,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FString PlayerType = TEXT("디폴트");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsIntroCheck = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsMainLobbyBGM = false;
 };
