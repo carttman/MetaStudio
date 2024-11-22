@@ -72,6 +72,17 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void PossessedBy(AController* NewController) override;
+
+	//UPROPERTY(EditAnywhere)
+	//class UAudioComponent* FootstepAudioComp;
+
+	//UPROPERTY()
+	//bool bAutoActivate;
+
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* BoosterPackMesh;
+
+	/*void AttachBoosterPack() const;*/
 	
 	// Tick에서 부스터 관리 함수
 	void ManageBooster(float DeltaTime);
@@ -169,6 +180,12 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "Effects")
 	class UNiagaraComponent* BoosterFXComponent2;
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UNiagaraComponent* BoosterFXComponent3;
+
+	UPROPERTY(EditAnywhere)
+	class UArrowComponent* BoosterArrow1;
 
 	void ActivateBooster(bool bActive);
 	
@@ -286,6 +303,7 @@ private:
 	//void DeleteVehicle(class ASpaceshipPawn* target);
 	//UFUNCTION()
 	//void DeleteVehicle(class ACarPawn* target);
+
 
 
 };

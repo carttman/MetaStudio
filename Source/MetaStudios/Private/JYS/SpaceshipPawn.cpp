@@ -149,7 +149,7 @@ bool ASpaceshipPawn::CanPlayerEnter(AMetaStudiosCharacter* targetCharacter)
 
 void ASpaceshipPawn::ExitSpaceship()
 {
-	if (IsLocallyControlled())
+	if (IsLocallyControlled() && !bIsMoving)
 	{
 		Server_ExitSpaceship();
 	}
@@ -278,6 +278,7 @@ void ASpaceshipPawn::OnMoveUp(const FInputActionValue& value)
 		bLanded = false;
 		MoveUpAnim();
 		Server_StartFlyEffect();
+		bIsMoving = true;
 		// ActivateStartFly(true);
 	}
 
@@ -477,6 +478,8 @@ bool ASpaceshipPawn::CheckLanding()
 					Server_PlayAnimMontage(Anim->openDoorMontage);
 					}, 2, false);
 				Server_EndFlyEffect();
+
+				bIsMoving = false;
 
 				return true;
 			}

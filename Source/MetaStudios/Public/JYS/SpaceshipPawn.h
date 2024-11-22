@@ -142,6 +142,9 @@ public:
 
 	bool bLanded = true;
 
+	// Âø·ú ÈÄ player·Î possessÇÒ ¼ö ÀÖ°Ô²û
+	bool bIsMoving = false;
+
 	////////////////Effect//////////////
 
 	UFUNCTION(Server, Reliable)
@@ -204,5 +207,4 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_CloseDoorMontageSetting();
 	////////////Animation/////////////////////////
-
 };

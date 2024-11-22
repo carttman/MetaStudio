@@ -15,6 +15,7 @@
 #include "Components/BoxComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 
 
@@ -68,6 +69,22 @@ void ACarPawn::BeginPlay()
 		UIBox->OnComponentBeginOverlap.AddDynamic(this, &ACarPawn::OnUIBoxBeginOverlap);
 		UIBox->OnComponentEndOverlap.AddDynamic(this, &ACarPawn::OnUIBoxEndOverlap);
 	}
+
+	//UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("TTT"), PlayerBox);
+	// //********Player 여러명이니깐 루프 돌려서 각자 넣어주기********
+	//if (PlayerBox.Num() > 0)
+	//{
+	//	player =  Cast<AMetaStudiosCharacter>(PlayerBox[0]);
+	//	AActor* A_This = <AActor>(this);
+	// 
+	//	if (player)
+	//	{
+	// 	//******* 다른곳에서 해보니깐 정상적으로 들어가는걸 봐선 this를 aactor*로 변환해서 생기는 문제인듯
+	//  // 1. 안쪽에서 this말고 다른 방식으로 자신을 캐스팅해서 넣어서 넘겨주거나 or player->Addvehicle 각자 나누기 ********
+	//  // 1번 방법 이 가장 효율적일 듯 (내 쪽에서 할 수 있는 부분도 맞는디 , 아 그 앞쪽 bp를 코드로 못 옮기겠써 ㅠㅅㅠ)
+	//		player->AddVehicle(A_This);
+	//	}
+	//}
 }
 
 // Called every frame
