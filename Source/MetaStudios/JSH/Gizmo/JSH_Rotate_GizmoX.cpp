@@ -191,7 +191,7 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SX);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
 
-	//IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_Ry);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RY);
 	Params.AddIgnoredActors(IgnoreGizmos);
 
 

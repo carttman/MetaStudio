@@ -1051,6 +1051,11 @@ void AJSH_Player::Save_Gizmo_RX(AActor* Gizmo_RX)
 	Saved_Gizmo_RX = Cast<AJSH_Rotate_GizmoX>(Gizmo_RX);
 }
 
+void AJSH_Player::Save_Gizmo_RY(AActor* Gizmo_RY)
+{
+	Saved_Gizmo_RY = Cast<AJSH_Rotate_GizmoY>(Gizmo_RY);
+}
+
 
 
 
@@ -1084,7 +1089,7 @@ void AJSH_Player::G_SelecteMode()
 	if (Editor_SpawnActor == nullptr) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
-	if (Saved_Gizmo_RX == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr) return;
 
 	
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
@@ -1108,7 +1113,8 @@ void AJSH_Player::G_SelecteMode()
 
 	
 	Saved_Gizmo_RX->Visible_and_Collision_Off();
-	
+	Saved_Gizmo_RY->Visible_and_Collision_Off();
+
 }
 
 void AJSH_Player::G_TranslateMode()
@@ -1123,6 +1129,8 @@ void AJSH_Player::G_TranslateMode()
 	if (Editor_SpawnActor == nullptr) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr) return;
+
 	
 	UE_LOG(LogTemp, Warning, TEXT("g translate"));
 	Gizmo_TranslateMode = true;
@@ -1140,6 +1148,7 @@ void AJSH_Player::G_TranslateMode()
 	Saved_Gizmo_SB->Visible_and_Collision_Off();
 
 	Saved_Gizmo_RX->Visible_and_Collision_Off();
+	Saved_Gizmo_RY->Visible_and_Collision_Off();
 }
 
 
@@ -1157,6 +1166,8 @@ void AJSH_Player::G_RotateMode()
 	if (Editor_SpawnActor == nullptr) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr) return;
+
 	UE_LOG(LogTemp, Warning, TEXT("g  rotate"));
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = true;
@@ -1175,6 +1186,7 @@ void AJSH_Player::G_RotateMode()
 	Saved_Gizmo_SB->Visible_and_Collision_Off();
 
 	Saved_Gizmo_RX->Visible_and_Collision_On();
+	Saved_Gizmo_RY->Visible_and_Collision_On();
 }
 
 
@@ -1190,6 +1202,8 @@ void AJSH_Player::G_SclaeMode()
 	if (Editor_SpawnActor == nullptr) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr) return;
+
 	UE_LOG(LogTemp, Warning, TEXT("g scale"));
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = false;
@@ -1207,6 +1221,7 @@ void AJSH_Player::G_SclaeMode()
 
 
 	Saved_Gizmo_RX->Visible_and_Collision_Off();
+	Saved_Gizmo_RY->Visible_and_Collision_Off();
 }
 
 
@@ -1216,6 +1231,8 @@ void AJSH_Player::Gizmo_Detect()
 	if (DisableEdit_b) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr) return;
+
 
 	
 	if (JPlayerController == nullptr) Saved_PlayerController();
@@ -1344,11 +1361,21 @@ void AJSH_Player::Gizmo_Detect()
 			{
 				Saved_Gizmo_RX->BeginCursorOver();
 
-				//Saved_Gizmo_SX->EndCursorOver();
-				//Saved_Gizmo_SY->EndCursorOver();
-				//Saved_Gizmo_SZ->EndCursorOver();
+				Saved_Gizmo_RY->EndCursorOver();
 			}
 		}
+
+		if (Saved_Gizmo_RY != nullptr)
+		{
+			if (HitResult.GetActor()  == Saved_Gizmo_RY)
+			{
+				Saved_Gizmo_RY->BeginCursorOver();
+
+				Saved_Gizmo_RX->EndCursorOver();
+			}
+		}
+
+
 	}
 	else
 	{
@@ -1397,6 +1424,11 @@ void AJSH_Player::Gizmo_Detect()
 		if (Saved_Gizmo_RX != nullptr)
 		{
 			Saved_Gizmo_RX->EndCursorOver();
+		}
+
+		if (Saved_Gizmo_RY != nullptr)
+		{
+			Saved_Gizmo_RY->EndCursorOver();
 		}
 	}
 }
@@ -1499,6 +1531,14 @@ void AJSH_Player::Gizmo_Click()
 		}
 	}
 
+	if (Saved_Gizmo_RY != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_RY)
+		{
+			Saved_Gizmo_RY->GOnClicked();
+			Clicked_B = true;
+		}
+	}
 
 	
 	// Last Location 저장
@@ -1523,6 +1563,7 @@ void AJSH_Player::Gizmo_Click_End()
 	{
 		if (Gizmo_TranslateMode) Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
 		else if (Gizmo_ScaleMode) Saved_Gizmo_SY->HandleMouseReleaseOutsideActor();
+		else if (Gizmo_RotateMode) Saved_Gizmo_RY->HandleMouseReleaseOutsideActor();
 		//Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
 	}
 	if (Clicked_Z)
