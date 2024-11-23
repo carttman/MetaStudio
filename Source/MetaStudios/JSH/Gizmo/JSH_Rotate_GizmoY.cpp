@@ -88,7 +88,7 @@ AJSH_Rotate_GizmoY::AJSH_Rotate_GizmoY()
 	}
 
 
-	ConstructorHelpers::FObjectFinder<UMaterial> YellowMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Red_Yellow.MM_Rotate_Red_Yellow'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> YellowMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Green_Yellow.MM_Rotate_Green_Yellow'"));
 	if (YellowMaterialLoader.Succeeded())
 	{
 		YellowMaterial = YellowMaterialLoader.Object;
