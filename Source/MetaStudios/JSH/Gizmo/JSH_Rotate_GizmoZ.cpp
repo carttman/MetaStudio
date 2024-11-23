@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../JSH/Gizmo/JSH_Rotate_GizmoX.h"
+#include "JSH_Rotate_GizmoZ.h"
 #include "MetaStudios/JSH/JSH_PlayerController.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
@@ -16,12 +16,14 @@
 #include "JSH_Scale_GizmoZ.h"
 #include "JSH_Scale_GizmoX.h"
 #include "JSH_Rotate_GizmoY.h"
-#include "JSH_Rotate_GizmoZ.h"
-#include "Engine/EngineTypes.h"
+#include "JSH_Rotate_GizmoX.h"
+#include "Engine/EngineTypes.h" 
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
+
 // Sets default values
-AJSH_Rotate_GizmoX::AJSH_Rotate_GizmoX()
+AJSH_Rotate_GizmoZ::AJSH_Rotate_GizmoZ()
+// Fill out your copyright notice in the Description page of Project Settings.
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -79,7 +81,7 @@ AJSH_Rotate_GizmoX::AJSH_Rotate_GizmoX()
 		Origin4->SetCollisionProfileName(TEXT("NoCollision"));
 	}
 
-	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Red.MM_Rotate_Red'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Blue.MM_Rotate_Blue'"));
 	if (OriginMaterial.Succeeded())
 	{
 		Origin->SetMaterial(0, OriginMaterial.Object);
@@ -89,30 +91,30 @@ AJSH_Rotate_GizmoX::AJSH_Rotate_GizmoX()
 	}
 
 
-	ConstructorHelpers::FObjectFinder<UMaterial> YellowMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Red_Yellow.MM_Rotate_Red_Yellow'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> YellowMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Blue_Yellow.MM_Rotate_Blue_Yellow'"));
 	if (YellowMaterialLoader.Succeeded())
 	{
 		YellowMaterial = YellowMaterialLoader.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UMaterial> RedMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Red.MM_Rotate_Red'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> RedMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Rotate_Blue.MM_Rotate_Blue'"));
 	if (RedMaterialLoader.Succeeded())
 	{
-		RedMaterial = RedMaterialLoader.Object;
+		BlueMaterial = RedMaterialLoader.Object;
 	}
 	
-	Tags.Add(FName("Rotate_Gizmo_X"));
+	Tags.Add(FName("Rotate_Gizmo_Z"));
 }
 
 
 // Called when the game starts or when spawned
-void AJSH_Rotate_GizmoX::BeginPlay()
+void AJSH_Rotate_GizmoZ::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
 // Called every frame
-void AJSH_Rotate_GizmoX::Tick(float DeltaTime)
+void AJSH_Rotate_GizmoZ::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -136,23 +138,23 @@ void AJSH_Rotate_GizmoX::Tick(float DeltaTime)
 
 
 
-void AJSH_Rotate_GizmoX::NotifyActorOnClicked(FKey ButtonPressed)
+void AJSH_Rotate_GizmoZ::NotifyActorOnClicked(FKey ButtonPressed)
 {
 	Super::NotifyActorOnClicked(ButtonPressed);
 
 }
 
-void AJSH_Rotate_GizmoX::GOnClicked()
+void AJSH_Rotate_GizmoZ::GOnClicked()
 {
 	// Cursor에 오버랩 되었을때 True로 바뀌는 bool값임 , 커서에 마우스 올라가 있을때에만 클릭해도 실행되도록 (왜 넣었는지 기억 안남, 없어도 될듯 싶음)
 	if (!CursorOveringGizmo) return;
 	
 	
 	//// 다른 기즈모가 실행 중 이면 , 기능 실행되지 않도록 ////
-	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON || OriginPlayer->Editor_SpawnActor->GizmoZ_ON || OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
-	if (!OriginPlayer->Editor_SpawnActor->GizmoX_ON)
+	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON || OriginPlayer->Editor_SpawnActor->GizmoX_ON || OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
+	if (!OriginPlayer->Editor_SpawnActor->GizmoZ_ON)
 	{
-		OriginPlayer->Editor_SpawnActor->GizmoX_ON = true;
+		OriginPlayer->Editor_SpawnActor->GizmoZ_ON = true;
 	}
 	
 
@@ -193,7 +195,7 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
 
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RY);
-	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RZ);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RX);
 	Params.AddIgnoredActors(IgnoreGizmos);
 
 
@@ -234,6 +236,7 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 
 
 
+
 	// Editor Actor 중심의 회전이 아닌 , gizmo 중심의 회전을 중심으로 돌리기
 	if (Clicked)
 	{
@@ -242,10 +245,10 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 		EndMouselocation_2D_Y = MouseY;
 
 		//End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * -0.2f) + ((EndMouselocation_2D_X - StartMouselocation_2D_X) * 0.2f);
-		End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * -0.2f);
+		End_variation = ((EndMouselocation_2D_X - StartMouselocation_2D_X) * -0.2f);
 
 		// 현재의 Yaw 값을 사용하여 새로운 DeltaRotation 계산
-		FRotator DeltaRotation = FRotator(0.0F, 0.0f, End_variation);
+		FRotator DeltaRotation = FRotator(0.0F, End_variation, 0.0f);
 
 		// 현재 회전을 기준으로 DeltaRotation 적용
 		FQuat CurrentQuat = Start_Rotate.Quaternion();
@@ -259,8 +262,11 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 		OriginPlayer->Editor_SpawnActor->Set_Rotate_from_Gizmo(End_Rotate);
 	}
 
-	
-	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
+
+
+
+	//
+	// ///// 처음 클릭 되고 난 후 돌아가는 함수 ////
 	// if (Clicked)
 	// {
 	// 	End_Location = End;
@@ -269,9 +275,9 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 	// 	EndMouselocation_2D_Y = MouseY;
 	//
 	// 	End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * - 0.2) + ((EndMouselocation_2D_X - StartMouselocation_2D_X) * 0.2);
-	// 	//End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * - 0.3);
+	// 	//End_variation = ((EndMouselocation_2D_X - StartMouselocation_2D_X) * -0.3);
 	//
-	// 	End_Rotate = FRotator(Start_Rotate.Pitch, Start_Rotate.Yaw, Start_Rotate.Roll + End_variation);
+	// 	End_Rotate = FRotator(Start_Rotate.Pitch, Start_Rotate.Yaw  + End_variation, Start_Rotate.Roll);
 	//
 	// 	OriginPlayer->Editor_SpawnActor->Set_Rotate_from_Gizmo(End_Rotate);
 	// }
@@ -281,17 +287,17 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 
 
 // 오버랩 색상 변경
-void AJSH_Rotate_GizmoX::BeginCursorOver()
+void AJSH_Rotate_GizmoZ::BeginCursorOver()
 {
 	if (OriginPlayer->Editor_SpawnActor->GizmoY_ON) return;
-	if (OriginPlayer->Editor_SpawnActor->GizmoZ_ON) return;
+	if (OriginPlayer->Editor_SpawnActor->GizmoX_ON) return;
 	if (OriginPlayer->Editor_SpawnActor->GizmoB_ON) return;
 	
 	SelectedColor();
 	CursorOveringGizmo = true;
 }
 
-void AJSH_Rotate_GizmoX::EndCursorOver()
+void AJSH_Rotate_GizmoZ::EndCursorOver()
 {
 	////Super::NotifyActorEndCursorOver();
 
@@ -303,21 +309,21 @@ void AJSH_Rotate_GizmoX::EndCursorOver()
 }
 
 
-void AJSH_Rotate_GizmoX::OriginColor()
+void AJSH_Rotate_GizmoZ::OriginColor()
 {
 	// Gizmo가 클릭된 상태라면 , 마우스가 Gizmo 위에 있지 않아도 계속해서 노란색 유지하기 위해
 	if (SelectedGizmo) return;
 	
-	if (RedMaterial)
+	if (BlueMaterial)
 	{
-		Origin->SetMaterial(0, RedMaterial);
-		Origin2->SetMaterial(0, RedMaterial);
-		Origin3->SetMaterial(0, RedMaterial);
-		Origin4->SetMaterial(0, RedMaterial);
+		Origin->SetMaterial(0, BlueMaterial);
+		Origin2->SetMaterial(0, BlueMaterial);
+		Origin3->SetMaterial(0, BlueMaterial);
+		Origin4->SetMaterial(0, BlueMaterial);
 	}
 }
 
-void AJSH_Rotate_GizmoX::SelectedColor()
+void AJSH_Rotate_GizmoZ::SelectedColor()
 {
 	if (YellowMaterial)
 	{
@@ -329,15 +335,15 @@ void AJSH_Rotate_GizmoX::SelectedColor()
 }
 
 
-void AJSH_Rotate_GizmoX::HandleMouseReleaseOutsideActor()
+void AJSH_Rotate_GizmoZ::HandleMouseReleaseOutsideActor()
 {
 	Clicked = false;
 	firstclick = false;
 	SelectedGizmo = false;
 	CursorOveringGizmo = false;
-	if (OriginPlayer->Editor_SpawnActor != nullptr && OriginPlayer->Editor_SpawnActor->GizmoX_ON != false)
+	if (OriginPlayer->Editor_SpawnActor != nullptr && OriginPlayer->Editor_SpawnActor->GizmoZ_ON != false)
 	{
-		OriginPlayer->Editor_SpawnActor->GizmoX_ON = false;
+		OriginPlayer->Editor_SpawnActor->GizmoZ_ON = false;
 	}
 	OriginColor();
 
@@ -347,7 +353,7 @@ void AJSH_Rotate_GizmoX::HandleMouseReleaseOutsideActor()
 
 
 //// Player쪽에서 Gizmo Mode 바꿀때 조정해줌  ////
-void AJSH_Rotate_GizmoX::Visible_and_Collision_On()
+void AJSH_Rotate_GizmoZ::Visible_and_Collision_On()
 {
 	Origin->SetVisibility(true);
 	Origin->SetCollisionProfileName(TEXT("Gizmo"));
@@ -359,7 +365,7 @@ void AJSH_Rotate_GizmoX::Visible_and_Collision_On()
 	Origin4->SetCollisionProfileName(TEXT("Gizmo"));
 	
 }
-void AJSH_Rotate_GizmoX::Visible_and_Collision_Off()
+void AJSH_Rotate_GizmoZ::Visible_and_Collision_Off()
 {
 	Origin->SetVisibility(false);
 	Origin->SetCollisionProfileName(TEXT("NoCollision"));
@@ -371,12 +377,12 @@ void AJSH_Rotate_GizmoX::Visible_and_Collision_Off()
 	Origin4->SetCollisionProfileName(TEXT("NoCollision"));
 }
 
-void AJSH_Rotate_GizmoX::BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control)
+void AJSH_Rotate_GizmoZ::BeginPlayer(AJSH_Player* temp, AJSH_PlayerController* control)
 {
 	OriginPlayer = temp;
 	if (OriginPlayer)
 	{
-		OriginPlayer->Save_Gizmo_RX(this);
+		OriginPlayer->Save_Gizmo_RZ(this);
 	}
 
 	JPlayerController = control;

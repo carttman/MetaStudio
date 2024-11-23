@@ -90,6 +90,11 @@ public:
 	UChildActorComponent* Rotate_Y;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	AJSH_Rotate_GizmoY* Origin_Rotate_Y;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UChildActorComponent* Rotate_Z;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	AJSH_Rotate_GizmoZ* Origin_Rotate_Z;
 	
 public:	
 	// Sets default values for this actor's properties
