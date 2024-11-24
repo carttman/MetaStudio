@@ -811,16 +811,22 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 			DisableEdit();
 
 
-			if (!RecordUI_01 && UI_Record_01)
+			if (Origin_RecordUI)
 			{
-				RecordUI_01 = CreateWidget<UUserWidget>(GetWorld(), UI_Record_01);
-				
-				if(RecordUI_01)
-				{
-					RecordUI_01->AddToViewport();
-					Origin_RecordUI = Cast<UJSH_Record_UI>(RecordUI_01);
-				}
+				Origin_RecordUI->SetVisibility(ESlateVisibility::Visible);
+				Origin_RecordUI->EditorMode_UI_Off();
 			}
+
+			// if (!RecordUI_01 && UI_Record_01)
+			// {
+			// 	RecordUI_01 = CreateWidget<UUserWidget>(GetWorld(), UI_Record_01);
+			//
+			// 	if(RecordUI_01)
+			// 	{
+			// 		RecordUI_01->AddToViewport();
+			// 		Origin_RecordUI = Cast<UJSH_Record_UI>(RecordUI_01);
+			// 	}
+			// }
 
 			UE_LOG(LogTemp, Warning, TEXT("`` delete"));
 		}
@@ -865,11 +871,16 @@ void AJSH_Player::EnableEdit()
 	
 	if (!PlayerMainUI)
 	{
-		// 촬영 UI 제거
-		if (RecordUI_01)
+		// // 촬영 UI 제거
+		// if (RecordUI_01)
+		// {
+		// 	RecordUI_01->RemoveFromParent();
+		// 	RecordUI_01 = nullptr;
+		// }
+		if (Origin_RecordUI)
 		{
-			RecordUI_01->RemoveFromParent();
-			RecordUI_01 = nullptr;
+			//Origin_RecordUI->SetVisibility(ESlateVisibility::HitTestInvisible);
+			Origin_RecordUI->EditorMode_UI_On();
 		}
 		// Editor UI 생성
 		if (UI_Editor_Main)
@@ -920,11 +931,23 @@ void AJSH_Player::DisableEdit()
 	}
 
 		JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	
+
+
+
 	if (PlayerMainUI)
 	{
 		PlayerMainUI->RemoveFromParent();
 		PlayerMainUI = nullptr;
+
+		// if (Origin_RecordUI)
+		// {
+		// 	Origin_RecordUI->SetVisibility(ESlateVisibility::Hidden);
+		// }
+
+		// if (!RecordUI_01->IsVisible())
+		// {
+		// 	RecordUI_01->SetVisibility(ESlateVisibility::Hidden);
+		// }
 	}
 	
 	Server_DisableEdit();

@@ -127,4 +127,28 @@ public:
 
 	UPROPERTY(meta=(BindWidget))
 	class UImage* Battery_Icon;
+
+
+	//// Editor Mode ///
+
+	// UPROPERTY(meta=(BindWidget))
+	// class UUserWidget* WBP_Drag;
+
+	UFUNCTION()
+	void EditorMode_UI_On();
+
+	UFUNCTION()
+	void EditorMode_UI_Off();
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Editor_line;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Editor_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* Editor_Text;
+
+
 };
+
+

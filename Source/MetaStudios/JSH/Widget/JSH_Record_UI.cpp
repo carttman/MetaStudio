@@ -26,6 +26,14 @@ void UJSH_Record_UI::NativeConstruct()
 	Zoom_MaxError->SetVisibility(ESlateVisibility::Hidden);
 	Sensitivity_MaxError->SetVisibility(ESlateVisibility::Hidden);
 	Sensitivity_MinError->SetVisibility(ESlateVisibility::Hidden);
+	//WBP_Drag->SetVisibility(ESlateVisibility::Hidden);
+
+	Line->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Center->SetVisibility(ESlateVisibility::HitTestInvisible);
+
+	Editor_line->SetVisibility(ESlateVisibility::Hidden);
+	Editor_Box->SetVisibility(ESlateVisibility::Hidden);
+	Editor_Text->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UJSH_Record_UI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -157,3 +165,30 @@ void UJSH_Record_UI::CameraUI_Rotate_Update(float Cameraupdate)
 		CameraUI_Rotate->SetText(FText::AsNumber(intCameraupdate));
 	}
 }
+
+
+
+void UJSH_Record_UI::EditorMode_UI_On()
+{
+	Line->SetVisibility(ESlateVisibility::Hidden);
+	Rec_WhiteCircle->SetVisibility(ESlateVisibility::Hidden);
+	Rec_Text->SetVisibility(ESlateVisibility::Hidden);
+
+	Editor_line->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Editor_Box->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Editor_Text->SetVisibility(ESlateVisibility::HitTestInvisible);
+}
+
+
+void UJSH_Record_UI::EditorMode_UI_Off()
+{
+	Line->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Rec_WhiteCircle->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Rec_Text->SetVisibility(ESlateVisibility::HitTestInvisible);
+
+
+	Editor_line->SetVisibility(ESlateVisibility::Hidden);
+	Editor_Box->SetVisibility(ESlateVisibility::Hidden);
+	Editor_Text->SetVisibility(ESlateVisibility::Hidden);
+}
+
