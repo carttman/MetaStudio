@@ -1758,7 +1758,8 @@ void AJSH_Player::Camera_Zoom_Default()
 
 	if (Origin_RecordUI)
 	{
-		Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+		//Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+		Origin_RecordUI->Reset_Zoom_Update();
 	}
 }
 
@@ -1840,14 +1841,14 @@ void AJSH_Player::CameraReset()
 	CurrentAngl = 0;
 	UE_LOG(LogTemp, Error, TEXT("CameraReset"));
 
-	if (Origin_RecordUI)
-	{
-		Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
-		//Origin_RecordUI->Sensitivity_Update(MouseSensitivityYaw);
-		Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
-		Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
-		Origin_RecordUI->Reset_Zoom_Update();
-	}
+	// if (Origin_RecordUI)
+	// {
+	// 	Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+	// 	//Origin_RecordUI->Sensitivity_Update(MouseSensitivityYaw);
+	// 	Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+	// 	Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+	// 	Origin_RecordUI->Reset_Zoom_Update();
+	// }
 }
 
 // 마우스 감도 조절 , 줌 했을때 마우스(화면 회전)가 너무 빨라서 추가

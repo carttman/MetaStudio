@@ -38,9 +38,9 @@ public:
 
 	//////
 	UPROPERTY(meta=(BindWidget))
-	class UImage* LeftTop_01;
+	class UImage* Resolation_Box;
 	UPROPERTY(meta=(BindWidget))
-	class UImage* LeftTop_01_text;
+	class UTextBlock* Resolation_Text;
 	////
 
 	UPROPERTY(meta=(BindWidget))
@@ -116,4 +116,15 @@ public:
 	class UTextBlock* CameraUI_Rotate;
 	UFUNCTION()
 	void CameraUI_Rotate_Update(float Cameraupdate);
+
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Menue_Icon;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Menue_Text;
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Battery_Icon;
 };
