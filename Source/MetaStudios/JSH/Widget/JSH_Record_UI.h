@@ -23,15 +23,25 @@ public:
 	class UCanvasPanel* Root_CanvasPanel;
 	
 	UPROPERTY(meta=(BindWidget))
-	class UImage* BackGround;
+	class UImage* Center;
 
 	UPROPERTY(meta=(BindWidget))
-	class UImage* BackGround2;
+	class UImage* Line;
 	
 
 	UPROPERTY(meta=(BindWidget))
-	class UImage* Rec;
+	class UImage* Rec_Circle;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Rec_WhiteCircle;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Rec_Text;
 
+	//////
+	UPROPERTY(meta=(BindWidget))
+	class UImage* LeftTop_01;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* LeftTop_01_text;
+	////
 
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* Speed;
@@ -49,11 +59,54 @@ public:
 	void StopRecrod_Anim();
 	
 	UFUNCTION()
-	void Speed_Update(FText NewText);
+	void Speed_Update(float speedUpdate);
 
 	UPROPERTY(editanywhere, blueprintReadWrite)
 	bool StartRecord = false;
 	//
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Speed_Icon;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Speed_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Speed_MinError;
 	UPROPERTY(editanywhere, blueprintReadWrite)
 	float Speed_Value = 0.0f;
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Zoom_Icon;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Zoom_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* Zoom;
+	UFUNCTION()
+	void Zoom_Update(float zoomupdate);
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Zoom_MinError;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Zoom_MaxError;
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Sensitivity_Icon;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Sensitivity_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* Sensitivity;
+	UFUNCTION()
+	void Sensitivity_Update(float Mouseupdate);
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* CameraUI_Rotate_Icon;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* CameraUI_Rotate_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* CameraUI_Rotate;
+	UFUNCTION()
+	void CameraUI_Rotate_Update(float Cameraupdate);
 };

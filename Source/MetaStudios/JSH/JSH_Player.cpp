@@ -652,8 +652,12 @@ void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 
 	GetCharacterMovement()->MaxFlySpeed = MaxFlySpeed_C;
 
-	Origin_RecordUI->Speed_Update(FText::AsNumber(MaxFlySpeed_C));
-	
+	//Origin_RecordUI->Speed_Update(FText::AsNumber(MaxFlySpeed_C));
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->Speed_Update(MaxFlySpeed_C);
+	}
+
 	if (HasAuthority())
 	{
 		NetMulti_FlySpeed(MaxFlySpeed_C);
@@ -1705,8 +1709,14 @@ void AJSH_Player::Camera_Zoom_In()
 		}
 		else
 		{
-			RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
+			RecordCamera->SetFieldOfView(RecordCamera->FieldOfView);
 		}
+
+		if (Origin_RecordUI)
+		{
+			Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+		}
+
 	}
 }
 
@@ -1731,6 +1741,11 @@ void AJSH_Player::Camera_Zoom_Out()
 		 {
 		 	RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
 		 }
+
+		if (Origin_RecordUI)
+		{
+			Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+		}
 	}
 }
 
@@ -1740,6 +1755,11 @@ void AJSH_Player::Camera_Zoom_Default()
 	
 		
 	RecordCamera->SetFieldOfView(90.0f);
+
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+	}
 }
 
 
@@ -1835,6 +1855,10 @@ void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 			MouseSensitivityYaw = 0.05;
 			MouseSensitivityPitch = 0.05;
 		}
+	}
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->Sensitivity_Update(MouseSensitivityYaw);
 	}
 	
 	UE_LOG(LogTemp, Error, TEXT("YYY %f"), MouseSensitivityYaw);
