@@ -3,6 +3,7 @@
 
 #include "../Gizmo/JSH_Gizmo.h"
 
+#include "JSH_Rotate_GizmoZ.h"
 #include "JSH_Scale_GizmoBox.h"
 #include "JSH_Scale_GizmoX.h"
 #include "JSH_Scale_GizmoY.h"
@@ -141,7 +142,7 @@ AJSH_Gizmo::AJSH_Gizmo()
 	Rotate_Box = CreateDefaultSubobject<USceneComponent>(TEXT("Rotate_Box"));
 	Rotate_Box->SetupAttachment(RootScence);
 	
-	
+
 	Rotate_X = CreateDefaultSubobject<UChildActorComponent>(TEXT("Rotate_X"));
 	Rotate_X->SetupAttachment(Rotate_Box);
 	UClass* Rotate_X_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Rotate/BP_RotateGizmo_X.BP_RotateGizmo_X_C"));
@@ -150,6 +151,28 @@ AJSH_Gizmo::AJSH_Gizmo()
 		Rotate_X->SetChildActorClass(Rotate_X_Class);
 		Rotate_X->SetRelativeLocationAndRotation(FVector(0.0, 0, 0), FRotator(0, -90.f, 90.f));
 		Rotate_X->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
+	}
+
+
+	Rotate_Y = CreateDefaultSubobject<UChildActorComponent>(TEXT("Rotate_Y"));
+	Rotate_Y->SetupAttachment(Rotate_Box);
+	UClass* Rotate_Y_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Rotate_Y/BP_RotateGizmo_Y.BP_RotateGizmo_Y_C"));
+	if (Rotate_Y)
+	{
+		Rotate_Y->SetChildActorClass(Rotate_Y_Class);
+		Rotate_Y->SetRelativeLocationAndRotation(FVector(0.0, 0, 0), FRotator(0, -180.f, 90.f));
+		Rotate_Y->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
+	}
+
+
+	Rotate_Z = CreateDefaultSubobject<UChildActorComponent>(TEXT("Rotate_Z"));
+	Rotate_Z->SetupAttachment(Rotate_Box);
+	UClass* Rotate_Z_Class = LoadObject<UClass>(NULL, TEXT("/Game/JSH/BP/Gizmo/Rotate_Z/BP_RotateGizmo_Z.BP_RotateGizmo_Z_C"));
+	if (Rotate_Z_Class)
+	{
+		Rotate_Z->SetChildActorClass(Rotate_Z_Class);
+		Rotate_Z->SetRelativeLocationAndRotation(FVector(0.0, 0, 0), FRotator(0, -90.f, 180.f));
+		Rotate_Z->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
 	}
 }
 
@@ -201,6 +224,7 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 	{
 		//SetActorTransform(OriginPlayer->Editor_SpawnActor->GetActorTransform());
 		SetActorLocation(OriginPlayer->Editor_SpawnActor->GetActorLocation());
+		//SetActorRotation(OriginPlayer->Editor_SpawnActor->GetActorRotation());
 	}
 }
 
@@ -337,6 +361,27 @@ void AJSH_Gizmo::Child_Actor_Detect()
 		if (Origin_Rotate_X != nullptr)
 		{
 			Origin_Rotate_X->BeginPlayer(OriginPlayer, JPlayerController);
+		}
+	}
+
+
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Rotate_Gizmo_Y"), Tag_RY);
+	if(Tag_RY.Num() > 0)
+	{
+		Origin_Rotate_Y = Cast<AJSH_Rotate_GizmoY>(Tag_RY[0]);
+		if (Origin_Rotate_Y != nullptr)
+		{
+			Origin_Rotate_Y->BeginPlayer(OriginPlayer, JPlayerController);
+		}
+	}
+
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("Rotate_Gizmo_Z"), Tag_RZ);
+	if(Tag_RZ.Num() > 0)
+	{
+		Origin_Rotate_Z = Cast<AJSH_Rotate_GizmoZ>(Tag_RZ[0]);
+		if (Origin_Rotate_Z != nullptr)
+		{
+			Origin_Rotate_Z->BeginPlayer(OriginPlayer, JPlayerController);
 		}
 	}
 

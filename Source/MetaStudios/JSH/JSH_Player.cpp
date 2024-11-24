@@ -30,6 +30,7 @@
 #include "Engine/Engine.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpectatorPawnMovement.h"
+#include "Gizmo/JSH_Rotate_GizmoZ.h"
 #include "Gizmo/JSH_Scale_GizmoBox.h"
 #include "Gizmo/JSH_Scale_GizmoX.h"
 #include "Gizmo/JSH_Scale_GizmoY.h"
@@ -532,7 +533,7 @@ void AJSH_Player::StartRecording()
 		
 		
 		// 카메라 확대, 축소, 회전 , 초기화
-		CameraReset();
+		//CameraReset();
 
 		if (JPlayerController == nullptr) Saved_PlayerController();
 		// 인스턴스에 넣어둔 녹화 기능 시작
@@ -651,8 +652,12 @@ void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 
 	GetCharacterMovement()->MaxFlySpeed = MaxFlySpeed_C;
 
-	Origin_RecordUI->Speed_Update(FText::AsNumber(MaxFlySpeed_C));
-	
+	//Origin_RecordUI->Speed_Update(FText::AsNumber(MaxFlySpeed_C));
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->Speed_Update(MaxFlySpeed_C);
+	}
+
 	if (HasAuthority())
 	{
 		NetMulti_FlySpeed(MaxFlySpeed_C);
@@ -806,16 +811,22 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 			DisableEdit();
 
 
-			if (!RecordUI_01 && UI_Record_01)
+			if (Origin_RecordUI)
 			{
-				RecordUI_01 = CreateWidget<UUserWidget>(GetWorld(), UI_Record_01);
-				
-				if(RecordUI_01)
-				{
-					RecordUI_01->AddToViewport();
-					Origin_RecordUI = Cast<UJSH_Record_UI>(RecordUI_01);
-				}
+				Origin_RecordUI->SetVisibility(ESlateVisibility::Visible);
+				Origin_RecordUI->EditorMode_UI_Off();
 			}
+
+			// if (!RecordUI_01 && UI_Record_01)
+			// {
+			// 	RecordUI_01 = CreateWidget<UUserWidget>(GetWorld(), UI_Record_01);
+			//
+			// 	if(RecordUI_01)
+			// 	{
+			// 		RecordUI_01->AddToViewport();
+			// 		Origin_RecordUI = Cast<UJSH_Record_UI>(RecordUI_01);
+			// 	}
+			// }
 
 			UE_LOG(LogTemp, Warning, TEXT("`` delete"));
 		}
@@ -860,11 +871,16 @@ void AJSH_Player::EnableEdit()
 	
 	if (!PlayerMainUI)
 	{
-		// 촬영 UI 제거
-		if (RecordUI_01)
+		// // 촬영 UI 제거
+		// if (RecordUI_01)
+		// {
+		// 	RecordUI_01->RemoveFromParent();
+		// 	RecordUI_01 = nullptr;
+		// }
+		if (Origin_RecordUI)
 		{
-			RecordUI_01->RemoveFromParent();
-			RecordUI_01 = nullptr;
+			//Origin_RecordUI->SetVisibility(ESlateVisibility::HitTestInvisible);
+			Origin_RecordUI->EditorMode_UI_On();
 		}
 		// Editor UI 생성
 		if (UI_Editor_Main)
@@ -915,11 +931,23 @@ void AJSH_Player::DisableEdit()
 	}
 
 		JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
-	
+
+
+
 	if (PlayerMainUI)
 	{
 		PlayerMainUI->RemoveFromParent();
 		PlayerMainUI = nullptr;
+
+		// if (Origin_RecordUI)
+		// {
+		// 	Origin_RecordUI->SetVisibility(ESlateVisibility::Hidden);
+		// }
+
+		// if (!RecordUI_01->IsVisible())
+		// {
+		// 	RecordUI_01->SetVisibility(ESlateVisibility::Hidden);
+		// }
 	}
 	
 	Server_DisableEdit();
@@ -1051,7 +1079,15 @@ void AJSH_Player::Save_Gizmo_RX(AActor* Gizmo_RX)
 	Saved_Gizmo_RX = Cast<AJSH_Rotate_GizmoX>(Gizmo_RX);
 }
 
+void AJSH_Player::Save_Gizmo_RY(AActor* Gizmo_RY)
+{
+	Saved_Gizmo_RY = Cast<AJSH_Rotate_GizmoY>(Gizmo_RY);
+}
 
+void AJSH_Player::Save_Gizmo_RZ(AActor* Gizmo_RZ)
+{
+	Saved_Gizmo_RZ = Cast<AJSH_Rotate_GizmoZ>(Gizmo_RZ);
+}
 
 
 void AJSH_Player::EditorAcotorDestroy()
@@ -1084,7 +1120,7 @@ void AJSH_Player::G_SelecteMode()
 	if (Editor_SpawnActor == nullptr) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
-	if (Saved_Gizmo_RX == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr || Saved_Gizmo_RZ == nullptr) return;
 
 	
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
@@ -1108,7 +1144,9 @@ void AJSH_Player::G_SelecteMode()
 
 	
 	Saved_Gizmo_RX->Visible_and_Collision_Off();
-	
+	Saved_Gizmo_RY->Visible_and_Collision_Off();
+	Saved_Gizmo_RZ->Visible_and_Collision_Off();
+
 }
 
 void AJSH_Player::G_TranslateMode()
@@ -1123,6 +1161,9 @@ void AJSH_Player::G_TranslateMode()
 	if (Editor_SpawnActor == nullptr) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr || Saved_Gizmo_RZ == nullptr) return;
+
+
 	
 	UE_LOG(LogTemp, Warning, TEXT("g translate"));
 	Gizmo_TranslateMode = true;
@@ -1140,6 +1181,8 @@ void AJSH_Player::G_TranslateMode()
 	Saved_Gizmo_SB->Visible_and_Collision_Off();
 
 	Saved_Gizmo_RX->Visible_and_Collision_Off();
+	Saved_Gizmo_RY->Visible_and_Collision_Off();
+	Saved_Gizmo_RZ->Visible_and_Collision_Off();
 }
 
 
@@ -1157,6 +1200,8 @@ void AJSH_Player::G_RotateMode()
 	if (Editor_SpawnActor == nullptr) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr || Saved_Gizmo_RZ == nullptr) return;
+
 	UE_LOG(LogTemp, Warning, TEXT("g  rotate"));
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = true;
@@ -1175,6 +1220,8 @@ void AJSH_Player::G_RotateMode()
 	Saved_Gizmo_SB->Visible_and_Collision_Off();
 
 	Saved_Gizmo_RX->Visible_and_Collision_On();
+	Saved_Gizmo_RY->Visible_and_Collision_On();
+	Saved_Gizmo_RZ->Visible_and_Collision_On();
 }
 
 
@@ -1190,6 +1237,9 @@ void AJSH_Player::G_SclaeMode()
 	if (Editor_SpawnActor == nullptr) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr || Saved_Gizmo_RZ == nullptr) return;
+
+
 	UE_LOG(LogTemp, Warning, TEXT("g scale"));
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = false;
@@ -1207,6 +1257,8 @@ void AJSH_Player::G_SclaeMode()
 
 
 	Saved_Gizmo_RX->Visible_and_Collision_Off();
+	Saved_Gizmo_RY->Visible_and_Collision_Off();
+	Saved_Gizmo_RZ->Visible_and_Collision_Off();
 }
 
 
@@ -1216,6 +1268,9 @@ void AJSH_Player::Gizmo_Detect()
 	if (DisableEdit_b) return;
 	if (Saved_Gizmo_TX == nullptr || Saved_Gizmo_TY == nullptr || Saved_Gizmo_TZ == nullptr || Saved_Gizmo_TB == nullptr) return;
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
+	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr || Saved_Gizmo_RZ == nullptr) return;
+
+
 
 	
 	if (JPlayerController == nullptr) Saved_PlayerController();
@@ -1344,11 +1399,33 @@ void AJSH_Player::Gizmo_Detect()
 			{
 				Saved_Gizmo_RX->BeginCursorOver();
 
-				//Saved_Gizmo_SX->EndCursorOver();
-				//Saved_Gizmo_SY->EndCursorOver();
-				//Saved_Gizmo_SZ->EndCursorOver();
+				Saved_Gizmo_RY->EndCursorOver();
+				Saved_Gizmo_RZ->EndCursorOver();
 			}
 		}
+
+		if (Saved_Gizmo_RY != nullptr)
+		{
+			if (HitResult.GetActor()  == Saved_Gizmo_RY)
+			{
+				Saved_Gizmo_RY->BeginCursorOver();
+
+				Saved_Gizmo_RX->EndCursorOver();
+				Saved_Gizmo_RZ->EndCursorOver();
+			}
+		}
+
+		if (Saved_Gizmo_RZ != nullptr)
+		{
+			if (HitResult.GetActor()  == Saved_Gizmo_RZ)
+			{
+				Saved_Gizmo_RZ->BeginCursorOver();
+
+				Saved_Gizmo_RX->EndCursorOver();
+				Saved_Gizmo_RY->EndCursorOver();
+			}
+		}
+
 	}
 	else
 	{
@@ -1397,6 +1474,16 @@ void AJSH_Player::Gizmo_Detect()
 		if (Saved_Gizmo_RX != nullptr)
 		{
 			Saved_Gizmo_RX->EndCursorOver();
+		}
+
+		if (Saved_Gizmo_RY != nullptr)
+		{
+			Saved_Gizmo_RY->EndCursorOver();
+		}
+
+		if (Saved_Gizmo_RZ != nullptr)
+		{
+			Saved_Gizmo_RZ->EndCursorOver();
 		}
 	}
 }
@@ -1499,6 +1586,23 @@ void AJSH_Player::Gizmo_Click()
 		}
 	}
 
+	if (Saved_Gizmo_RY != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_RY)
+		{
+			Saved_Gizmo_RY->GOnClicked();
+			Clicked_B = true;
+		}
+	}
+
+	if (Saved_Gizmo_RZ != nullptr)
+	{
+		if (HitResult.GetActor() == Saved_Gizmo_RZ)
+		{
+			Saved_Gizmo_RZ->GOnClicked();
+			Clicked_B = true;
+		}
+	}
 
 	
 	// Last Location 저장
@@ -1523,13 +1627,15 @@ void AJSH_Player::Gizmo_Click_End()
 	{
 		if (Gizmo_TranslateMode) Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
 		else if (Gizmo_ScaleMode) Saved_Gizmo_SY->HandleMouseReleaseOutsideActor();
+		else if (Gizmo_RotateMode) Saved_Gizmo_RY->HandleMouseReleaseOutsideActor();
 		//Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
 	}
 	if (Clicked_Z)
 	{
 		if (Gizmo_TranslateMode) Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
 		else if (Gizmo_ScaleMode) Saved_Gizmo_SZ->HandleMouseReleaseOutsideActor();
-		
+		else if (Gizmo_RotateMode) Saved_Gizmo_RZ->HandleMouseReleaseOutsideActor();
+
 		//Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
 	}
 	if (Clicked_B)
@@ -1626,8 +1732,14 @@ void AJSH_Player::Camera_Zoom_In()
 		}
 		else
 		{
-			RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
+			RecordCamera->SetFieldOfView(RecordCamera->FieldOfView);
 		}
+
+		if (Origin_RecordUI)
+		{
+			Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+		}
+
 	}
 }
 
@@ -1652,6 +1764,11 @@ void AJSH_Player::Camera_Zoom_Out()
 		 {
 		 	RecordCamera->SetFieldOfView(RecordCamera->FieldOfView );
 		 }
+
+		if (Origin_RecordUI)
+		{
+			Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+		}
 	}
 }
 
@@ -1661,6 +1778,12 @@ void AJSH_Player::Camera_Zoom_Default()
 	
 		
 	RecordCamera->SetFieldOfView(90.0f);
+
+	if (Origin_RecordUI)
+	{
+		//Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+		Origin_RecordUI->Reset_Zoom_Update();
+	}
 }
 
 
@@ -1678,10 +1801,17 @@ void AJSH_Player::CameraRight()
 	// {
 	// 	CurrentAngl = 90.0f;
 	// }
-	
+
+
 	NewCameraRotation = RecordCamera->GetRelativeRotation();
 	NewCameraRotation.Roll = CurrentAngl;
 	RecordCamera->SetRelativeRotation(NewCameraRotation);
+
+
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+	}
 }
 
 void AJSH_Player::CameraLeft()
@@ -1702,6 +1832,12 @@ void AJSH_Player::CameraLeft()
 	NewCameraRotation = RecordCamera->GetRelativeRotation();
 	NewCameraRotation.Roll = CurrentAngl;
 	RecordCamera->SetRelativeRotation(NewCameraRotation);
+
+
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+	}
 }
 
 void AJSH_Player::CameraDefault()
@@ -1714,6 +1850,10 @@ void AJSH_Player::CameraDefault()
 	
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+	}
 }
 
 void AJSH_Player::CameraReset()
@@ -1723,6 +1863,15 @@ void AJSH_Player::CameraReset()
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
 	UE_LOG(LogTemp, Error, TEXT("CameraReset"));
+
+	// if (Origin_RecordUI)
+	// {
+	// 	Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+	// 	//Origin_RecordUI->Sensitivity_Update(MouseSensitivityYaw);
+	// 	Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+	// 	Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+	// 	Origin_RecordUI->Reset_Zoom_Update();
+	// }
 }
 
 // 마우스 감도 조절 , 줌 했을때 마우스(화면 회전)가 너무 빨라서 추가
@@ -1756,6 +1905,10 @@ void AJSH_Player::Mouse_Sensitivity(const FInputActionValue& Value)
 			MouseSensitivityYaw = 0.05;
 			MouseSensitivityPitch = 0.05;
 		}
+	}
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->Sensitivity_Update(MouseSensitivityYaw);
 	}
 	
 	UE_LOG(LogTemp, Error, TEXT("YYY %f"), MouseSensitivityYaw);

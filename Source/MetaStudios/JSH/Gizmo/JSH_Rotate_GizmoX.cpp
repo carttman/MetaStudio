@@ -15,7 +15,9 @@
 #include "JSH_Scale_GizmoY.h"
 #include "JSH_Scale_GizmoZ.h"
 #include "JSH_Scale_GizmoX.h"
-#include "Engine/EngineTypes.h" 
+#include "JSH_Rotate_GizmoY.h"
+#include "JSH_Rotate_GizmoZ.h"
+#include "Engine/EngineTypes.h"
 #include "MetaStudios/JSH/JSH_Editor_SpawnActor.h"
 
 // Sets default values
@@ -188,8 +190,10 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SY);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SZ);
 	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_SB);
 
-	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RX);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RY);
+	IgnoreGizmos.Add(OriginPlayer->Saved_Gizmo_RZ);
 	Params.AddIgnoredActors(IgnoreGizmos);
 
 
@@ -228,21 +232,49 @@ void AJSH_Rotate_GizmoX::GOnClicked()
 		SelectedGizmo = true;
 	}
 
-	
-	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
+
+
+	// Editor Actor 중심의 회전이 아닌 , gizmo 중심의 회전을 중심으로 돌리기
 	if (Clicked)
 	{
 		End_Location = End;
-
 		EndMouselocation_2D_X = MouseX;
 		EndMouselocation_2D_Y = MouseY;
-		
-		End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * - 0.1) + ((EndMouselocation_2D_X - StartMouselocation_2D_X) * 0.1);
-		
-		End_Rotate = FRotator(Start_Rotate.Pitch, Start_Rotate.Yaw, Start_Rotate.Roll + End_variation);
 
+		//End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * -0.2f) + ((EndMouselocation_2D_X - StartMouselocation_2D_X) * 0.2f);
+		End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * -0.2f);
+
+		// 현재의 Yaw 값을 사용하여 새로운 DeltaRotation 계산
+		FRotator DeltaRotation = FRotator(0.0F, 0.0f, End_variation);
+
+		// 현재 회전을 기준으로 DeltaRotation 적용
+		FQuat CurrentQuat = Start_Rotate.Quaternion();
+		FQuat DeltaQuat = DeltaRotation.Quaternion();
+		FQuat NewQuat = DeltaQuat * CurrentQuat;
+
+		// 새로운 Rotation 설정
+		End_Rotate = NewQuat.Rotator();
+
+		// 최종 회전 적용
 		OriginPlayer->Editor_SpawnActor->Set_Rotate_from_Gizmo(End_Rotate);
 	}
+
+	
+	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
+	// if (Clicked)
+	// {
+	// 	End_Location = End;
+	//
+	// 	EndMouselocation_2D_X = MouseX;
+	// 	EndMouselocation_2D_Y = MouseY;
+	//
+	// 	End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * - 0.2) + ((EndMouselocation_2D_X - StartMouselocation_2D_X) * 0.2);
+	// 	//End_variation = ((EndMouselocation_2D_Y - StartMouselocation_2D_Y) * - 0.3);
+	//
+	// 	End_Rotate = FRotator(Start_Rotate.Pitch, Start_Rotate.Yaw, Start_Rotate.Roll + End_variation);
+	//
+	// 	OriginPlayer->Editor_SpawnActor->Set_Rotate_from_Gizmo(End_Rotate);
+	// }
 }
 
 
