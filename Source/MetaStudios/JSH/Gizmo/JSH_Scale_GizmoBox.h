@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "JSH_Scale_GizmoBox.generated.h"
 
+
+class AJSH_PlayerController;
+class AJSH_Player;
+
 UCLASS()
 class METASTUDIOS_API AJSH_Scale_GizmoBox : public AActor
 {

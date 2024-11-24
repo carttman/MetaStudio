@@ -23,15 +23,25 @@ public:
 	class UCanvasPanel* Root_CanvasPanel;
 	
 	UPROPERTY(meta=(BindWidget))
-	class UImage* BackGround;
+	class UImage* Center;
 
 	UPROPERTY(meta=(BindWidget))
-	class UImage* BackGround2;
+	class UImage* Line;
 	
 
 	UPROPERTY(meta=(BindWidget))
-	class UImage* Rec;
+	class UImage* Rec_Circle;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Rec_WhiteCircle;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Rec_Text;
 
+	//////
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Resolation_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* Resolation_Text;
+	////
 
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* Speed;
@@ -49,11 +59,96 @@ public:
 	void StopRecrod_Anim();
 	
 	UFUNCTION()
-	void Speed_Update(FText NewText);
+	void Speed_Update(float speedUpdate);
 
 	UPROPERTY(editanywhere, blueprintReadWrite)
 	bool StartRecord = false;
 	//
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Speed_Icon;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Speed_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Speed_MinError;
 	UPROPERTY(editanywhere, blueprintReadWrite)
 	float Speed_Value = 0.0f;
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Zoom_Icon;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Zoom_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* Zoom;
+	UFUNCTION()
+	void Zoom_Update(float zoomupdate);
+	UFUNCTION()
+	void Reset_Zoom_Update();
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Zoom_MinError;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Zoom_MaxError;
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Sensitivity_Icon;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Sensitivity_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* Sensitivity;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Sensitivity_MinError;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Sensitivity_MaxError;
+
+	UFUNCTION()
+	void Sensitivity_Update(float Mouseupdate);
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* CameraUI_Rotate_Icon;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* CameraUI_Rotate_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* CameraUI_Rotate;
+	UFUNCTION()
+	void CameraUI_Rotate_Update(float Cameraupdate);
+
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Menue_Icon;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Menue_Text;
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Battery_Icon;
+
+
+	//// Editor Mode ///
+
+	// UPROPERTY(meta=(BindWidget))
+	// class UUserWidget* WBP_Drag;
+
+	UFUNCTION()
+	void EditorMode_UI_On();
+
+	UFUNCTION()
+	void EditorMode_UI_Off();
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Editor_line;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Editor_Box;
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* Editor_Text;
+
+
 };
+
+

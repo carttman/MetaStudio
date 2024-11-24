@@ -8,6 +8,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Gizmo/JSH_Rotate_GizmoX.h"
+#include "Gizmo/JSH_Rotate_GizmoY.h"
+#include "Gizmo/JSH_Rotate_GizmoZ.h"
 #include "Logging/LogMacros.h"
 #include "Widget/JSH_Record_UI.h"
 #include "JSH_Player.generated.h"
@@ -290,7 +292,8 @@ public:
 	UPROPERTY()
 	float MaxFlySpeed_C = 500.f;
 	UPROPERTY()
-	float BrakingDecelerationFlying_C = 5000.f;
+	float BrakingDecelerationFlying_C = 10000.f;
+	//float BrakingDecelerationFlying_C = 5000.f;
 
 	
 	UFUNCTION()
@@ -452,6 +455,16 @@ public:
 	void Save_Gizmo_RX(AActor* Gizmo_RX);
 	UPROPERTY()
 	AJSH_Rotate_GizmoX* Saved_Gizmo_RX;
+
+	UFUNCTION()
+	void Save_Gizmo_RY(AActor* Gizmo_RY);
+	UPROPERTY()
+	AJSH_Rotate_GizmoY* Saved_Gizmo_RY;
+
+	UFUNCTION()
+	void Save_Gizmo_RZ(AActor* Gizmo_RZ);
+	UPROPERTY()
+	AJSH_Rotate_GizmoZ* Saved_Gizmo_RZ;
 
 	
 	
