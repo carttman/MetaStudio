@@ -92,12 +92,7 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 		ApplyRollBack();
 	}
 
-
-	//ActivateStartFly(!MoveStop);
-	//if (MoveStop)
-	//{
-	//	ActivateStartFly(false);
-	//}
+	GEngine->AddOnScreenDebugMessage(0, DeltaTime, FColor::Green, FString::Printf (TEXT("bIsMoving : %d"), bIsMoving));
 }
 
 // Called to bind functionality to input
@@ -448,8 +443,8 @@ void ASpaceshipPawn::ActivateStartFly(bool bActive)
 
 bool ASpaceshipPawn::CheckLanding()
 {
-
 	if (!IsLocallyControlled())	return false;
+	UE_LOG(LogTemp, Warning, TEXT("CheckLanding"));
 	FVector start = GetActorLocation();
 	FVector end = start - FVector(0, 0, 100000000000);
 
@@ -460,17 +455,20 @@ bool ASpaceshipPawn::CheckLanding()
 	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f, 0, 20.0f);
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("LineTrace Success"));
 		bHitResult = true;
 		DrawDebugLine(GetWorld(), start, end, FColor::Magenta, false, 1.0f, 0, 20.0f);
 		LastLandingPosZ = hitResult.ImpactPoint.Z;
 
 		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.ImpactPoint);
-		UE_LOG(LogTemp, Warning, TEXT("dist : %f - %f"), distanceToGround, LandingDistance)
-
+		// UE_LOG(LogTemp, Warning, TEXT("dist : %f - %f"), distanceToGround, LandingDistance)
+		UE_LOG(LogTemp, Warning, TEXT("DistanceToGround: %f, LandingDistance: %f"), distanceToGround, LandingDistance);
 			if (distanceToGround < LandingDistance)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("distanceToGround < LandingDistance"));
 				bCantMove = true;
 				bLanded = true;
+				bIsMoving = false;
 
 				Server_PlayAnimMontage(Anim->legDownMontage);
 				FTimerHandle handle;
@@ -479,7 +477,6 @@ bool ASpaceshipPawn::CheckLanding()
 					}, 2, false);
 				Server_EndFlyEffect();
 
-				bIsMoving = false;
 
 				return true;
 			}

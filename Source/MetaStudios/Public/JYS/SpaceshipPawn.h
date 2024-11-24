@@ -136,13 +136,14 @@ public:
 	class UAnimSequence* doorAnim;
 
 	UPROPERTY(EditAnywhere)
-	float LandingDistance = 500.0f;
+	float LandingDistance = 1000.0f;
 
 	bool bCantMove = false;
 
 	bool bLanded = true;
 
 	// Âø·ú ÈÄ player·Î possessÇÒ ¼ö ÀÖ°Ô²û
+	UPROPERTY()
 	bool bIsMoving = false;
 
 	////////////////Effect//////////////

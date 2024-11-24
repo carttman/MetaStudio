@@ -213,57 +213,13 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 	if (direction.X != 0.0f)
 	{
 		ApplyRoll(v.Y);
-		//UE_LOG(LogTemp, Warning, TEXT("direction.X != 0.0f"))
+		// UE_LOG(LogTemp, Warning, TEXT("direction.X != 0.0f"))
 	}
 	else
 	{
 		ApplyRollBack();
-		//UE_LOG(LogTemp, Warning, TEXT("ApplyRollBack"))
+		// UE_LOG(LogTemp, Warning, TEXT("ApplyRollBack"))
 	}
-
-
-
-	/////////////////LineTrace//////////////////////
-	//FVector startLocation = GetActorLocation();
-	//FVector endLocation = startLocation + -(FVector::UpVector * 10000.0f); // Trace downwards
-	//FHitResult hitResult;
-	//FCollisionQueryParams queryParams;
-	//queryParams.AddIgnoredActor(this);
-	//
-	//if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_Visibility, queryParams))
-	//{
-	//	// DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
-	//
-	//	FVector newLocation = hitResult.ImpactPoint;
-	//	newLocation.Z += 100.0f;  
-	//	SetActorLocation(newLocation);
-	//	float PosZ = GetActorLocation().Z;
-	//	UE_LOG(LogTemp, Warning, TEXT("Ground hit : %f : %f"), hitResult.ImpactPoint.Z, PosZ);
-	//}	
-	// 
-	//
-
-	//if (LineTraceArrow)
-	//{
-	//	FVector startLocation2 = LineTraceArrow->GetComponentLocation();
-	//	FVector endLocation2 = startLocation2 + (LineTraceArrow->GetForwardVector() * 10000.0f); // Trace in the forward //direction
-	//
-	//	FHitResult hitResult2;
-	//	FCollisionQueryParams queryParams2;
-	//	queryParams.AddIgnoredActor(this);
-	//
-	//	if (GetWorld()->LineTraceSingleByChannel(hitResult2, startLocation, endLocation, ECC_Visibility, queryParams2))
-	//	{
-	//		// DrawDebugLine(GetWorld(), startLocation2, endLocation2, FColor::Blue, false, 1.0f, 0, 20.0f);
-	//
-	//		FVector newLocation = hitResult2.ImpactPoint;
-	//		newLocation.Z += 50.0f;
-	//		SetActorLocation(newLocation);
-	//
-	//		UE_LOG(LogTemp, Warning, TEXT("Line trace hit from ArrowComponent"));
-	//	}
-	//}
-	///////////////LineTrace//////////////////////
 
 	FTransform ttt = FTransform(GetControlRotation());
 	direction = ttt.TransformVector(direction);
