@@ -292,7 +292,8 @@ public:
 	UPROPERTY()
 	float MaxFlySpeed_C = 500.f;
 	UPROPERTY()
-	float BrakingDecelerationFlying_C = 5000.f;
+	float BrakingDecelerationFlying_C = 10000.f;
+	//float BrakingDecelerationFlying_C = 5000.f;
 
 	
 	UFUNCTION()

@@ -84,6 +84,8 @@ public:
 	class UTextBlock* Zoom;
 	UFUNCTION()
 	void Zoom_Update(float zoomupdate);
+	UFUNCTION()
+	void Reset_Zoom_Update();
 
 	UPROPERTY(meta=(BindWidget))
 	class UImage* Zoom_MinError;
@@ -97,6 +99,11 @@ public:
 	class UImage* Sensitivity_Box;
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* Sensitivity;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Sensitivity_MinError;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Sensitivity_MaxError;
+
 	UFUNCTION()
 	void Sensitivity_Update(float Mouseupdate);
 

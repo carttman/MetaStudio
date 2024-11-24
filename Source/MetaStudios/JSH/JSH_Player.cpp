@@ -533,7 +533,7 @@ void AJSH_Player::StartRecording()
 		
 		
 		// 카메라 확대, 축소, 회전 , 초기화
-		CameraReset();
+		//CameraReset();
 
 		if (JPlayerController == nullptr) Saved_PlayerController();
 		// 인스턴스에 넣어둔 녹화 기능 시작
@@ -1777,10 +1777,17 @@ void AJSH_Player::CameraRight()
 	// {
 	// 	CurrentAngl = 90.0f;
 	// }
-	
+
+
 	NewCameraRotation = RecordCamera->GetRelativeRotation();
 	NewCameraRotation.Roll = CurrentAngl;
 	RecordCamera->SetRelativeRotation(NewCameraRotation);
+
+
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+	}
 }
 
 void AJSH_Player::CameraLeft()
@@ -1801,6 +1808,12 @@ void AJSH_Player::CameraLeft()
 	NewCameraRotation = RecordCamera->GetRelativeRotation();
 	NewCameraRotation.Roll = CurrentAngl;
 	RecordCamera->SetRelativeRotation(NewCameraRotation);
+
+
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+	}
 }
 
 void AJSH_Player::CameraDefault()
@@ -1813,6 +1826,10 @@ void AJSH_Player::CameraDefault()
 	
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+	}
 }
 
 void AJSH_Player::CameraReset()
@@ -1822,6 +1839,15 @@ void AJSH_Player::CameraReset()
 	RecordCamera->SetRelativeRotation(DefaultCameraleaning);
 	CurrentAngl = 0;
 	UE_LOG(LogTemp, Error, TEXT("CameraReset"));
+
+	if (Origin_RecordUI)
+	{
+		Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+		//Origin_RecordUI->Sensitivity_Update(MouseSensitivityYaw);
+		Origin_RecordUI->CameraUI_Rotate_Update(CurrentAngl);
+		Origin_RecordUI->Zoom_Update(RecordCamera->FieldOfView);
+		Origin_RecordUI->Reset_Zoom_Update();
+	}
 }
 
 // 마우스 감도 조절 , 줌 했을때 마우스(화면 회전)가 너무 빨라서 추가

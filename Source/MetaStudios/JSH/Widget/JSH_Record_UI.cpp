@@ -24,6 +24,8 @@ void UJSH_Record_UI::NativeConstruct()
 	Speed_MinError->SetVisibility(ESlateVisibility::Hidden);
 	Zoom_MinError->SetVisibility(ESlateVisibility::Hidden);
 	Zoom_MaxError->SetVisibility(ESlateVisibility::Hidden);
+	Sensitivity_MaxError->SetVisibility(ESlateVisibility::Hidden);
+	Sensitivity_MinError->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UJSH_Record_UI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -98,6 +100,10 @@ void UJSH_Record_UI::Zoom_Update(float zoomupdate)
 		Zoom_MaxError->SetVisibility(ESlateVisibility::Visible);
 		Zoom->SetText(FText::FromString(TEXT("Max")));
 	}
+	// else if (IntZoom == 0)
+	// {
+	// 	Zoom->SetText(FText::FromString(TEXT("Default")));
+	// }
 	else
 	{
 		Zoom_MinError->SetVisibility(ESlateVisibility::Hidden);
@@ -106,6 +112,11 @@ void UJSH_Record_UI::Zoom_Update(float zoomupdate)
 
 	}
 
+}
+
+void UJSH_Record_UI::Reset_Zoom_Update()
+{
+	Zoom->SetText(FText::FromString(TEXT("Default")));
 }
 
 void UJSH_Record_UI::Sensitivity_Update(float Mouseupdate)
@@ -117,13 +128,17 @@ void UJSH_Record_UI::Sensitivity_Update(float Mouseupdate)
 	else if (Mouseupdate >= 1.0f)
 	{
 		Sensitivity->SetText(FText::FromString(TEXT("Max")));
+		Sensitivity_MaxError->SetVisibility(ESlateVisibility::Visible);
 	}
 	else if (Mouseupdate <= 0.06f)
 	{
 		Sensitivity->SetText(FText::FromString(TEXT("Min")));
+		Sensitivity_MinError->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
+		Sensitivity_MinError->SetVisibility(ESlateVisibility::Hidden);
+		Sensitivity_MaxError->SetVisibility(ESlateVisibility::Hidden);
 		// 소수점 둘째 자리까지 항상 표시되도록
 		FString formattedValue = FString::Printf(TEXT("%.2f"), Mouseupdate);
 		Sensitivity->SetText(FText::FromString(formattedValue));
@@ -132,4 +147,13 @@ void UJSH_Record_UI::Sensitivity_Update(float Mouseupdate)
 
 void UJSH_Record_UI::CameraUI_Rotate_Update(float Cameraupdate)
 {
+	if (Cameraupdate == 0.0f)
+	{
+		CameraUI_Rotate->SetText(FText::FromString(TEXT("Default")));
+	}
+	else
+	{
+		int32 intCameraupdate = FMath::RoundToInt(Cameraupdate);
+		CameraUI_Rotate->SetText(FText::AsNumber(intCameraupdate));
+	}
 }
