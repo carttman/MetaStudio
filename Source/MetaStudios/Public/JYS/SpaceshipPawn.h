@@ -92,6 +92,9 @@ public:
 	void OnMoveUp(const FInputActionValue& value);
 	void OnMoveDown(const FInputActionValue& value);
 
+	UFUNCTION()
+	void StopMove();
+
 	UFUNCTION(Server, Reliable)
 	void Server_OnMyActionMoveSpaceship(bool bMove);
 
