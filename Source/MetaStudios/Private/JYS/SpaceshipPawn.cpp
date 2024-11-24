@@ -92,12 +92,7 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 		ApplyRollBack();
 	}
 
-
-	//ActivateStartFly(!MoveStop);
-	//if (MoveStop)
-	//{
-	//	ActivateStartFly(false);
-	//}
+	GEngine->AddOnScreenDebugMessage(0, DeltaTime, FColor::Green, FString::Printf (TEXT("bIsMoving : %d"), bIsMoving));
 }
 
 // Called to bind functionality to input
@@ -125,15 +120,18 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		EnhancedInputComponent->BindAction(SpaceshipLook, ETriggerEvent::Triggered, this, &ASpaceshipPawn::OnMyActionLook);
 		EnhancedInputComponent->BindAction(SpaceshipMove, ETriggerEvent::Triggered, this, &ASpaceshipPawn::OnMyActionMove);
+		EnhancedInputComponent->BindAction(SpaceshipMove, ETriggerEvent::Completed, this, &ASpaceshipPawn::StopMove);
 		EnhancedInputComponent->BindAction(SpaceshipMoveUp, ETriggerEvent::Triggered, this, &ASpaceshipPawn::OnMoveUp);
 		EnhancedInputComponent->BindAction(SpaceshipMoveDown, ETriggerEvent::Triggered, this, &ASpaceshipPawn::OnMoveDown);
+
 	}
 }
 
 void ASpaceshipPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASpaceshipPawn, MoveStop);
 
 }
 
@@ -149,7 +147,7 @@ bool ASpaceshipPawn::CanPlayerEnter(AMetaStudiosCharacter* targetCharacter)
 
 void ASpaceshipPawn::ExitSpaceship()
 {
-	if (IsLocallyControlled())
+	if (IsLocallyControlled() && !bIsMoving)
 	{
 		Server_ExitSpaceship();
 	}
@@ -219,11 +217,11 @@ void ASpaceshipPawn::ResetEnhancedInputSetting(class APlayerController* pc)
 void ASpaceshipPawn::OnMyActionMove(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();
-	if (v.X <= 0.0f && MoveStop == false)
-	{
-		Server_OnMyActionMoveSpaceship(true);
-		return;
-	}
+	//if (v.X <= 0.0f && MoveStop == false)
+	//{
+	//	Server_OnMyActionMoveSpaceship(true);
+	//	return;
+	//}
 
 	if (v.X <= 0.0f)	return;
 
@@ -278,6 +276,7 @@ void ASpaceshipPawn::OnMoveUp(const FInputActionValue& value)
 		bLanded = false;
 		MoveUpAnim();
 		Server_StartFlyEffect();
+		bIsMoving = true;
 		// ActivateStartFly(true);
 	}
 
@@ -295,6 +294,11 @@ void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
 	// 수직 하강
 	currentLocation.Z -= MovementSpeed * GetWorld()->GetDeltaSeconds();
 	SetActorLocation(currentLocation);
+}
+
+void ASpaceshipPawn::StopMove()
+{
+	Server_OnMyActionMoveSpaceship(true);
 }
 
 void ASpaceshipPawn::ApplyRoll(float RollInput)
@@ -447,8 +451,8 @@ void ASpaceshipPawn::ActivateStartFly(bool bActive)
 
 bool ASpaceshipPawn::CheckLanding()
 {
-
 	if (!IsLocallyControlled())	return false;
+	UE_LOG(LogTemp, Warning, TEXT("CheckLanding"));
 	FVector start = GetActorLocation();
 	FVector end = start - FVector(0, 0, 100000000000);
 
@@ -459,17 +463,20 @@ bool ASpaceshipPawn::CheckLanding()
 	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f, 0, 20.0f);
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("LineTrace Success"));
 		bHitResult = true;
 		DrawDebugLine(GetWorld(), start, end, FColor::Magenta, false, 1.0f, 0, 20.0f);
 		LastLandingPosZ = hitResult.ImpactPoint.Z;
 
 		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.ImpactPoint);
-		UE_LOG(LogTemp, Warning, TEXT("dist : %f - %f"), distanceToGround, LandingDistance)
-
+		// UE_LOG(LogTemp, Warning, TEXT("dist : %f - %f"), distanceToGround, LandingDistance)
+		UE_LOG(LogTemp, Warning, TEXT("DistanceToGround: %f, LandingDistance: %f"), distanceToGround, LandingDistance);
 			if (distanceToGround < LandingDistance)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("distanceToGround < LandingDistance"));
 				bCantMove = true;
 				bLanded = true;
+				bIsMoving = false;
 
 				Server_PlayAnimMontage(Anim->legDownMontage);
 				FTimerHandle handle;
@@ -477,6 +484,7 @@ bool ASpaceshipPawn::CheckLanding()
 					Server_PlayAnimMontage(Anim->openDoorMontage);
 					}, 2, false);
 				Server_EndFlyEffect();
+
 
 				return true;
 			}

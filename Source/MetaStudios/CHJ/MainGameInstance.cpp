@@ -30,6 +30,13 @@ void UMainGameInstance::Init()
 	// 바인딩 =================================================================================================================
 
 	}
+	// 게임 엔진이 유효한 경우
+	if ( GEngine )
+	{
+		// 네트워크 실패 이벤트에 대한 핸들러 등록
+		// 네트워크 연결 실패 시 OnNetworkFailure 함수가 호출되도록 설정
+		GEngine->OnNetworkFailure().AddUObject(this , &UMainGameInstance::OnNetworkFailure);
+	}
 
 	//PRINTLOG(TEXT("Network Start!!"));
 	//FTimerHandle handle;
@@ -235,6 +242,7 @@ void UMainGameInstance::ServerRPCExitSession_Implementation()
 
 void UMainGameInstance::MulticastRPCExitSession_Implementation()
 {
+	
 	// 방퇴장 요청
 	SessionInterface->DestroySession(FName(MySessionName));
 }
@@ -247,8 +255,18 @@ void UMainGameInstance::OnMyDestroySessionComplete(FName SessionName , bool bWas
 	{
 		// 클라이언트가 로비로 여행을 가고싶다.
 		auto* pc = GetWorld()->GetFirstPlayerController();
+		
 		pc->ClientTravel(TEXT("/Game/SYM/MainLobby.MainLobby"), ETravelType::TRAVEL_Absolute);
+		
 	}
+}
+
+void UMainGameInstance::OnNetworkFailure(UWorld* World , UNetDriver* NetDriver , ENetworkFailure::Type FailureType , const FString& ErrorString)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s %hs"), *ErrorString, "DestroySessionDestroySessionDestroySession");
+
+	// 방퇴장 요청
+	SessionInterface->DestroySession(FName(MySessionName));
 }
 
 #pragma region 인코딩

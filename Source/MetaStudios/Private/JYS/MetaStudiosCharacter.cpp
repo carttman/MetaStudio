@@ -22,6 +22,7 @@
 #include "JYS/PlayerAnimInstance.h"
 #include <MetaStudios/CHJ/MainGameInstance.h>
 #include "Blueprint/UserWidget.h"
+#include "Components/ArrowComponent.h"
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -75,12 +76,25 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	FPSCamera->SetupAttachment(FPSCameraSpringArm);
 	FPSCamera->bUsePawnControlRotation = false;
 
+	//FootstepAudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("FootstepAudioComp"));
+	//FootstepAudioComp->SetupAttachment(RootComponent);
+	//FootstepAudioComp->bAutoActivate = false;
+
+	BoosterPackMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoosterPackMesh"));
+	BoosterPackMesh->SetupAttachment(GetMesh(), TEXT("BoosterSocket"));
+	BoosterPackMesh->SetVisibility(true);
+
+	BoosterArrow1 = CreateDefaultSubobject<UArrowComponent>(TEXT("UArrowComponent"));
+	BoosterArrow1->SetupAttachment(BoosterPackMesh);
+
 	BoosterFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent"));
-	BoosterFXComponent->SetupAttachment(GetMesh());
+	BoosterFXComponent->SetupAttachment(BoosterArrow1);
 
 	BoosterFXComponent2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent2"));
 	BoosterFXComponent2->SetupAttachment(GetMesh());
 
+	BoosterFXComponent3 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent3"));
+	BoosterFXComponent3->SetupAttachment(GetMesh());
 }
 
 void AMetaStudiosCharacter::Tick(float DeltaTime)
@@ -265,6 +279,15 @@ void AMetaStudiosCharacter::ResetEnhancedInputSetting(APlayerController* PlayerC
 
 
 /////////////////////Booster/////////////////////////////////////////////////////
+
+//void AMetaStudiosCharacter::AttachBoosterPack() const
+//{
+// 	const FName SocketName = TEXT("BoosterSocket");
+//	if (!GetMesh()->DoesSocketExist(SocketName))
+//	{
+//		return;
+//	}
+//}
 
 void AMetaStudiosCharacter::ManageBooster(float DeltaTime)
 {
@@ -631,7 +654,7 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 			// Possess가 된 후 widget 사라지기
 			if (SpaceshipActor->ActiveWidget != nullptr)
 			{
-				SpaceshipActor->ActiveWidget->RemoveFromViewport();
+				SpaceshipActor->ActiveWidget->RemoveFromParent();
 			}
 		}
 	}
@@ -730,7 +753,7 @@ void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarAc
 			// Possess가 된 후 widget 사라지기
 			if (CarActor->ActiveWidget != nullptr)
 			{
-				CarActor->ActiveWidget->RemoveFromViewport();
+				CarActor->ActiveWidget->RemoveFromParent();
 			}
 		}
 
@@ -767,6 +790,23 @@ void AMetaStudiosCharacter::Move(const FInputActionValue& Value)
 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
+
+		//if (!MovementVector.IsZero())
+		//{
+		//	if (!FootstepAudioComp->IsPlaying())
+		//	{
+		//		bAutoActivate = true;
+		//		FootstepAudioComp->Play();
+		//	}
+		//}
+		//else 
+		//{
+		//	if (FootstepAudioComp->IsPlaying())
+		//	{
+		//		bAutoActivate= false;
+		//		FootstepAudioComp->Stop();
+		//	}
+		//}
 	}
 }
 

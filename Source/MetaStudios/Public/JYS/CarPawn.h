@@ -138,4 +138,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USkeletalMeshComponent* RidingPlayer;
 
+
+
+	//UPROPERTY(Replicated)
+	//TArray<AActor> PlayerBox;
+
 };

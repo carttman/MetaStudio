@@ -92,6 +92,9 @@ public:
 	void OnMoveUp(const FInputActionValue& value);
 	void OnMoveDown(const FInputActionValue& value);
 
+	UFUNCTION()
+	void StopMove();
+
 	UFUNCTION(Server, Reliable)
 	void Server_OnMyActionMoveSpaceship(bool bMove);
 
@@ -136,11 +139,15 @@ public:
 	class UAnimSequence* doorAnim;
 
 	UPROPERTY(EditAnywhere)
-	float LandingDistance = 500.0f;
+	float LandingDistance = 1000.0f;
 
 	bool bCantMove = false;
 
 	bool bLanded = true;
+
+	// Âø·ú ÈÄ player·Î possessÇÒ ¼ö ÀÖ°Ô²û
+	UPROPERTY()
+	bool bIsMoving = false;
 
 	////////////////Effect//////////////
 
@@ -204,5 +211,4 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_CloseDoorMontageSetting();
 	////////////Animation/////////////////////////
-
 };
