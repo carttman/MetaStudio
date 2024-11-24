@@ -40,5 +40,27 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	class UImage* Window_Left;
 
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* SelectMode;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* SelectMode2;
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* TranslateMode;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* TranslateMode2;
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* RotateMode;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* RotateMode2;
+
+
+	UPROPERTY(meta=(BindWidget))
+	class UImage* ScaleMode;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* ScaleMode2;
 	
 };

@@ -38,20 +38,20 @@ AJSH_Translate_GizmoX::AJSH_Translate_GizmoX()
 	}
 	
 	
-	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Red.MM_Gizmo_Red'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_White.MM_Gizmo_White'"));
 	if (OriginMaterial.Succeeded())
 	{
 		Origin->SetMaterial(0, OriginMaterial.Object);
 	}
 
 
-	ConstructorHelpers::FObjectFinder<UMaterial> YellowMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Yellow.MM_Gizmo_Yellow'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> YellowMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Red.MM_Gizmo_Red'"));
 	if (YellowMaterialLoader.Succeeded())
 	{
 		YellowMaterial = YellowMaterialLoader.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UMaterial> RedMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Red.MM_Gizmo_Red'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> RedMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_White.MM_Gizmo_White'"));
 	if (RedMaterialLoader.Succeeded())
 	{
 		RedMaterial = RedMaterialLoader.Object;

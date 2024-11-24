@@ -198,7 +198,7 @@ void AJSH_Player::BeginPlay()
 	CameraSpawn_b_On_Off = true;
 	
 	
-	if (HasAuthority() && !RecordUI_01)
+	if (IsLocallyControlled() && !RecordUI_01)
 	{
 		if (UI_Record_01)
 		{
@@ -210,6 +210,21 @@ void AJSH_Player::BeginPlay()
 			}
 		}
 	}
+
+	if (IsLocallyControlled() && !PlayerMainUI)
+	{
+		if (UI_Editor_Main)
+		{
+			PlayerMainUI = CreateWidget<UUserWidget>(GetWorld(), UI_Editor_Main);
+			if(PlayerMainUI)
+			{
+				//Editor_UI->AddToViewport();
+				Editor_UI = Cast<UJSH_Editor_MainUI>(PlayerMainUI);
+				// Editor_UI->SetVisibility(ESlateVisibility::Hidden);
+			}
+		}
+	}
+
 	
 }
 
@@ -810,11 +825,20 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 			
 			DisableEdit();
 
+			// if (PlayerMainUI)
+			// {
+			// 	PlayerMainUI->RemoveFromParent();
+			// 	PlayerMainUI = nullptr;
+			// }
+			// if (Editor_UI)
+			// {
+			// 	Editor_UI->SetVisibility(ESlateVisibility::Hidden);
+			// }
 
 			if (Origin_RecordUI)
 			{
 				Origin_RecordUI->SetVisibility(ESlateVisibility::Visible);
-				Origin_RecordUI->EditorMode_UI_Off();
+				//Origin_RecordUI->EditorMode_UI_Off();
 			}
 
 			// if (!RecordUI_01 && UI_Record_01)
@@ -869,30 +893,28 @@ void AJSH_Player::EnableEdit()
 	}
 
 	
-	if (!PlayerMainUI)
+	if (Editor_UI)
 	{
-		// // 촬영 UI 제거
-		// if (RecordUI_01)
+		// // Editor UI 생성
+		// if (UI_Editor_Main)
 		// {
-		// 	RecordUI_01->RemoveFromParent();
-		// 	RecordUI_01 = nullptr;
+		// 	PlayerMainUI->AddToViewport();
 		// }
-		if (Origin_RecordUI)
-		{
-			//Origin_RecordUI->SetVisibility(ESlateVisibility::HitTestInvisible);
-			Origin_RecordUI->EditorMode_UI_On();
-		}
-		// Editor UI 생성
-		if (UI_Editor_Main)
-		{
-			PlayerMainUI = CreateWidget<UUserWidget>(GetWorld(), UI_Editor_Main);
-			if(PlayerMainUI)
-			{
-				PlayerMainUI->AddToViewport();
-			}
-		}
+		Editor_UI->AddToViewport();
 	}
-	
+
+
+	if (Origin_RecordUI)
+	{
+		//Origin_RecordUI->SetVisibility(ESlateVisibility::HitTestInvisible);
+		Origin_RecordUI->SetVisibility(ESlateVisibility::Hidden);
+		//Origin_RecordUI->EditorMode_UI_On();
+	}
+
+	// if (Editor_UI)
+	// {
+	// 	Editor_UI->SetVisibility(ESlateVisibility::Visible);
+	// }
 	Server_EnableEdit();
 }
 
@@ -934,20 +956,31 @@ void AJSH_Player::DisableEdit()
 
 
 
-	if (PlayerMainUI)
+	// if (PlayerMainUI)
+	// {
+	// 	PlayerMainUI->RemoveFromParent();
+	// 	//PlayerMainUI = nullptr;
+	//
+	// 	 // if (Origin_RecordUI)
+	// 	 // {
+	// 	 // 	Origin_RecordUI->SetVisibility(ESlateVisibility::Hidden);
+	// 	 // }
+	// 	 //
+	// 	 // if (!RecordUI_01->IsVisible())
+	// 	 // {
+	// 	 // 	RecordUI_01->SetVisibility(ESlateVisibility::Hidden);
+	// 	 // }
+	// }
+	//
+	// if (Editor_UI)
+	// {
+	// 	Editor_UI->SetVisibility(ESlateVisibility::Hidden);
+	// }
+
+
+	if (Editor_UI)
 	{
-		PlayerMainUI->RemoveFromParent();
-		PlayerMainUI = nullptr;
-
-		// if (Origin_RecordUI)
-		// {
-		// 	Origin_RecordUI->SetVisibility(ESlateVisibility::Hidden);
-		// }
-
-		// if (!RecordUI_01->IsVisible())
-		// {
-		// 	RecordUI_01->SetVisibility(ESlateVisibility::Hidden);
-		// }
+		Editor_UI->RemoveFromParent();
 	}
 	
 	Server_DisableEdit();
@@ -1129,9 +1162,12 @@ void AJSH_Player::G_SelecteMode()
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = false;
 	Gizmo_ScaleMode = false;
-	
 
-	
+	// if (PlayerMainUI)
+	// {
+	// 	PlayerMainUI->select
+	// }
+
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();

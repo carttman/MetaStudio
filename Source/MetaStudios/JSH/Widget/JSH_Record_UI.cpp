@@ -170,25 +170,37 @@ void UJSH_Record_UI::CameraUI_Rotate_Update(float Cameraupdate)
 
 void UJSH_Record_UI::EditorMode_UI_On()
 {
-	Line->SetVisibility(ESlateVisibility::Hidden);
+	//Line->SetVisibility(ESlateVisibility::Hidden);
 	Rec_WhiteCircle->SetVisibility(ESlateVisibility::Hidden);
 	Rec_Text->SetVisibility(ESlateVisibility::Hidden);
+	Center->SetVisibility(ESlateVisibility::Hidden);
+	Menue_Icon->SetVisibility(ESlateVisibility::Hidden);
+	Menue_Text->SetVisibility(ESlateVisibility::Hidden);
+	Battery_Icon->SetVisibility(ESlateVisibility::Hidden);
+	Resolation_Box->SetVisibility(ESlateVisibility::Hidden);
+	Resolation_Text->SetVisibility(ESlateVisibility::Hidden);
 
-	Editor_line->SetVisibility(ESlateVisibility::HitTestInvisible);
-	Editor_Box->SetVisibility(ESlateVisibility::HitTestInvisible);
-	Editor_Text->SetVisibility(ESlateVisibility::HitTestInvisible);
+	//Editor_line->SetVisibility(ESlateVisibility::HitTestInvisible);
+	//Editor_Box->SetVisibility(ESlateVisibility::HitTestInvisible);
+	//Editor_Text->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 
 void UJSH_Record_UI::EditorMode_UI_Off()
 {
-	Line->SetVisibility(ESlateVisibility::HitTestInvisible);
+	//Line->SetVisibility(ESlateVisibility::HitTestInvisible);
 	Rec_WhiteCircle->SetVisibility(ESlateVisibility::HitTestInvisible);
 	Rec_Text->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Center->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Menue_Icon->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Menue_Text->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Battery_Icon->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Resolation_Box->SetVisibility(ESlateVisibility::HitTestInvisible);
+	Resolation_Text->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 
-	Editor_line->SetVisibility(ESlateVisibility::Hidden);
-	Editor_Box->SetVisibility(ESlateVisibility::Hidden);
-	Editor_Text->SetVisibility(ESlateVisibility::Hidden);
+	//Editor_line->SetVisibility(ESlateVisibility::Hidden);
+	//Editor_Box->SetVisibility(ESlateVisibility::Hidden);
+	//Editor_Text->SetVisibility(ESlateVisibility::Hidden);
 }
 

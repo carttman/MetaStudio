@@ -11,6 +11,7 @@
 #include "Gizmo/JSH_Rotate_GizmoY.h"
 #include "Gizmo/JSH_Rotate_GizmoZ.h"
 #include "Logging/LogMacros.h"
+#include "Widget/JSH_Editor_MainUI.h"
 #include "Widget/JSH_Record_UI.h"
 #include "JSH_Player.generated.h"
 
@@ -354,6 +355,9 @@ public:
 
 	UPROPERTY()
 	UJSH_Record_UI* Origin_RecordUI;
+
+	UPROPERTY()
+	UJSH_Editor_MainUI* Editor_UI;
 	
 	
 	// Editor Actor Destroy
