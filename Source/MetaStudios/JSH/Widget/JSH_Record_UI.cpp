@@ -35,6 +35,9 @@ void UJSH_Record_UI::NativeConstruct()
 	Editor_line->SetVisibility(ESlateVisibility::Hidden);
 	Editor_Box->SetVisibility(ESlateVisibility::Hidden);
 	Editor_Text->SetVisibility(ESlateVisibility::Hidden);
+
+	Resolation_Box->SetVisibility(ESlateVisibility::Hidden);
+	Resolation_Text->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UJSH_Record_UI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
