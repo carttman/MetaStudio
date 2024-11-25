@@ -232,7 +232,8 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 		}
 		else if (!OriginPlayer->Gizmo_ScaleMode && one_rotation)
 		{
-			SetActorRotation(start_rotator);
+			//SetActorRotation(start_rotator);
+			SetActorRotation(FRotator(0, 0, 0));
 			one_rotation = false;
 		}
 	}
