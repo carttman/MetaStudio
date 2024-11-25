@@ -284,7 +284,7 @@ private:
 
 	// 瞒 格废
 	UPROPERTY()
-	TArray<ACarPawn*>	ListCar;
+	TArray<ACarPawn*> ListCar;
 	// 快林急 格废
 	UPROPERTY()
 	TArray<ASpaceshipPawn*>	ListShip;	

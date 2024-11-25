@@ -511,7 +511,7 @@ void AMetaStudiosCharacter::SelectAutoMobile()
 	{
 		float distCur = GetDistanceTo(ListShip[i]);
 		if (distMinShip < distCur)	continue;
-		if( ListShip[i]->bExistRider == true )	continue;
+		if (ListShip[i]->bExistRider == true)	continue;
 		distMinShip = distCur;
 		selIdxShip = i;
 	}
@@ -593,6 +593,13 @@ void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation(class AActor* T
 			NetMulticast_EnterSpaceship(SpaceshipActor);
 		}
 
+		SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+		// Possess가 된 후 widget 사라지기
+		if (SpaceshipActor->ActiveWidget != nullptr)
+		{
+			SpaceshipActor->ActiveWidget->RemoveFromParent();
+		}
+
 		//ASpaceshipPawn* SpaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
 		//if (SpaceshipActor == nullptr)
 		//{
@@ -627,15 +634,15 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 		SpaceshipActor->bExistRider = true;
 		GetMesh()->SetVisibility(false);
 
-		if (IsLocallyControlled())
-		{
-			SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
-			// Possess가 된 후 widget 사라지기
-			if (SpaceshipActor->ActiveWidget != nullptr)
-			{
-				SpaceshipActor->ActiveWidget->RemoveFromParent();
-			}
-		}
+		//if (IsLocallyControlled())
+		//{
+		//	SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+		//	// Possess가 된 후 widget 사라지기
+		//	if (SpaceshipActor->ActiveWidget != nullptr)
+		//	{
+		//		SpaceshipActor->ActiveWidget->RemoveFromParent();
+		//	}
+		//}
 	}
 	else
 	{
@@ -665,7 +672,12 @@ void AMetaStudiosCharacter::Server_EnterCar_Implementation(class AActor* TargetA
 			GetController()->Possess(CarActor);
 			NetMulticast_EnterCar(CarActor);
 		}
-
+		CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+		// Possess가 된 후 widget 사라지기
+		if (CarActor->ActiveWidget != nullptr)
+		{
+			CarActor->ActiveWidget->RemoveFromParent();
+		}
 
 		//ACarPawn* CarActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
 		//if (CarActor == nullptr)
@@ -709,15 +721,15 @@ void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarAc
 		GetMesh()->SetVisibility(false);
 		CarActor->RidingPlayer->SetVisibility(true);
 
-		if (IsLocallyControlled())
-		{
-			CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
-			// Possess가 된 후 widget 사라지기
-			if (CarActor->ActiveWidget != nullptr)
-			{
-				CarActor->ActiveWidget->RemoveFromParent();
-			}
-		}
+		//if (IsLocallyControlled())
+		//{
+		//	CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+		//	// Possess가 된 후 widget 사라지기
+		//	if (CarActor->ActiveWidget != nullptr)
+		//	{
+		//		CarActor->ActiveWidget->RemoveFromParent();
+		//	}
+		//}
 
 		//CarActor->SetActorRotation(CarActor->GetActorRotation());
 	}
@@ -843,26 +855,26 @@ void AMetaStudiosCharacter::ExitSession()
 
 void AMetaStudiosCharacter::AddVehicle(class AActor* target)
 {
-	if( target == nullptr )	return;
-	
+	if (target == nullptr)	return;
+
 	ASpaceshipPawn* SpaceShip = Cast<ASpaceshipPawn>(target);
 	if (SpaceShip != nullptr)
 	{
 		ListShip.Add(SpaceShip);
 		return;
 	}
-	
+
 	ACarPawn* Car = Cast<ACarPawn>(target);
 	if (Car != nullptr)
 	{
 		ListCar.Add(Car);
 		return;
-	}	
+	}
 }
 
 void AMetaStudiosCharacter::DeleteVehicle(AActor* target)
 {
-	if( ListShip.Remove(Cast<ASpaceshipPawn>(target)) >= 0 )	return;
+	if (ListShip.Remove(Cast<ASpaceshipPawn>(target)) >= 0)	return;
 	ListCar.Remove(Cast<ACarPawn>(target));
 }
 

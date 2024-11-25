@@ -94,7 +94,10 @@ public:
 	class UBoxComponent* UIBox;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> WidgetClass;
+	TSubclassOf<UUserWidget> EnterWidgetClass;
+
+	//UPROPERTY(EditAnywhere)
+	//TSubclassOf<UUserWidget> ExitWidgetClass;
 
 	UUserWidget* ActiveWidget;
 
