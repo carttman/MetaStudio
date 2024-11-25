@@ -103,8 +103,29 @@ void ACarPawn::Tick(float DeltaTime)
 		FCollisionQueryParams queryParams;
 		queryParams.AddIgnoredActor(this);
 
+		float SphereRadius = 100.0f;
+		float HalfSphereRadius = SphereRadius * 0.5f;
+
+		//DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);      
+
+		bool HitDetected = GetWorld()->SweepSingleByChannel(hitResult, startLocation, endLocation, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(SphereRadius), queryParams);
+		if (HitDetected)
+		{
+			FVector locCharacter = GetActorLocation();
+			FVector newLocation = hitResult.ImpactPoint;
+			newLocation.Z += HalfSphereRadius;
+			locCharacter.Z = newLocation.Z + HalfSphereRadius;
+			SetActorLocation(locCharacter);
+		}
+
+		FVector CapsuleOrigin = startLocation + (endLocation - startLocation) * 0.5f;
+		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+
+		DrawDebugCapsule(GetWorld(), hitResult.ImpactPoint, HalfSphereRadius, SphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
+
+
 		//DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
-		
+		/*
 		if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_Visibility, queryParams))
 		{
 			// DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
@@ -138,6 +159,7 @@ void ACarPawn::Tick(float DeltaTime)
 			float PosZ = GetActorLocation().Z;	
 			UE_LOG(LogTemp, Warning, TEXT("Ground hit : %f : %f"), hitResult.ImpactPoint.Z, PosZ);
 		}
+		*/
 	}
 
 	ActivateThruster(!MoveStop);

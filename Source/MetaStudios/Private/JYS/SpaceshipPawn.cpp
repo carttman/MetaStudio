@@ -146,7 +146,7 @@ bool ASpaceshipPawn::CanPlayerEnter(AMetaStudiosCharacter* targetCharacter)
 
 	if (SpaceshipSkeletalMesh)
 	{
-		FVector SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("EnterExitSpaceship"));
+		FVector SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("EnterSpaceship"));
 
 		float Distance = FVector::Dist(SocketLocation, targetCharacter->GetActorLocation());
 
@@ -185,23 +185,23 @@ void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 
 	// 우주선 소켓 위치 가져오기
 	FVector SocketLocation = FVector::ZeroVector;
-	FRotator SocketRotation = FRotator::ZeroRotator;
+	//FRotator SocketRotation = FRotator::ZeroRotator;
 
 	if (SpaceshipSkeletalMesh)
 	{
-		SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("EnterExitSpaceship"));
-		SocketRotation = SpaceshipSkeletalMesh->GetSocketRotation(FName("EnterExitSpaceship"));
+		SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("ExitSpaceship"));
+		//SocketRotation = SpaceshipSkeletalMesh->GetSocketRotation(FName("ExitSpaceship"));
 	}
 	else
 	{
 		// 소켓이 없을 경우 기본 우주선 위치 사용
 		SocketLocation = GetActorLocation();
-		SocketRotation = GetActorRotation();
+		//SocketRotation = GetActorRotation();
 	}
-	FVector AdjustedLocation = SocketLocation + FVector(0.0f, 0.0f, 20.0f);
+	// FVector AdjustedLocation = SocketLocation + FVector(0.0f, 0.0f, 0.0f);
 	// 플레이어를 소켓 위치로 이동
-	player->SetActorLocation(AdjustedLocation);
-	player->SetActorRotation(SocketRotation);
+	player->SetActorLocation(SocketLocation);
+	//player->SetActorRotation(SocketRotation);
 
 	// 플레이어 컨트롤러가 Possess 처리
 	GetController()->Possess(player);
@@ -238,27 +238,27 @@ void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 	{
 		// 우주선 소켓 위치 가져오기
 		FVector SocketLocation = FVector::ZeroVector;
-		FRotator SocketRotation = FRotator::ZeroRotator;
+		//FRotator SocketRotation = FRotator::ZeroRotator;
 
 		if (SpaceshipSkeletalMesh)
 		{
-			SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("EnterExitSpaceship"));
-			SocketRotation = SpaceshipSkeletalMesh->GetSocketRotation(FName("EnterExitSpaceship"));
+			SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("ExitSpaceship"));
+			//SocketRotation = SpaceshipSkeletalMesh->GetSocketRotation(FName("ExitSpaceship"));
 		}
 		else
 		{
 			// 소켓이 없을 경우 기본 우주선 위치 사용
 			SocketLocation = GetActorLocation();
-			SocketRotation = GetActorRotation();
+			//SocketRotation = GetActorRotation();
 		}
 
-		FVector AdjustedLocation = SocketLocation + FVector(0.0f, 0.0f, 20.0f);
+		// FVector AdjustedLocation = SocketLocation + FVector(0.0f, 0.0f, 20.0f);
 
 		// 플레이어를 소켓 위치로 이동
-		player->SetActorLocation(AdjustedLocation);
+		player->SetActorLocation(SocketLocation);
 		if (HasAuthority())
 		{
-			player->SetActorRotation(SocketRotation);
+			//player->SetActorRotation(SocketRotation);
 		}
 
 		// 플레이어 가시화 처리
