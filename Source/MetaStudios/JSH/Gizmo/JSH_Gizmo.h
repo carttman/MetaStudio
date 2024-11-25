@@ -188,4 +188,8 @@ public:
 	FRotator start_rotator;
 	UPROPERTY()
 	bool one_rotation = false;
+
+
+	UPROPERTY()
+	bool First_GMode = false;
 };

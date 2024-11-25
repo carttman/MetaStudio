@@ -178,15 +178,27 @@ void AJSH_Scale_GizmoY::GOnClicked()
 
 	
 	
+	// ///// 처음 클릭 되고 난 후 돌아가는 함수 ////
+	// if (Clicked)
+	// {
+	// 	End_Location = End;
+	//
+	// 	End_Scale = FVector(Start_Scale.X, Start_Scale.Y + (( End_Location.Y - StartMouselocation.Y) * 0.01), Start_Scale.Z);
+	//
+	// 	// -값으로 가면 3d object 앞뒤가 뒤집혀 버어림
+	// 	//End_Scale = FVector(FMath::Abs(Start_Scale.X), FMath::Abs(Start_Scale.Y), FMath::Abs(Start_Scale.Z + ((End_Location.Z - StartMouselocation.Z) * 0.01)));
+	// 	//OriginPlayer->Editor_SpawnActor->SetActorRelativeScale3D(End_Scale);
+	// 	OriginPlayer->Editor_SpawnActor->Set_Scale_from_Gizmo(End_Scale);
+	// }
+
 	///// 처음 클릭 되고 난 후 돌아가는 함수 ////
 	if (Clicked)
 	{
 		End_Location = End;
-		
-		End_Scale = FVector(Start_Scale.X, Start_Scale.Y + (( End_Location.Y - StartMouselocation.Y) * 0.01), Start_Scale.Z);
+		//End_Scale = FVector(Start_Scale.X + (( End_Location.X - StartMouselocation.X) * 0.01), Start_Scale.Y, Start_Scale.Z);
 
 		// -값으로 가면 3d object 앞뒤가 뒤집혀 버어림
-		//End_Scale = FVector(FMath::Abs(Start_Scale.X), FMath::Abs(Start_Scale.Y), FMath::Abs(Start_Scale.Z + ((End_Location.Z - StartMouselocation.Z) * 0.01)));
+		End_Scale = FVector(FMath::Abs(Start_Scale.X), FMath::Abs(Start_Scale.Y + ((End_Location.Y - StartMouselocation.Y) * 0.01)), FMath::Abs(Start_Scale.Z));
 		//OriginPlayer->Editor_SpawnActor->SetActorRelativeScale3D(End_Scale);
 		OriginPlayer->Editor_SpawnActor->Set_Scale_from_Gizmo(End_Scale);
 	}
