@@ -305,6 +305,9 @@ private:
 	//void DeleteVehicle(class ACarPawn* target);
 
 
+public:
+	UFUNCTION()
+	bool IsLocallyPlayer()	{	return IsLocallyControlled(); }
 
 };
 

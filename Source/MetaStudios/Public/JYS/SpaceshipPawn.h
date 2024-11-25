@@ -70,7 +70,7 @@ public:
 	void Server_ExitSpaceship();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticast_ExitSpaceship();
+	void NetMulticast_ExitSpaceship(FVector ExitLocation, FRotator ExitRotation);
 
 	void ResetEnhancedInputSetting(class APlayerController* pc);
 
@@ -146,8 +146,8 @@ public:
 	bool bLanded = true;
 
 	// Âø·ú ÈÄ player·Î possessÇÒ ¼ö ÀÖ°Ô²û
-	UPROPERTY()
-	bool bIsMoving = false;
+	//UPROPERTY(Replicated)
+	//bool bIsMoving = false;
 
 	////////////////Effect//////////////
 
@@ -174,6 +174,10 @@ public:
 	void ActivateStartFly(bool bActive);
 
 	bool activeStartFly = true;
+
+
+	UPROPERTY(EditAnywhere)
+	class UArrowComponent*	ExitPosition;
 
 private:
 	

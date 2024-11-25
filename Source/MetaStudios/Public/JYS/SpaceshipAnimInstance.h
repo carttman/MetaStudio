@@ -23,6 +23,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_LegUpLoopNotify();
 
+	UFUNCTION()
+	void AnimNotify_openDoorEnded();
+
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* legDownMontage; 
 	UPROPERTY(EditAnywhere)
