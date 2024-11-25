@@ -68,7 +68,7 @@ AJSH_Rotate_GizmoZ::AJSH_Rotate_GizmoZ()
 		Origin3->SetVisibility(false);
 		Origin3->SetCollisionProfileName(TEXT("NoCollision"));
 	}
-	
+
 	Origin4 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Origin4"));
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TMesh4(TEXT("/Script/Engine.StaticMesh'/Game/JSH/Material/Rotate/circle.circle'"));
 	if (TMesh4.Succeeded())

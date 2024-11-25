@@ -224,7 +224,17 @@ void AJSH_Gizmo::Tick(float DeltaTime)
 	{
 		//SetActorTransform(OriginPlayer->Editor_SpawnActor->GetActorTransform());
 		SetActorLocation(OriginPlayer->Editor_SpawnActor->GetActorLocation());
-		//SetActorRotation(OriginPlayer->Editor_SpawnActor->GetActorRotation());
+
+		if (OriginPlayer->Gizmo_ScaleMode)
+		{
+			SetActorRotation(OriginPlayer->Editor_SpawnActor->GetActorRotation());
+			one_rotation = true;
+		}
+		else if (!OriginPlayer->Gizmo_ScaleMode && one_rotation)
+		{
+			SetActorRotation(start_rotator);
+			one_rotation = false;
+		}
 	}
 }
 
@@ -264,6 +274,27 @@ void AJSH_Gizmo::Begin_PlayerData(AJSH_Player* temp, AJSH_PlayerController* cont
 
 	Child_Actor_Detect();
 	//AttachToActor(OriginPlayer->Editor_SpawnActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
+
+	if (!OriginPlayer->FirstGizmode)
+	{
+		OriginPlayer->G_TranslateMode();
+		OriginPlayer->FirstGizmode = true;
+	}
+	else if (OriginPlayer->Saved_Gizmo_Mode_Value == 1)
+	{
+		OriginPlayer->G_TranslateMode();
+	}
+	else if (OriginPlayer->Saved_Gizmo_Mode_Value == 2)
+	{
+		OriginPlayer->G_RotateMode();
+	}
+	else if (OriginPlayer->Saved_Gizmo_Mode_Value == 3)
+	{
+		OriginPlayer->G_SclaeMode();
+	}
+
+	start_rotator = GetActorRotation();
 }
 
 

@@ -183,7 +183,7 @@ void AJSH_Scale_GizmoZ::GOnClicked()
 	if (Clicked)
 	{
 		End_Location = End;
-		
+
 		End_Scale = FVector(Start_Scale.X, Start_Scale.Y, Start_Scale.Z + (( End_Location.Z - StartMouselocation.Z) * 0.01));
 
 		// -값으로 가면 3d object 앞뒤가 뒤집혀 버어림
