@@ -182,4 +182,10 @@ public:
 	TArray<AActor*> Tag_RX;
 	TArray<AActor*> Tag_RY;
 	TArray<AActor*> Tag_RZ;
+
+
+	UPROPERTY()
+	FRotator start_rotator;
+	UPROPERTY()
+	bool one_rotation = false;
 };
