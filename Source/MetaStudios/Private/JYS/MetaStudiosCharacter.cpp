@@ -23,6 +23,7 @@
 #include <MetaStudios/CHJ/MainGameInstance.h>
 #include "Blueprint/UserWidget.h"
 #include "Components/ArrowComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -80,21 +81,21 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	//FootstepAudioComp->SetupAttachment(RootComponent);
 	//FootstepAudioComp->bAutoActivate = false;
 
-	BoosterPackMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoosterPackMesh"));
-	BoosterPackMesh->SetupAttachment(GetMesh(), TEXT("BoosterSocket"));
-	BoosterPackMesh->SetVisibility(true);
+	JetMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("JetMesh"));
+	JetMesh->SetupAttachment(GetMesh(), TEXT("BoosterSocket"));
+	JetMesh->SetVisibility(true);
 
-	BoosterArrow1 = CreateDefaultSubobject<UArrowComponent>(TEXT("UArrowComponent"));
-	BoosterArrow1->SetupAttachment(BoosterPackMesh);
+	//BoosterArrow1 = CreateDefaultSubobject<UArrowComponent>(TEXT("UArrowComponent"));
+	//BoosterArrow1->SetupAttachment(JetMesh);
 
 	BoosterFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent"));
-	BoosterFXComponent->SetupAttachment(BoosterArrow1);
+	BoosterFXComponent->SetupAttachment(JetMesh, TEXT("FirstEffectSocket"));
 
 	BoosterFXComponent2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent2"));
-	BoosterFXComponent2->SetupAttachment(GetMesh());
+	BoosterFXComponent2->SetupAttachment(JetMesh, TEXT("SecondEffectSocket"));
 
 	BoosterFXComponent3 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent3"));
-	BoosterFXComponent3->SetupAttachment(GetMesh());
+	BoosterFXComponent3->SetupAttachment(JetMesh, TEXT("ThirdEffectSocket"));
 }
 
 void AMetaStudiosCharacter::Tick(float DeltaTime)
@@ -459,6 +460,17 @@ void AMetaStudiosCharacter::ActivateBooster(bool bActive)
 		{
 			BoosterFXComponent2->Deactivate();
 		}
+	}	
+	if (BoosterFXComponent3)
+	{
+		if (bActive)
+		{
+			BoosterFXComponent3->Activate();
+		}
+		else
+		{
+			BoosterFXComponent3->Deactivate();
+		}
 	}
 }
 /////////////////////Booster/////////////////////////////////////////////////////
@@ -626,7 +638,7 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 		SpaceshipActor->player = this;
 		SpaceshipActor->bExistRider = true;
 		GetMesh()->SetVisibility(false);
-		BoosterPackMesh->SetVisibility(false);
+		JetMesh->SetVisibility(false);
 
 		if (IsLocallyControlled())
 		{
@@ -708,7 +720,7 @@ void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarAc
 		CarActor->player = this;
 		CarActor->bExistRider = true;
 		GetMesh()->SetVisibility(false);
-		BoosterPackMesh->SetVisibility(false);
+		JetMesh->SetVisibility(false);
 		CarActor->RidingPlayer->SetVisibility(true);
 
 		if (IsLocallyControlled())

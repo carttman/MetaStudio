@@ -466,7 +466,7 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 
 		//characterController->`(player);
 		player->GetMesh()->SetVisibility(true);
-		player->BoosterPackMesh->SetVisibility(true);
+		player->JetMesh->SetVisibility(true);
 
 		RidingPlayer->SetVisibility(false);
 		bExistRider = false;

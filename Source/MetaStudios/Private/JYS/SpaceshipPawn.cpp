@@ -289,7 +289,7 @@ void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation(FVector ExitLocat
 
 		// 플레이어 가시화 처리
 		player->GetMesh()->SetVisibility(true);
-		player->BoosterPackMesh->SetVisibility(true);
+		player->JetMesh->SetVisibility(true);
 
 		// 기타 로직 처리
 		Server_EndFlyEffect();

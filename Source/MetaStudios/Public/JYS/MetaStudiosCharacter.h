@@ -80,7 +80,7 @@ public:
 	//bool bAutoActivate;
 
 	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* BoosterPackMesh;
+	class USkeletalMeshComponent* JetMesh;
 
 	/*void AttachBoosterPack() const;*/
 	
@@ -184,8 +184,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Effects")
 	class UNiagaraComponent* BoosterFXComponent3;
 
-	UPROPERTY(EditAnywhere)
-	class UArrowComponent* BoosterArrow1;
+	//UPROPERTY(EditAnywhere)
+	//class UArrowComponent* BoosterArrow1;
 
 	void ActivateBooster(bool bActive);
 	
