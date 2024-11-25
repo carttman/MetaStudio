@@ -118,7 +118,7 @@ public:
 	class UBoxComponent* UIBox;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> WidgetClass;
+	TSubclassOf<UUserWidget> EnterWidgetClass;
 
 	UUserWidget* ActiveWidget;
 

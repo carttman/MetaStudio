@@ -276,9 +276,9 @@ void ACarPawn::OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 {
 	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
 	{
-		if (WidgetClass && !ActiveWidget)
+		if (EnterWidgetClass && !ActiveWidget)
 		{
-			ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetClass);
+			ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), EnterWidgetClass);
 			if (ActiveWidget)
 			{
 				ActiveWidget->AddToViewport();
@@ -293,7 +293,7 @@ void ACarPawn::OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* Ot
 	{
 		if (ActiveWidget)
 		{
-			ActiveWidget->RemoveFromViewport();
+			ActiveWidget->RemoveFromParent();
 			ActiveWidget = nullptr;
 		}
 	}
@@ -391,6 +391,23 @@ void ACarPawn::ExitCar()
 	{
 		Server_ExitCar();
 	}
+
+	//if (ExitWidgetClass && ActiveWidget)
+	//{
+	//	ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), ExitWidgetClass);
+	//	if (ActiveWidget)
+	//	{
+	//		ActiveWidget->AddToViewport();
+	//	}
+	//}
+	//else
+	//{
+	//	ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), ExitWidgetClass);
+	//	if (!ActiveWidget)
+	//	{
+	//		ActiveWidget->RemoveFromParent();
+	//	}
+	//}
 }
 
 void ACarPawn::Server_ExitCar_Implementation()
@@ -407,6 +424,7 @@ void ACarPawn::Server_ExitCar_Implementation()
 	player->SetActorRelativeRotation(carRot);
 
 	GetController()->Possess(player);
+
 
 	FRotator rot = this->GetActorRotation();
 	rot.Roll = 0.0f;

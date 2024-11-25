@@ -413,9 +413,9 @@ void ASpaceshipPawn::OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AA
 {
 	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
 	{
-		if (WidgetClass && !ActiveWidget)
+		if (EnterWidgetClass && !ActiveWidget)
 		{
-			ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetClass);
+			ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), EnterWidgetClass);
 			if (ActiveWidget)
 			{
 				ActiveWidget->AddToViewport();
@@ -430,7 +430,7 @@ void ASpaceshipPawn::OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AAct
 	{
 		if (ActiveWidget)
 		{
-			ActiveWidget->RemoveFromViewport();
+			ActiveWidget->RemoveFromParent();
 			ActiveWidget = nullptr;
 		}
 	}
