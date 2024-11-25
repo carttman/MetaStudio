@@ -12,7 +12,7 @@ class AMetaStudiosGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-	AMetaStudiosGameMode();
+	//AMetaStudiosGameMode();
 };
 
 
