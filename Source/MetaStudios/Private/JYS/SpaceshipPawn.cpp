@@ -141,8 +141,19 @@ bool ASpaceshipPawn::CanPlayerEnter(AMetaStudiosCharacter* targetCharacter)
 
 	if (targetCharacter == nullptr)	return false;
 
-	float distance = GetDistanceTo(targetCharacter);
-	return distance <= 1000.0f;
+	//float distance = GetDistanceTo(targetCharacter);
+	//return distance <= 1000.0f;
+
+	if (SpaceshipSkeletalMesh)
+	{
+		FVector SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("EnterSpaceship"));
+
+		float Distance = FVector::Dist(SocketLocation, targetCharacter->GetActorLocation());
+
+		return Distance <= 1000.0f;
+
+	}
+	return false;
 }
 
 void ASpaceshipPawn::ExitSpaceship()
@@ -155,43 +166,106 @@ void ASpaceshipPawn::ExitSpaceship()
 
 void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 {
-	if (player == nullptr)	return;
+	//if (player == nullptr)	return;
 
-	FVector spaceshipLoc = GetActorLocation();
-	FRotator spaceshipRot = GetActorRotation();
+	//FVector spaceshipLoc = GetActorLocation();
+	//FRotator spaceshipRot = GetActorRotation();
 
-	FVector offset = spaceshipRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
-	FVector playerSpawnLocation = spaceshipLoc + offset;
+	//FVector offset = spaceshipRot.RotateVector(FVector(200.0f, 0.0f, 0.0f));
+	//FVector playerSpawnLocation = spaceshipLoc + offset;
 
-	player->SetActorLocation(playerSpawnLocation);
-	player->SetActorRotation(spaceshipRot);
+	//player->SetActorLocation(playerSpawnLocation);
+	//player->SetActorRotation(spaceshipRot);
 
+	//GetController()->Possess(player);
+	////player->GetMesh()->SetVisibility(true);
+	//NetMulticast_ExitSpaceship();
+	//bExistRider = false;
+	if (player == nullptr) return;
+
+	// 우주선 소켓 위치 가져오기
+	FVector SocketLocation = FVector::ZeroVector;
+	//FRotator SocketRotation = FRotator::ZeroRotator;
+
+	if (SpaceshipSkeletalMesh)
+	{
+		SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("ExitSpaceship"));
+		//SocketRotation = SpaceshipSkeletalMesh->GetSocketRotation(FName("ExitSpaceship"));
+	}
+	else
+	{
+		// 소켓이 없을 경우 기본 우주선 위치 사용
+		SocketLocation = GetActorLocation();
+		//SocketRotation = GetActorRotation();
+	}
+	// FVector AdjustedLocation = SocketLocation + FVector(0.0f, 0.0f, 0.0f);
+	// 플레이어를 소켓 위치로 이동
+	player->SetActorLocation(SocketLocation);
+	//player->SetActorRotation(SocketRotation);
+
+	// 플레이어 컨트롤러가 Possess 처리
 	GetController()->Possess(player);
-	//player->GetMesh()->SetVisibility(true);
+
+	// Multicast 호출
 	NetMulticast_ExitSpaceship();
 	bExistRider = false;
 }
 
 void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 {
+	//if (player)
+	//{
+	//	FVector spaceshipLoc = GetActorLocation();
+	//	FRotator spaceshipRot = GetActorRotation();
+
+	//	FVector offset = spaceshipRot.RotateVector(FVector(500.0f, 500.0f, 0.0f));
+	//	FVector playerSpawnLocation = spaceshipLoc + offset;
+
+	//	player->SetActorLocation(playerSpawnLocation);
+	//	if (HasAuthority())
+	//	{
+	//		player->SetActorRotation(spaceshipRot);
+	//	}
+
+	//	//characterController->Possess(player);
+	//	player->GetMesh()->SetVisibility(true);
+	//	Server_EndFlyEffect();
+
+	//	player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+	//}
+	//bExistRider = false;
 	if (player)
 	{
-		FVector spaceshipLoc = GetActorLocation();
-		FRotator spaceshipRot = GetActorRotation();
+		// 우주선 소켓 위치 가져오기
+		FVector SocketLocation = FVector::ZeroVector;
+		//FRotator SocketRotation = FRotator::ZeroRotator;
 
-		FVector offset = spaceshipRot.RotateVector(FVector(500.0f, 500.0f, 0.0f));
-		FVector playerSpawnLocation = spaceshipLoc + offset;
-
-		player->SetActorLocation(playerSpawnLocation);
-		if (HasAuthority())
+		if (SpaceshipSkeletalMesh)
 		{
-			player->SetActorRotation(spaceshipRot);
+			SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("ExitSpaceship"));
+			//SocketRotation = SpaceshipSkeletalMesh->GetSocketRotation(FName("ExitSpaceship"));
+		}
+		else
+		{
+			// 소켓이 없을 경우 기본 우주선 위치 사용
+			SocketLocation = GetActorLocation();
+			//SocketRotation = GetActorRotation();
 		}
 
-		//characterController->Possess(player);
-		player->GetMesh()->SetVisibility(true);
-		Server_EndFlyEffect();
+		// FVector AdjustedLocation = SocketLocation + FVector(0.0f, 0.0f, 20.0f);
 
+		// 플레이어를 소켓 위치로 이동
+		player->SetActorLocation(SocketLocation);
+		if (HasAuthority())
+		{
+			//player->SetActorRotation(SocketRotation);
+		}
+
+		// 플레이어 가시화 처리
+		player->GetMesh()->SetVisibility(true);
+
+		// 기타 로직 처리
+		Server_EndFlyEffect();
 		player->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
 	}
 	bExistRider = false;

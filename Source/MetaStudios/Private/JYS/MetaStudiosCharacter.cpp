@@ -569,27 +569,6 @@ void AMetaStudiosCharacter::SelectAutoMobile()
 }
 
 //////////////////// 우주선이랑 플레이어랑 컨트롤러 바꾸기 ///////////////////
-//void AMetaStudiosCharacter::EnterSpaceship()
-//{
-//	float spaceshipDist = GetDistanceTo(spaceshipActor);
-//	float carDist = GetDistanceTo(carActor);
-//
-//	if (carDist < spaceshipDist)
-//		return;
-//
-//
-//	if (IsLocallyControlled())
-//	{
-//		Server_EnterSpaceship();
-//	}
-//
-//	// Possess가 된 후 widget 사라지기
-//	if (spaceshipActor->ActiveWidget)
-//	{
-//		spaceshipActor->ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), spaceshipActor->WidgetClass);
-//		spaceshipActor->ActiveWidget->RemoveFromViewport();
-//	}
-//}
 
 void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation(class AActor* TargetActor)
 {
@@ -663,23 +642,6 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 		UE_LOG(LogTemp, Error, TEXT("Spaceship class could not be loaded!"));
 	}
 }
-
-/// 자동차랑 플레이어랑 컨트롤러 바꾸기
-//void AMetaStudiosCharacter::EnterCar()
-//{
-//
-//	float spaceshipDist = GetDistanceTo(spaceshipActor);
-//	float carDist = GetDistanceTo(carActor);
-//
-//	if (carDist >= spaceshipDist)
-//		return;
-//
-//	if (IsLocallyControlled())
-//	{
-//		Server_EnterCar();
-//	}
-//
-//}
 
 void AMetaStudiosCharacter::Server_EnterCar_Implementation(class AActor* TargetActor)
 {
