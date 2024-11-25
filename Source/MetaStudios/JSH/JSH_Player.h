@@ -483,6 +483,12 @@ public:
 	bool Gizmo_RotateMode = false;
 
 	UFUNCTION()
+	void Saved_Gizmo_Mode(float value);
+
+	UPROPERTY()
+	float Saved_Gizmo_Mode_Value;
+
+	UFUNCTION()
 	void G_SelecteMode();
 	UFUNCTION()
 	void G_TranslateMode();

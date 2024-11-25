@@ -38,20 +38,20 @@ AJSH_Translate_GizmoZ::AJSH_Translate_GizmoZ()
 		Origin->SetCollisionProfileName(TEXT("Gizmo"));
 	}
 	
-	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_White.MM_Gizmo_White'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> OriginMaterial(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Blue.MM_Gizmo_Blue'"));
 	if (OriginMaterial.Succeeded())
 	{
 		Origin->SetMaterial(0, OriginMaterial.Object);
 	}
 
 
-	ConstructorHelpers::FObjectFinder<UMaterial> YellowMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Blue.MM_Gizmo_Blue'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> YellowMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Yellow.MM_Gizmo_Yellow'"));
 	if (YellowMaterialLoader.Succeeded())
 	{
 		YellowMaterial = YellowMaterialLoader.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UMaterial> BlueMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_White.MM_Gizmo_White'"));
+	ConstructorHelpers::FObjectFinder<UMaterial> BlueMaterialLoader(TEXT("/Script/Engine.Material'/Game/JSH/BP/Gizmo/MM_Gizmo_Blue.MM_Gizmo_Blue'"));
 	if (BlueMaterialLoader.Succeeded())
 	{
 		BlueMaterial = BlueMaterialLoader.Object;

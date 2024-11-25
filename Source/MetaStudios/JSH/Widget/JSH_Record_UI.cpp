@@ -31,6 +31,7 @@ void UJSH_Record_UI::NativeConstruct()
 	Line->SetVisibility(ESlateVisibility::HitTestInvisible);
 	Center->SetVisibility(ESlateVisibility::HitTestInvisible);
 
+
 	Editor_line->SetVisibility(ESlateVisibility::Hidden);
 	Editor_Box->SetVisibility(ESlateVisibility::Hidden);
 	Editor_Text->SetVisibility(ESlateVisibility::Hidden);
