@@ -18,6 +18,7 @@
 #include "JSH_Editor_SpawnActor.h"
 #include "JSH_PlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Image.h"
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/CommandLine.h"
@@ -198,7 +199,7 @@ void AJSH_Player::BeginPlay()
 	CameraSpawn_b_On_Off = true;
 	
 	
-	if (HasAuthority() && !RecordUI_01)
+	if (IsLocallyControlled() && !RecordUI_01)
 	{
 		if (UI_Record_01)
 		{
@@ -210,6 +211,21 @@ void AJSH_Player::BeginPlay()
 			}
 		}
 	}
+
+	if (IsLocallyControlled() && !PlayerMainUI)
+	{
+		if (UI_Editor_Main)
+		{
+			PlayerMainUI = CreateWidget<UUserWidget>(GetWorld(), UI_Editor_Main);
+			if(PlayerMainUI)
+			{
+				//Editor_UI->AddToViewport();
+				Editor_UI = Cast<UJSH_Editor_MainUI>(PlayerMainUI);
+				// Editor_UI->SetVisibility(ESlateVisibility::Hidden);
+			}
+		}
+	}
+
 	
 }
 
@@ -778,22 +794,24 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 	// Editor Mode 꺼져 있다면
 	if (!EditorMode_B)
 	{
-		// 기즈모 모드 임시
-		if (!FirstGizmode)
-		{
-			Gizmo_TranslateMode = true;
-			Gizmo_ScaleMode = false;
-			Gizmo_RotateMode = false;
-
-			FirstGizmode = true;
-		}
-
 		// 에디터 모드 상태 체크 함수 (먼저 켜줘야 EnableEdit()가 돌아갈 수 있음)
 		EditorMode_B = true;
 
 		if (IsLocallyControlled())
 		{
+			if (Editor_UI)
+			{
+				Editor_UI->AddToViewport();
+				Editor_UI->SelectMode2->SetVisibility(ESlateVisibility::Visible);
+			}
 			EnableEdit();  // EditorMode_B == false 이면 돌아가지 않음
+
+			// // 기즈모 모드 임시
+			// if (!FirstGizmode)
+			// {
+			// 	G_SelecteMode();
+			// 	FirstGizmode = true;
+			// }
 		}
 	}
 	// Editor Mode 켜져 있다면
@@ -802,6 +820,7 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 		//EditorMode_On_B = false;
 		if (IsLocallyControlled())
 		{
+
 			// Gizmo 강제종료 문제
 			if (Editor_SpawnActor != nullptr)
 			{
@@ -810,11 +829,24 @@ void AJSH_Player::NetMulti_EditorMode_Implementation()
 			
 			DisableEdit();
 
+			if (Editor_UI)
+			{
+				Editor_UI->RemoveFromParent();
+			}
+			// if (PlayerMainUI)
+			// {
+			// 	PlayerMainUI->RemoveFromParent();
+			// 	PlayerMainUI = nullptr;
+			// }
+			// if (Editor_UI)
+			// {
+			// 	Editor_UI->SetVisibility(ESlateVisibility::Hidden);
+			// }
 
 			if (Origin_RecordUI)
 			{
 				Origin_RecordUI->SetVisibility(ESlateVisibility::Visible);
-				Origin_RecordUI->EditorMode_UI_Off();
+				//Origin_RecordUI->EditorMode_UI_Off();
 			}
 
 			// if (!RecordUI_01 && UI_Record_01)
@@ -869,30 +901,24 @@ void AJSH_Player::EnableEdit()
 	}
 
 	
-	if (!PlayerMainUI)
+	if (Editor_UI)
 	{
-		// // 촬영 UI 제거
-		// if (RecordUI_01)
-		// {
-		// 	RecordUI_01->RemoveFromParent();
-		// 	RecordUI_01 = nullptr;
-		// }
-		if (Origin_RecordUI)
-		{
-			//Origin_RecordUI->SetVisibility(ESlateVisibility::HitTestInvisible);
-			Origin_RecordUI->EditorMode_UI_On();
-		}
-		// Editor UI 생성
-		if (UI_Editor_Main)
-		{
-			PlayerMainUI = CreateWidget<UUserWidget>(GetWorld(), UI_Editor_Main);
-			if(PlayerMainUI)
-			{
-				PlayerMainUI->AddToViewport();
-			}
-		}
+		//Editor_UI->AddToViewport();
+		Editor_UI->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
-	
+
+
+	if (Origin_RecordUI)
+	{
+		//Origin_RecordUI->SetVisibility(ESlateVisibility::HitTestInvisible);
+		Origin_RecordUI->SetVisibility(ESlateVisibility::Hidden);
+		//Origin_RecordUI->EditorMode_UI_On();
+	}
+
+	// if (Editor_UI)
+	// {
+	// 	Editor_UI->SetVisibility(ESlateVisibility::Visible);
+	// }
 	Server_EnableEdit();
 }
 
@@ -934,20 +960,32 @@ void AJSH_Player::DisableEdit()
 
 
 
-	if (PlayerMainUI)
+	// if (PlayerMainUI)
+	// {
+	// 	PlayerMainUI->RemoveFromParent();
+	// 	//PlayerMainUI = nullptr;
+	//
+	// 	 // if (Origin_RecordUI)
+	// 	 // {
+	// 	 // 	Origin_RecordUI->SetVisibility(ESlateVisibility::Hidden);
+	// 	 // }
+	// 	 //
+	// 	 // if (!RecordUI_01->IsVisible())
+	// 	 // {
+	// 	 // 	RecordUI_01->SetVisibility(ESlateVisibility::Hidden);
+	// 	 // }
+	// }
+	//
+	// if (Editor_UI)
+	// {
+	// 	Editor_UI->SetVisibility(ESlateVisibility::Hidden);
+	// }
+
+
+	if (Editor_UI)
 	{
-		PlayerMainUI->RemoveFromParent();
-		PlayerMainUI = nullptr;
-
-		// if (Origin_RecordUI)
-		// {
-		// 	Origin_RecordUI->SetVisibility(ESlateVisibility::Hidden);
-		// }
-
-		// if (!RecordUI_01->IsVisible())
-		// {
-		// 	RecordUI_01->SetVisibility(ESlateVisibility::Hidden);
-		// }
+		//Editor_UI->RemoveFromParent();
+		Editor_UI->SetVisibility(ESlateVisibility::Hidden);
 	}
 	
 	Server_DisableEdit();
@@ -1108,6 +1146,11 @@ void AJSH_Player::NetMulti_EditorAcotorDestroy_Implementation()
 }
 
 
+void AJSH_Player::Saved_Gizmo_Mode(float value)
+{
+	Saved_Gizmo_Mode_Value = value;
+}
+
 void AJSH_Player::G_SelecteMode()
 {
 	if (!EditorMode_B) return;
@@ -1122,16 +1165,33 @@ void AJSH_Player::G_SelecteMode()
 	if (Saved_Gizmo_SX == nullptr || Saved_Gizmo_SY == nullptr || Saved_Gizmo_SZ == nullptr || Saved_Gizmo_SB == nullptr) return;
 	if (Saved_Gizmo_RX == nullptr || Saved_Gizmo_RY == nullptr || Saved_Gizmo_RZ == nullptr) return;
 
-	
 	UE_LOG(LogTemp, Warning, TEXT("g select"));
 	Editor_SpawnActor = nullptr;
 	
 	Gizmo_TranslateMode = false;
 	Gizmo_RotateMode = false;
 	Gizmo_ScaleMode = false;
-	
 
-	
+	// if (PlayerMainUI)
+	// {
+	// 	PlayerMainUI->select
+	// }
+
+	if (Editor_UI)
+	{
+		//Editor_UI->SelectMode->SetVisibility(ESlateVisibility::Hidden);
+		Editor_UI->SelectMode2->SetVisibility(ESlateVisibility::Visible);
+
+		//Editor_UI->TranslateMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->TranslateMode2->SetVisibility(ESlateVisibility::Hidden);
+
+		//Editor_UI->RotateMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->RotateMode2->SetVisibility(ESlateVisibility::Hidden);
+
+		//Editor_UI->ScaleMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->ScaleMode2->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
@@ -1147,6 +1207,7 @@ void AJSH_Player::G_SelecteMode()
 	Saved_Gizmo_RY->Visible_and_Collision_Off();
 	Saved_Gizmo_RZ->Visible_and_Collision_Off();
 
+	Saved_Gizmo_Mode(0);
 }
 
 void AJSH_Player::G_TranslateMode()
@@ -1170,6 +1231,22 @@ void AJSH_Player::G_TranslateMode()
 	Gizmo_RotateMode = false;
 	Gizmo_ScaleMode = false;
 
+
+	if (Editor_UI)
+	{
+		//Editor_UI->SelectMode->SetVisibility(ESlateVisibility::Hidden);
+		Editor_UI->SelectMode2->SetVisibility(ESlateVisibility::Hidden);
+
+		//Editor_UI->TranslateMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->TranslateMode2->SetVisibility(ESlateVisibility::Visible);
+
+		//Editor_UI->RotateMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->RotateMode2->SetVisibility(ESlateVisibility::Hidden);
+
+		//Editor_UI->ScaleMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->ScaleMode2->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	Saved_Gizmo_TX->Visible_and_Collision_On();
 	Saved_Gizmo_TY->Visible_and_Collision_On();
 	Saved_Gizmo_TZ->Visible_and_Collision_On();
@@ -1183,6 +1260,8 @@ void AJSH_Player::G_TranslateMode()
 	Saved_Gizmo_RX->Visible_and_Collision_Off();
 	Saved_Gizmo_RY->Visible_and_Collision_Off();
 	Saved_Gizmo_RZ->Visible_and_Collision_Off();
+
+	Saved_Gizmo_Mode(1);
 }
 
 
@@ -1207,7 +1286,22 @@ void AJSH_Player::G_RotateMode()
 	Gizmo_RotateMode = true;
 	Gizmo_ScaleMode = false;
 
-	
+
+
+	if (Editor_UI)
+	{
+		//Editor_UI->SelectMode->SetVisibility(ESlateVisibility::Hidden);
+		Editor_UI->SelectMode2->SetVisibility(ESlateVisibility::Hidden);
+
+		//Editor_UI->TranslateMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->TranslateMode2->SetVisibility(ESlateVisibility::Hidden);
+
+		//Editor_UI->RotateMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->RotateMode2->SetVisibility(ESlateVisibility::Visible);
+
+		//Editor_UI->ScaleMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->ScaleMode2->SetVisibility(ESlateVisibility::Hidden);
+	}
 
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
@@ -1222,6 +1316,8 @@ void AJSH_Player::G_RotateMode()
 	Saved_Gizmo_RX->Visible_and_Collision_On();
 	Saved_Gizmo_RY->Visible_and_Collision_On();
 	Saved_Gizmo_RZ->Visible_and_Collision_On();
+
+	Saved_Gizmo_Mode(2);
 }
 
 
@@ -1245,6 +1341,24 @@ void AJSH_Player::G_SclaeMode()
 	Gizmo_RotateMode = false;
 	Gizmo_ScaleMode = true;
 
+
+	if (Editor_UI)
+	{
+		//Editor_UI->SelectMode->SetVisibility(ESlateVisibility::Hidden);
+		Editor_UI->SelectMode2->SetVisibility(ESlateVisibility::Hidden);
+
+		//Editor_UI->TranslateMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->TranslateMode2->SetVisibility(ESlateVisibility::Hidden);
+
+		//Editor_UI->RotateMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->RotateMode2->SetVisibility(ESlateVisibility::Hidden);
+
+		//Editor_UI->ScaleMode->SetVisibility(ESlateVisibility::Visible);
+		Editor_UI->ScaleMode2->SetVisibility(ESlateVisibility::Visible);
+	}
+
+
+
 	Saved_Gizmo_TX->Visible_and_Collision_Off();
 	Saved_Gizmo_TY->Visible_and_Collision_Off();
 	Saved_Gizmo_TZ->Visible_and_Collision_Off();
@@ -1259,6 +1373,8 @@ void AJSH_Player::G_SclaeMode()
 	Saved_Gizmo_RX->Visible_and_Collision_Off();
 	Saved_Gizmo_RY->Visible_and_Collision_Off();
 	Saved_Gizmo_RZ->Visible_and_Collision_Off();
+
+	Saved_Gizmo_Mode(3);
 }
 
 
@@ -1617,34 +1733,49 @@ void AJSH_Player::Gizmo_Click_End()
 {
 	if (!Gizmo_Clicking_forError) return;
 
-	if (Clicked_X)
-	{
-		if (Gizmo_TranslateMode) Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
-		else if (Gizmo_ScaleMode) Saved_Gizmo_SX->HandleMouseReleaseOutsideActor();
-		else if (Gizmo_RotateMode) Saved_Gizmo_RX->HandleMouseReleaseOutsideActor();
-	}
-	if (Clicked_Y)
-	{
-		if (Gizmo_TranslateMode) Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
-		else if (Gizmo_ScaleMode) Saved_Gizmo_SY->HandleMouseReleaseOutsideActor();
-		else if (Gizmo_RotateMode) Saved_Gizmo_RY->HandleMouseReleaseOutsideActor();
-		//Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
-	}
-	if (Clicked_Z)
-	{
-		if (Gizmo_TranslateMode) Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
-		else if (Gizmo_ScaleMode) Saved_Gizmo_SZ->HandleMouseReleaseOutsideActor();
-		else if (Gizmo_RotateMode) Saved_Gizmo_RZ->HandleMouseReleaseOutsideActor();
+	Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
+	Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
+	Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
+	Saved_Gizmo_TB->HandleMouseReleaseOutsideActor();
 
-		//Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
-	}
-	if (Clicked_B)
-	{
-		if (Gizmo_TranslateMode) Saved_Gizmo_TB->HandleMouseReleaseOutsideActor();
-		else if (Gizmo_ScaleMode) Saved_Gizmo_SB->HandleMouseReleaseOutsideActor();
-		
-		//Saved_Gizmo_TB->HandleMouseReleaseOutsideActor();
-	}
+	Saved_Gizmo_SX->HandleMouseReleaseOutsideActor();
+	Saved_Gizmo_SY->HandleMouseReleaseOutsideActor();
+	Saved_Gizmo_SZ->HandleMouseReleaseOutsideActor();
+	Saved_Gizmo_SB->HandleMouseReleaseOutsideActor();
+
+
+	Saved_Gizmo_RX->HandleMouseReleaseOutsideActor();
+	Saved_Gizmo_RY->HandleMouseReleaseOutsideActor();
+	Saved_Gizmo_RZ->HandleMouseReleaseOutsideActor();
+
+	// if (Clicked_X)
+	// {
+	// 	if (Gizmo_TranslateMode) Saved_Gizmo_TX->HandleMouseReleaseOutsideActor();
+	// 	else if (Gizmo_ScaleMode) Saved_Gizmo_SX->HandleMouseReleaseOutsideActor();
+	// 	else if (Gizmo_RotateMode) Saved_Gizmo_RX->HandleMouseReleaseOutsideActor();
+	// }
+	// if (Clicked_Y)
+	// {
+	// 	if (Gizmo_TranslateMode) Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
+	// 	else if (Gizmo_ScaleMode) Saved_Gizmo_SY->HandleMouseReleaseOutsideActor();
+	// 	else if (Gizmo_RotateMode) Saved_Gizmo_RY->HandleMouseReleaseOutsideActor();
+	// 	//Saved_Gizmo_TY->HandleMouseReleaseOutsideActor();
+	// }
+	// if (Clicked_Z)
+	// {
+	// 	if (Gizmo_TranslateMode) Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
+	// 	else if (Gizmo_ScaleMode) Saved_Gizmo_SZ->HandleMouseReleaseOutsideActor();
+	// 	else if (Gizmo_RotateMode) Saved_Gizmo_RZ->HandleMouseReleaseOutsideActor();
+	//
+	// 	//Saved_Gizmo_TZ->HandleMouseReleaseOutsideActor();
+	// }
+	// if (Clicked_B)
+	// {
+	// 	if (Gizmo_TranslateMode) Saved_Gizmo_TB->HandleMouseReleaseOutsideActor();
+	// 	else if (Gizmo_ScaleMode) Saved_Gizmo_SB->HandleMouseReleaseOutsideActor();
+	//
+	// 	//Saved_Gizmo_TB->HandleMouseReleaseOutsideActor();
+	// }
 
 	// 클릭 중에 q나 tap누르면 튕기는 오류 때문에
 	Gizmo_Clicking_forError = false;

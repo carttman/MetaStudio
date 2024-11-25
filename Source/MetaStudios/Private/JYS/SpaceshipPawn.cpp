@@ -65,6 +65,7 @@ void ASpaceshipPawn::BeginPlay()
 		UIBox->OnComponentEndOverlap.AddDynamic(this, &ASpaceshipPawn::OnUIBoxEndOverlap);
 
 	}
+	Server_PlayAnimMontage(Anim->openDoorMontage);
 }
 
 
