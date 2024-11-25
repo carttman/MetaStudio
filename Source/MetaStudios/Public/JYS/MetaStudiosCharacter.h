@@ -184,9 +184,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Effects")
 	class UNiagaraComponent* BoosterFXComponent3;
 
-	//UPROPERTY(EditAnywhere)
-	//class UArrowComponent* BoosterArrow1;
-
 	void ActivateBooster(bool bActive);
 	
 	UPROPERTY()

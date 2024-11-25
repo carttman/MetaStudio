@@ -85,8 +85,6 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	JetMesh->SetupAttachment(GetMesh(), TEXT("BoosterSocket"));
 	JetMesh->SetVisibility(true);
 
-	//BoosterArrow1 = CreateDefaultSubobject<UArrowComponent>(TEXT("UArrowComponent"));
-	//BoosterArrow1->SetupAttachment(JetMesh);
 
 	BoosterFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent"));
 	BoosterFXComponent->SetupAttachment(JetMesh, TEXT("FirstEffectSocket"));
@@ -823,8 +821,10 @@ void AMetaStudiosCharacter::NetMulticast_FindObject_Implementation()
 
 	if (nearActor != nullptr)
 	{
-		DestroyObject();
 		PickUpAnim();
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, this, &AMetaStudiosCharacter::DestroyObject, 2.0f);
+		// DestroyObject();
 	}
 }
 
