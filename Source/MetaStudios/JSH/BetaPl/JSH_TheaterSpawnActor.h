@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "JSH_TheaterSpawnActor.generated.h"
 
+class AJSH_BetaPlayer;
+
 UCLASS()
 class METASTUDIOS_API AJSH_TheaterSpawnActor : public AActor
 {
@@ -30,5 +32,15 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void SET_JOwner(AActor* me);
+	UFUNCTION(Reliable, Server)
+	void Server_SET_JOwner(AActor* me);
+	UFUNCTION(Reliable, NetMulticast)
+	void Netmulti_SET_JOwner(AActor* me);
+
+	UPROPERTY()
+	AActor* JOwner;
 
 };

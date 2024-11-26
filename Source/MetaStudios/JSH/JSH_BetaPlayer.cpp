@@ -98,6 +98,9 @@ void AJSH_BetaPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 void AJSH_BetaPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	FName tag = TEXT("Pop");
+	UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld() , AActor::StaticClass() , tag , PopList);
 }
 
 
@@ -174,31 +177,34 @@ void AJSH_BetaPlayer::Grab()
 		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("g4"));
 		MyReleasePop();
 		
-		Server_Grab();
+		Server_Grab(BHasPop);
 	}
 	else
 	{
-		// 그랩할때 갱신
-		FName tag = TEXT("Pop");
-		UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld() , AActor::StaticClass() , tag , PopList);
-		
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("g5"));
+		Server_Grab(BHasPop);
 		MyTakePop();
 	}
 	
 	
 }
 
-void AJSH_BetaPlayer::Server_Grab_Implementation()
+void AJSH_BetaPlayer::Server_Grab_Implementation(bool gtrue)
 {
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("g2"));
-	NetMulti_Grab();
+	NetMulti_Grab(gtrue);
 }
 
 
-void AJSH_BetaPlayer::NetMulti_Grab_Implementation()
+void AJSH_BetaPlayer::NetMulti_Grab_Implementation(bool gtrue)
 {
-	PopModeON = false;
+	if (gtrue)
+	{
+		PopModeON = false;
+	}
+	else
+	{
+		FName tag = TEXT("Pop");
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), tag, PopList);
+	}
 }
 
 
@@ -206,51 +212,45 @@ void AJSH_BetaPlayer::NetMulti_Grab_Implementation()
 ////////////////////////
 void AJSH_BetaPlayer::MyTakePop()
 {
+	Server_MyTakePop();
+}
+
+void AJSH_BetaPlayer::Server_MyTakePop_Implementation()
+{
+	NetMulti_MyTakePop();
+}
+
+void AJSH_BetaPlayer::NetMulti_MyTakePop_Implementation()
+{
+	FName tag = TEXT("Pop");
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), tag, PopList);
+	
 	for ( AActor* Pop : PopList )
 	{
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-2"));
 		float tempDist = GetDistanceTo(Pop);
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-3"));
+
 		if ( tempDist > GrabDistance ) continue;
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-4"));
+
 		//서버 쪽에서 여기서 자꾸 막힘... 왜 그런지 몰르겠음 ....
 		if (Pop->GetOwner() != nullptr)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("000000"));
 			continue;
 		}
-		UE_LOG(LogTemp, Warning, TEXT("11111"));
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t4"));
-		UE_LOG(LogTemp, Warning, TEXT("22222"));
-		if (IsLocallyControlled()) UE_LOG(LogTemp, Warning, TEXT("rt4"));
-		UE_LOG(LogTemp, Warning, TEXT("22222222"));
-		Server_MyTakePop(Pop);
+		OriginPop = Cast<AJSH_TheaterSpawnActor>(Pop);
+		OriginPop->SET_JOwner(this);
+		GrabPopActor = Pop;
+		AttachPop(GrabPopActor);
+		BHasPop = true;
+		PopModeON = true;
+		PopGrab_O = true;
 		
 		break;
 	}
 	
-}
 
-void AJSH_BetaPlayer::Server_MyTakePop_Implementation(AActor* pop)
-{
-	UE_LOG(LogTemp, Warning, TEXT("t2"));
-	
 
-	NetMulti_MyTakePop(pop);
-}
 
-void AJSH_BetaPlayer::NetMulti_MyTakePop_Implementation(AActor* pop)
-{
-	GrabPopActor = pop;
-	
-	pop->SetOwner(this);
-	BHasPop = true;
-
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t5"));
-	if (IsLocallyControlled()) UE_LOG(LogTemp, Warning, TEXT("rt5"));
-	AttachPop(GrabPopActor);
-	PopModeON = true;
-	PopGrab_O = true;
 }
 
 
@@ -296,23 +296,20 @@ void AJSH_BetaPlayer::NetMulti_MyReleasePop_Implementation()
 ////////////////////////
 void AJSH_BetaPlayer::AttachPop(AActor* PopActor)
 {
-	CapsuleComp = GrabPopActor->GetComponentByClass<UCapsuleComponent>();
-	check(CapsuleComp);
-	if ( CapsuleComp )
-	{
-		Server_AttachPop(CapsuleComp);
-	}
+	Server_AttachPop(PopActor);
 }
-void AJSH_BetaPlayer::Server_AttachPop_Implementation(UCapsuleComponent* cap)
+void AJSH_BetaPlayer::Server_AttachPop_Implementation(AActor* PopActor)
 {
-	NetMulti_AttachPop(cap);
+	NetMulti_AttachPop(PopActor);
 }
 
-void AJSH_BetaPlayer::NetMulti_AttachPop_Implementation(UCapsuleComponent* cap)
+void AJSH_BetaPlayer::NetMulti_AttachPop_Implementation(AActor* PopActor)
 {
-	cap->SetSimulatePhysics(false);
-	cap->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	cap->AttachToComponent(HandComp , FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	CapsuleComp = OriginPop->GetComponentByClass<UCapsuleComponent>();
+	check(CapsuleComp);
+	CapsuleComp->SetSimulatePhysics(false);
+	CapsuleComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	CapsuleComp->AttachToComponent(HandComp , FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	
 }
 
@@ -320,12 +317,7 @@ void AJSH_BetaPlayer::NetMulti_AttachPop_Implementation(UCapsuleComponent* cap)
 ////////////////////////
 void AJSH_BetaPlayer::DetachPop(AActor* PopActor)
 {
-	CapsuleComp = GrabPopActor->GetComponentByClass<UCapsuleComponent>();
-	check(CapsuleComp);
-	if ( CapsuleComp )
-	{
-		Server_DetachPop(CapsuleComp);
-	}
+	Server_DetachPop(CapsuleComp);
 
 }
 void AJSH_BetaPlayer::Server_DetachPop_Implementation(UCapsuleComponent* cap)
@@ -335,9 +327,16 @@ void AJSH_BetaPlayer::Server_DetachPop_Implementation(UCapsuleComponent* cap)
 
 void AJSH_BetaPlayer::NetMulti_DetachPop_Implementation(UCapsuleComponent* cap)
 {
-	cap->SetSimulatePhysics(true);
-	cap->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-	cap->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+	CapsuleComp = OriginPop->GetComponentByClass<UCapsuleComponent>();
+	check(CapsuleComp);
+	CapsuleComp->SetSimulatePhysics(true);
+	CapsuleComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	CapsuleComp->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+
+	
+	// cap->SetSimulatePhysics(true);
+	// cap->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	// cap->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
 }
 
 //////
@@ -367,5 +366,17 @@ void AJSH_BetaPlayer::NetMulit_Pop_Implementation(FVector lo, FRotator ro)
 		PopAct = GetWorld()->SpawnActor<AActor>(PopClass, lo, ro, SpawnParams);
         
 		OriginPop = Cast<AJSH_TheaterSpawnActor>(PopAct);
+
+		// 귀엽게 위로 살짝 튀도록
+		if (OriginPop)
+		{
+			UPrimitiveComponent* PopRootComponent = Cast<UPrimitiveComponent>(OriginPop->GetRootComponent());
+			if (PopRootComponent)
+			{
+				FVector Impulse(0.0f, 0.0f, 500.0f); // 위쪽으로 향하는 임펄스 벡터
+				PopRootComponent->AddImpulse(Impulse, NAME_None, true); // Root Component에 임펄스를 추가합니다.
+			}
+		}
 	}
+	
 }

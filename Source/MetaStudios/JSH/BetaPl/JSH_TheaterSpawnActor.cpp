@@ -35,3 +35,24 @@ void AJSH_TheaterSpawnActor::Tick(float DeltaTime)
 
 }
 
+
+
+void AJSH_TheaterSpawnActor::SET_JOwner(AActor* me)
+{
+	Server_SET_JOwner(me);
+}
+
+void AJSH_TheaterSpawnActor::Server_SET_JOwner_Implementation(AActor* me)
+{
+	Netmulti_SET_JOwner(me);
+}
+
+
+void AJSH_TheaterSpawnActor::Netmulti_SET_JOwner_Implementation(AActor* me)
+{
+
+	SetOwner(JOwner);
+}
+
+
+

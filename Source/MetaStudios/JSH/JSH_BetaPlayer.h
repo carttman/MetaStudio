@@ -88,9 +88,9 @@ public:
 	UFUNCTION()
 	void Grab();
 	UFUNCTION(Server, Reliable)
-	void Server_Grab();
+	void Server_Grab(bool gtrue);
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulti_Grab();
+	void NetMulti_Grab(bool gtrue);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated)
 	bool BHasPop;
@@ -108,15 +108,16 @@ public:
 	UPROPERTY(Replicated)
 	class AActor* GrabPopActor;
 
+
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	float GrabDistance = 150;
 
 	UFUNCTION()
 	void AttachPop(AActor* PopActor);
 	UFUNCTION(Server, Reliable)
-	void Server_AttachPop(UCapsuleComponent* cap);
+	void Server_AttachPop(AActor* PopActor);
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulti_AttachPop(UCapsuleComponent* cap);
+	void NetMulti_AttachPop(AActor* PopActor);
 
 	UFUNCTION()
 	void DetachPop(AActor* PopActor);
@@ -129,9 +130,9 @@ public:
 	UFUNCTION()
 	void MyTakePop();
 	UFUNCTION(Server, Reliable)
-	void Server_MyTakePop(AActor* pop);
+	void Server_MyTakePop();
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulti_MyTakePop(AActor* pop);
+	void NetMulti_MyTakePop();
 
 
 
