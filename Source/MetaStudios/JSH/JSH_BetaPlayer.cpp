@@ -58,7 +58,7 @@ AJSH_BetaPlayer::AJSH_BetaPlayer()
 
 
 	HandComp = CreateDefaultSubobject<USceneComponent>(TEXT("HandComp"));
-	HandComp->SetupAttachment(GetMesh() , TEXT("RightHand"));
+	HandComp->SetupAttachment(GetMesh() , TEXT("LeftHand_Pop"));
 }
 
 void AJSH_BetaPlayer::BeginPlay()
@@ -196,7 +196,7 @@ void AJSH_BetaPlayer::MyTakePop()
 		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-2"));
 		float tempDist = GetDistanceTo(Pop);
 		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-3"));
-		//if ( tempDist > GrabDistance ) continue;
+		if ( tempDist > GrabDistance ) continue;
 		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-4"));
 		//서버 쪽에서 여기서 자꾸 막힘... 왜 그런지 몰르겠음 ....
 		if (Pop->GetOwner() != nullptr)
@@ -294,6 +294,7 @@ void AJSH_BetaPlayer::Server_AttachPop_Implementation(UCapsuleComponent* cap)
 void AJSH_BetaPlayer::NetMulti_AttachPop_Implementation(UCapsuleComponent* cap)
 {
 	cap->SetSimulatePhysics(false);
+	cap->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	cap->AttachToComponent(HandComp , FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	
 }
@@ -318,5 +319,6 @@ void AJSH_BetaPlayer::Server_DetachPop_Implementation(UCapsuleComponent* cap)
 void AJSH_BetaPlayer::NetMulti_DetachPop_Implementation(UCapsuleComponent* cap)
 {
 	cap->SetSimulatePhysics(true);
+	cap->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	cap->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
 }
