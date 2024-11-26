@@ -80,7 +80,7 @@ public:
 	//bool bAutoActivate;
 
 	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* BoosterPackMesh;
+	class USkeletalMeshComponent* JetMesh;
 
 	/*void AttachBoosterPack() const;*/
 	
@@ -183,9 +183,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Effects")
 	class UNiagaraComponent* BoosterFXComponent3;
-
-	UPROPERTY(EditAnywhere)
-	class UArrowComponent* BoosterArrow1;
 
 	void ActivateBooster(bool bActive);
 	
@@ -305,6 +302,9 @@ private:
 	//void DeleteVehicle(class ACarPawn* target);
 
 
+public:
+	UFUNCTION()
+	bool IsLocallyPlayer()	{	return IsLocallyControlled(); }
 
 };
 

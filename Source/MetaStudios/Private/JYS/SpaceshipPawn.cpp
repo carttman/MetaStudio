@@ -13,6 +13,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Components/BoxComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/ArrowComponent.h"
 
 // Sets default values
 ASpaceshipPawn::ASpaceshipPawn()
@@ -44,6 +45,11 @@ ASpaceshipPawn::ASpaceshipPawn()
 
 	UIBox->SetGenerateOverlapEvents(true);
 	UIBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+
+	ExitPosition = CreateDefaultSubobject<UArrowComponent>(TEXT("ExitPosition"));
+	ExitPosition->SetupAttachment(SpaceshipSkeletalMesh);
+	ExitPosition->SetRelativeLocation(FVector(0.0f, -2045.0f, 380.0f));
+	//(X = -2370.000000, Y = 30.000000, Z = 380.000000)
 }
 
 // Called when the game starts or when spawned
@@ -56,6 +62,7 @@ void ASpaceshipPawn::BeginPlay()
 	if (Anim)
 	{
 		Anim->SetLegUpMontagePlayRate();
+		Anim->Play_OpenDoor();
 	}
 	ActivateStartFly(false);
 
@@ -64,8 +71,7 @@ void ASpaceshipPawn::BeginPlay()
 		UIBox->OnComponentBeginOverlap.AddDynamic(this, &ASpaceshipPawn::OnUIBoxBeginOverlap);
 		UIBox->OnComponentEndOverlap.AddDynamic(this, &ASpaceshipPawn::OnUIBoxEndOverlap);
 
-	}
-	Server_PlayAnimMontage(Anim->openDoorMontage);
+	}	
 }
 
 
@@ -75,6 +81,15 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (!IsLocallyControlled())	return;
+
+	if(SpaceshipSkeletalMesh != nullptr )
+	{
+		FVector SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("ExitSpaceship"));
+		DrawDebugCapsule(GetWorld(), SocketLocation, 50.0f, 100.0f, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), FColor::Red, false, 5.0f);
+
+	}
+
+
 	FTransform trans = FTransform(this->GetControlRotation());
 	direction = trans.TransformVector(direction);
 	// direction.Z = 0;
@@ -93,7 +108,7 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 		ApplyRollBack();
 	}
 
-	GEngine->AddOnScreenDebugMessage(0, DeltaTime, FColor::Green, FString::Printf (TEXT("bIsMoving : %d"), bIsMoving));
+	//GEngine->AddOnScreenDebugMessage(0, DeltaTime, FColor::Green, FString::Printf(TEXT("bIsMoving : %d"), bIsMoving));
 }
 
 // Called to bind functionality to input
@@ -101,7 +116,7 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("ExitSpaceship", IE_Pressed, this, &ASpaceshipPawn::ExitSpaceship);
+	// PlayerInputComponent->BindAction("ExitSpaceship", IE_Pressed, this, &ASpaceshipPawn::ExitSpaceship);
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -133,6 +148,7 @@ void ASpaceshipPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASpaceshipPawn, MoveStop);
+	//DOREPLIFETIME(ASpaceshipPawn, bIsMoving);
 
 }
 
@@ -159,8 +175,8 @@ bool ASpaceshipPawn::CanPlayerEnter(AMetaStudiosCharacter* targetCharacter)
 
 void ASpaceshipPawn::ExitSpaceship()
 {
-	if (IsLocallyControlled() && !bIsMoving)
-	{
+	if (!HasAuthority() && IsLocallyControlled()/* && !bIsMoving*/)
+	{		
 		Server_ExitSpaceship();
 	}
 }
@@ -186,12 +202,16 @@ void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 
 	// 우주선 소켓 위치 가져오기
 	FVector SocketLocation = FVector::ZeroVector;
-	//FRotator SocketRotation = FRotator::ZeroRotator;
-
+	FRotator SocketRotation = FRotator::ZeroRotator;
+	
 	if (SpaceshipSkeletalMesh)
 	{
-		SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("ExitSpaceship"));
+		//SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("ExitSpaceship"));
+		//FTransform SocketTransform = SpaceshipSkeletalMesh->GetSocketTransform(FName("ExitSpaceship"), ERelativeTransformSpace::RTS_World);
+		//SocketLocation = SocketTransform.GetLocation();
+		//SpaceshipSkeletalMesh->GetSocketWorldLocationAndRotation(FName("ExitSpaceship"), SocketLocation, SocketRotation);
 		//SocketRotation = SpaceshipSkeletalMesh->GetSocketRotation(FName("ExitSpaceship"));
+		SocketLocation = ExitPosition->GetComponentLocation();
 	}
 	else
 	{
@@ -201,18 +221,20 @@ void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 	}
 	// FVector AdjustedLocation = SocketLocation + FVector(0.0f, 0.0f, 0.0f);
 	// 플레이어를 소켓 위치로 이동
+	
 	player->SetActorLocation(SocketLocation);
 	//player->SetActorRotation(SocketRotation);
 
 	// 플레이어 컨트롤러가 Possess 처리
 	GetController()->Possess(player);
 
+	//UE_LOG(LogTemp, Warning, TEXT("===== ExitShipInfo : %s : %s"), *SocketLocation.ToString(), *SocketRotation.ToString());
 	// Multicast 호출
-	NetMulticast_ExitSpaceship();
+	NetMulticast_ExitSpaceship(SocketLocation, SocketRotation);
 	bExistRider = false;
 }
 
-void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
+void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation(FVector ExitLocation, FRotator ExitRotation)
 {
 	//if (player)
 	//{
@@ -238,32 +260,36 @@ void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation()
 	if (player)
 	{
 		// 우주선 소켓 위치 가져오기
-		FVector SocketLocation = FVector::ZeroVector;
-		//FRotator SocketRotation = FRotator::ZeroRotator;
-
-		if (SpaceshipSkeletalMesh)
-		{
-			SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("ExitSpaceship"));
-			//SocketRotation = SpaceshipSkeletalMesh->GetSocketRotation(FName("ExitSpaceship"));
-		}
-		else
-		{
-			// 소켓이 없을 경우 기본 우주선 위치 사용
-			SocketLocation = GetActorLocation();
-			//SocketRotation = GetActorRotation();
-		}
+		//FVector SocketLocation = FVector::ZeroVector;
+		////FRotator SocketRotation = FRotator::ZeroRotator;
+		//
+		//if (SpaceshipSkeletalMesh)
+		//{
+		//	SocketLocation = SpaceshipSkeletalMesh->GetSocketLocation(FName("ExitSpaceship"));
+		//	//SocketRotation = SpaceshipSkeletalMesh->GetSocketRotation(FName("ExitSpaceship"));
+		//}
+		//else
+		//{
+		//	// 소켓이 없을 경우 기본 우주선 위치 사용
+		//	SocketLocation = GetActorLocation();
+		//	//SocketRotation = GetActorRotation();
+		//}
 
 		// FVector AdjustedLocation = SocketLocation + FVector(0.0f, 0.0f, 20.0f);
 
 		// 플레이어를 소켓 위치로 이동
-		player->SetActorLocation(SocketLocation);
-		if (HasAuthority())
-		{
-			//player->SetActorRotation(SocketRotation);
-		}
+		//player->SetActorLocation(SocketLocation);
+		
+		player->SetActorLocation(ExitLocation);
+		//UE_LOG(LogTemp, Warning, TEXT("===== ExitShipInfo Client : %s : %s - %s"), *ExitLocation.ToString(), *ExitRotation.ToString(), *GetActorLocation().ToString());
+		//if (HasAuthority())
+		//{
+		//	//player->SetActorRotation(SocketRotation);
+		//}
 
 		// 플레이어 가시화 처리
 		player->GetMesh()->SetVisibility(true);
+		player->JetMesh->SetVisibility(true);
 
 		// 기타 로직 처리
 		Server_EndFlyEffect();
@@ -351,7 +377,7 @@ void ASpaceshipPawn::OnMoveUp(const FInputActionValue& value)
 		bLanded = false;
 		MoveUpAnim();
 		Server_StartFlyEffect();
-		bIsMoving = true;
+		//bIsMoving = true;
 		// ActivateStartFly(true);
 	}
 
@@ -411,27 +437,38 @@ void ASpaceshipPawn::ApplyRollBack()
 // 가까이 가면 키 관련 UI 생성
 void ASpaceshipPawn::OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if(IsLocallyControlled())	return;
+
 	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
 	{
+		AMetaStudiosCharacter* targetChar = Cast<AMetaStudiosCharacter>(OtherActor);
+		if( targetChar->IsLocallyPlayer() == false )	return;
+
 		if (EnterWidgetClass && !ActiveWidget)
 		{
-			ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), EnterWidgetClass);
+			ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), EnterWidgetClass);			
 			if (ActiveWidget)
 			{
 				ActiveWidget->AddToViewport();
 			}
+		}
+
+		if (ActiveWidget)
+		{			
+			ActiveWidget->SetVisibility(ESlateVisibility::Visible);
 		}
 	}
 }
 
 void ASpaceshipPawn::OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (IsLocallyControlled())	return;
+
 	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
 	{
 		if (ActiveWidget)
 		{
-			ActiveWidget->RemoveFromParent();
-			ActiveWidget = nullptr;
+			ActiveWidget->SetVisibility(ESlateVisibility::Hidden);			
 		}
 	}
 }
@@ -450,11 +487,44 @@ void ASpaceshipPawn::Server_StartFlyEffect_Implementation()
 void ASpaceshipPawn::NetMulticast_StartFlyEffect_Implementation()
 {
 	FVector start = GetActorLocation();
-	FVector end = start - FVector(0, 0, 1000.0f);
+	FVector end = start - FVector(0, 0, 10000.0f);
 
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
+
+
+
+	float SphereRadius = 100.0f;
+	float HalfSphereRadius = SphereRadius * 0.5f;
+
+	//DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);      
+
+	bool HitDetected = GetWorld()->SweepSingleByChannel(hitResult, start, end, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(SphereRadius), params);
+	if (HitDetected)
+	{
+		FVector currentLocation = GetActorLocation();
+		FVector newLocation = hitResult.ImpactPoint;
+		newLocation.Z += HalfSphereRadius;
+
+		//float distanceToGround = FVector::Dist(currentLocation, hitResult.Location);
+
+		currentLocation.Z += 500.0f * GetWorld()->GetDeltaSeconds();
+
+		/////////////////우주선 출발할 때 이펙트/////////////////
+		ActivateStartFly(true);
+
+		SetActorLocation(currentLocation);
+	}
+
+	FVector CapsuleOrigin = start + (end - start) * 0.5f;
+	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+
+	DrawDebugCapsule(GetWorld(), hitResult.ImpactPoint, HalfSphereRadius, SphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
+
+
+	/*
+
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
 	{
 		// DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 1.0f, 0, 5.0f);
@@ -477,6 +547,7 @@ void ASpaceshipPawn::NetMulticast_StartFlyEffect_Implementation()
 		}
 		SetActorLocation(currentLocation);
 	}
+	*/
 }
 
 void ASpaceshipPawn::Server_EndFlyEffect_Implementation()
@@ -546,23 +617,23 @@ bool ASpaceshipPawn::CheckLanding()
 		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.ImpactPoint);
 		// UE_LOG(LogTemp, Warning, TEXT("dist : %f - %f"), distanceToGround, LandingDistance)
 		UE_LOG(LogTemp, Warning, TEXT("DistanceToGround: %f, LandingDistance: %f"), distanceToGround, LandingDistance);
-			if (distanceToGround < LandingDistance)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("distanceToGround < LandingDistance"));
-				bCantMove = true;
-				bLanded = true;
-				bIsMoving = false;
+		if (distanceToGround < LandingDistance)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("distanceToGround < LandingDistance"));
+			bCantMove = true;
+			bLanded = true;
+			//bIsMoving = false;
 
-				Server_PlayAnimMontage(Anim->legDownMontage);
-				FTimerHandle handle;
-				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
-					Server_PlayAnimMontage(Anim->openDoorMontage);
-					}, 2, false);
-				Server_EndFlyEffect();
+			Server_PlayAnimMontage(Anim->legDownMontage);
+			FTimerHandle handle;
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				Server_PlayAnimMontage(Anim->openDoorMontage);
+				}, 2, false);
+			Server_EndFlyEffect();
 
 
-				return true;
-			}
+			return true;
+		}
 	}
 
 	if (bHitResult == false && GetActorLocation().Z < LastLandingPosZ)

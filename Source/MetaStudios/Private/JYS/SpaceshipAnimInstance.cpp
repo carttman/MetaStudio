@@ -13,7 +13,7 @@ void USpaceshipAnimInstance::NativeBeginPlay()
 void USpaceshipAnimInstance::AnimNotify_LegAnimEnded()
 {
 	UE_LOG(LogTemp, Warning, TEXT("AnimNotify_LegAnimEnded"))
-	Me->bCantMove = false;
+	Me->bCantMove = false;	
 }
 
 void USpaceshipAnimInstance::AnimNotify_LegUpLoopNotify()
@@ -21,6 +21,13 @@ void USpaceshipAnimInstance::AnimNotify_LegUpLoopNotify()
 	
 	UE_LOG(LogTemp, Warning, TEXT("AnimNotify_LegUpLoopNotify"))
 	Montage_SetPlayRate(legUpMontage, 0);
+}
+
+void USpaceshipAnimInstance::AnimNotify_openDoorEnded()
+{
+	UE_LOG(LogTemp, Warning, TEXT("AnimNotify_openDoorEnded"))
+	Me->bCantMove = false;
+	Me->ExitSpaceship();
 }
 
 void USpaceshipAnimInstance::Play_LegUpMontage()

@@ -64,10 +64,13 @@ void ACarPawn::BeginPlay()
 
 	ActivateThruster(false);
 
-	if (UIBox)
+	if (IsLocallyControlled())
 	{
-		UIBox->OnComponentBeginOverlap.AddDynamic(this, &ACarPawn::OnUIBoxBeginOverlap);
-		UIBox->OnComponentEndOverlap.AddDynamic(this, &ACarPawn::OnUIBoxEndOverlap);
+		if (UIBox)
+		{
+			UIBox->OnComponentBeginOverlap.AddDynamic(this, &ACarPawn::OnUIBoxBeginOverlap);
+			UIBox->OnComponentEndOverlap.AddDynamic(this, &ACarPawn::OnUIBoxEndOverlap);
+		}
 	}
 
 	//UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("TTT"), PlayerBox);
@@ -461,8 +464,10 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 		// player->SetActorRotation(carRot);
 
 
-		//characterController->Possess(player);
+		//characterController->`(player);
 		player->GetMesh()->SetVisibility(true);
+		player->JetMesh->SetVisibility(true);
+
 		RidingPlayer->SetVisibility(false);
 		bExistRider = false;
 		if (IsLocallyControlled())

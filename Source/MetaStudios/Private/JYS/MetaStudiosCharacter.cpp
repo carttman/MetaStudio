@@ -23,6 +23,7 @@
 #include <MetaStudios/CHJ/MainGameInstance.h>
 #include "Blueprint/UserWidget.h"
 #include "Components/ArrowComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -80,21 +81,19 @@ AMetaStudiosCharacter::AMetaStudiosCharacter()
 	//FootstepAudioComp->SetupAttachment(RootComponent);
 	//FootstepAudioComp->bAutoActivate = false;
 
-	BoosterPackMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoosterPackMesh"));
-	BoosterPackMesh->SetupAttachment(GetMesh(), TEXT("BoosterSocket"));
-	BoosterPackMesh->SetVisibility(true);
+	JetMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("JetMesh"));
+	JetMesh->SetupAttachment(GetMesh(), TEXT("BoosterSocket"));
+	JetMesh->SetVisibility(true);
 
-	BoosterArrow1 = CreateDefaultSubobject<UArrowComponent>(TEXT("UArrowComponent"));
-	BoosterArrow1->SetupAttachment(BoosterPackMesh);
 
 	BoosterFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent"));
-	BoosterFXComponent->SetupAttachment(BoosterArrow1);
+	BoosterFXComponent->SetupAttachment(JetMesh, TEXT("FirstEffectSocket"));
 
 	BoosterFXComponent2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent2"));
-	BoosterFXComponent2->SetupAttachment(GetMesh());
+	BoosterFXComponent2->SetupAttachment(JetMesh, TEXT("SecondEffectSocket"));
 
 	BoosterFXComponent3 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BoosterFXComponent3"));
-	BoosterFXComponent3->SetupAttachment(GetMesh());
+	BoosterFXComponent3->SetupAttachment(JetMesh, TEXT("ThirdEffectSocket"));
 }
 
 void AMetaStudiosCharacter::Tick(float DeltaTime)
@@ -459,6 +458,17 @@ void AMetaStudiosCharacter::ActivateBooster(bool bActive)
 		{
 			BoosterFXComponent2->Deactivate();
 		}
+	}	
+	if (BoosterFXComponent3)
+	{
+		if (bActive)
+		{
+			BoosterFXComponent3->Activate();
+		}
+		else
+		{
+			BoosterFXComponent3->Deactivate();
+		}
 	}
 }
 /////////////////////Booster/////////////////////////////////////////////////////
@@ -593,13 +603,6 @@ void AMetaStudiosCharacter::Server_EnterSpaceship_Implementation(class AActor* T
 			NetMulticast_EnterSpaceship(SpaceshipActor);
 		}
 
-		SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
-		// Possess가 된 후 widget 사라지기
-		if (SpaceshipActor->ActiveWidget != nullptr)
-		{
-			SpaceshipActor->ActiveWidget->RemoveFromParent();
-		}
-
 		//ASpaceshipPawn* SpaceshipActor = Cast<ASpaceshipPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), SpaceshipPawnFactory));
 		//if (SpaceshipActor == nullptr)
 		//{
@@ -633,16 +636,18 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 		SpaceshipActor->player = this;
 		SpaceshipActor->bExistRider = true;
 		GetMesh()->SetVisibility(false);
+		JetMesh->SetVisibility(false);
 
-		//if (IsLocallyControlled())
-		//{
-		//	SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
-		//	// Possess가 된 후 widget 사라지기
-		//	if (SpaceshipActor->ActiveWidget != nullptr)
-		//	{
-		//		SpaceshipActor->ActiveWidget->RemoveFromParent();
-		//	}
-		//}
+		if (IsLocallyControlled())
+		{
+			SpaceshipActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+			// Possess가 된 후 widget 사라지기
+			if (SpaceshipActor->ActiveWidget != nullptr)
+			{
+				//SpaceshipActor->ActiveWidget->RemoveFromParent();
+				SpaceshipActor->ActiveWidget->SetVisibility(ESlateVisibility::Hidden);
+			}
+		}
 	}
 	else
 	{
@@ -670,13 +675,7 @@ void AMetaStudiosCharacter::Server_EnterCar_Implementation(class AActor* TargetA
 			CarActor->bExistRider = true;
 			GetController()->SetControlRotation(CarActor->GetActorRotation());
 			GetController()->Possess(CarActor);
-			NetMulticast_EnterCar(CarActor);
-		}
-		CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
-		// Possess가 된 후 widget 사라지기
-		if (CarActor->ActiveWidget != nullptr)
-		{
-			CarActor->ActiveWidget->RemoveFromParent();
+			NetMulticast_EnterCar(CarActor);			
 		}
 
 		//ACarPawn* CarActor = Cast<ACarPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), CarPawnFactory));
@@ -719,17 +718,18 @@ void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarAc
 		CarActor->player = this;
 		CarActor->bExistRider = true;
 		GetMesh()->SetVisibility(false);
+		JetMesh->SetVisibility(false);
 		CarActor->RidingPlayer->SetVisibility(true);
 
-		//if (IsLocallyControlled())
-		//{
-		//	CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
-		//	// Possess가 된 후 widget 사라지기
-		//	if (CarActor->ActiveWidget != nullptr)
-		//	{
-		//		CarActor->ActiveWidget->RemoveFromParent();
-		//	}
-		//}
+		if (IsLocallyControlled())
+		{
+			CarActor->ResetEnhancedInputSetting(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()));
+			// Possess가 된 후 widget 사라지기
+			if (CarActor->ActiveWidget != nullptr)
+			{
+				CarActor->ActiveWidget->RemoveFromParent();
+			}
+		}
 
 		//CarActor->SetActorRotation(CarActor->GetActorRotation());
 	}
@@ -821,8 +821,10 @@ void AMetaStudiosCharacter::NetMulticast_FindObject_Implementation()
 
 	if (nearActor != nullptr)
 	{
-		DestroyObject();
 		PickUpAnim();
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, this, &AMetaStudiosCharacter::DestroyObject, 2.0f);
+		// DestroyObject();
 	}
 }
 
