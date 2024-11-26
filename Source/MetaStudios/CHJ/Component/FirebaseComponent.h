@@ -44,6 +44,9 @@ public:
 
 	UPROPERTY()
 	class ACHJ_TestCharacter* CHJCharacter;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void LightOn();
 private:
 	FString AnonymousID = "";
 	FString FirebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/metastudio2.appspot.com/o/";
