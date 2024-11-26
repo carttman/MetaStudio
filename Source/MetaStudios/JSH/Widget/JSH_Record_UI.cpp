@@ -78,9 +78,9 @@ void UJSH_Record_UI::Speed_Update(float speedUpdate)
 
 	Speed_Value = speedUpdate;
 
-	if (Speed_Value < -1.0f)
+	if (Speed_Value <= 0.0f)
 	{
-		Speed_Value = -1.0f;
+		Speed_Value = 0.0f;
 		Speed->SetText(FText::FromString(TEXT("Stop")));
 		Speed_MinError->SetVisibility(ESlateVisibility::Visible);
 	}

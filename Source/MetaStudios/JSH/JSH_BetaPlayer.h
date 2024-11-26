@@ -168,19 +168,26 @@ public:
 	bool PopGrab_O = false;
 
 
-
+	UPROPERTY(Replicated)
+	AJSH_TheaterSpawnActor* OriginPop;
+	
 	UFUNCTION()
 	void Spawn_Pop();
+	
 	UFUNCTION(Reliable, Server)
-	void Server_Spawn_Pop(FVector lo, FRotator ro);
+	void Server_Spawn_Pop(FVector slo, FRotator sro);
+	
 	UFUNCTION(Reliable, NetMulticast)
-	void NetMulit_Pop(FVector lo, FRotator ro);
+	void NetMulit_Pop(FVector slo, FRotator sro);
+	
 	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Gizmo")
 	TSubclassOf<AActor> PopClass;
 	UPROPERTY(Replicated)
 	AActor* PopAct = nullptr;
 	UPROPERTY(Replicated)
-	AJSH_TheaterSpawnActor* OriginPop;
+	AJSH_TheaterSpawnActor* SpawnPop;
+
+	FActorSpawnParameters SpawnParams;
 };
 
 

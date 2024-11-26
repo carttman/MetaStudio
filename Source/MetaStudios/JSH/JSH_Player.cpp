@@ -226,7 +226,10 @@ void AJSH_Player::BeginPlay()
 		}
 	}
 
-	
+
+
+	FName tag = TEXT("Rock");
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), tag, RockList);
 }
 
 void AJSH_Player::Tick(float DeltaTime)
@@ -280,6 +283,13 @@ void AJSH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	
 	DOREPLIFETIME(AJSH_Player, First_Clicked_SpawnActor);
 	DOREPLIFETIME(AJSH_Player, Recent_Clicked_SpawnActor);
+	DOREPLIFETIME(AJSH_Player, Now_Click_Actor);
+	DOREPLIFETIME(AJSH_Player, EditorMode_On_B);
+	
+	DOREPLIFETIME(AJSH_Player, RockList);
+	DOREPLIFETIME(AJSH_Player, Preset_Rock);
+	
+
 }
 
 void AJSH_Player::Saved_PlayerController()
@@ -376,6 +386,10 @@ void AJSH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 		// 4Key -> UI_Off
 		EnhancedInputComponent->BindAction(IA_UI_OFF, ETriggerEvent::Started, this, &AJSH_Player::UI_Off);
+
+
+		
+		EnhancedInputComponent->BindAction(IA_Preset_On, ETriggerEvent::Started, this, &AJSH_Player::Preset_On_Off);
 	}
 	else
 	{
@@ -684,6 +698,11 @@ void AJSH_Player::FlySpeed(const FInputActionValue& Value)
 void AJSH_Player::NetMulti_FlySpeed_Implementation(float Value)
 {
 	MaxFlySpeed_C = Value;
+
+	if (MaxFlySpeed_C <= 0.0f)
+	{
+		MaxFlySpeed_C = 0.0f;
+	}
 	
 	GetCharacterMovement()->MaxFlySpeed = MaxFlySpeed_C;
 }
@@ -2086,7 +2105,41 @@ void AJSH_Player::UI_Off()
 	}
 }
 
+
+
 #pragma endregion
+
+
+
+void AJSH_Player::Preset_On_Off()
+{
+	for (AActor* Pop : RockList)
+	{
+		if (Pop)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("p111111"));
+
+			Server_Preset_On_Off(Pop);
+			break;
+		}
+	}
+}
+
+void AJSH_Player::Server_Preset_On_Off_Implementation(AActor* rock)
+{
+	NetMulti_Preset_On_Off(rock);
+}
+
+
+void AJSH_Player::NetMulti_Preset_On_Off_Implementation(AActor* rock)
+{
+	UE_LOG(LogTemp, Warning, TEXT("p2"));
+	Preset_Rock = Cast<AJSH_Preset>(rock);
+	UE_LOG(LogTemp, Warning, TEXT("p33"));
+	if (Preset_Rock) Preset_Rock->Hidden_On_Off();
+
+}
+
 
 
 #pragma region Text

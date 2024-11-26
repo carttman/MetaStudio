@@ -93,6 +93,14 @@ void AJSH_BetaPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AJSH_BetaPlayer, BHasPop);
 	DOREPLIFETIME(AJSH_BetaPlayer, PopList);
 	DOREPLIFETIME(AJSH_BetaPlayer, HandComp);
+	DOREPLIFETIME(AJSH_BetaPlayer, CapsuleComp);
+	DOREPLIFETIME(AJSH_BetaPlayer, PopGrab_O);
+	DOREPLIFETIME(AJSH_BetaPlayer, OriginPop);
+	DOREPLIFETIME(AJSH_BetaPlayer, PopClass);
+	DOREPLIFETIME(AJSH_BetaPlayer, PopAct);
+	DOREPLIFETIME(AJSH_BetaPlayer, SpawnPop);
+	DOREPLIFETIME(AJSH_BetaPlayer, CapsuleComp);
+	DOREPLIFETIME(AJSH_BetaPlayer, CapsuleComp);
 }
 
 void AJSH_BetaPlayer::Tick(float DeltaTime)
@@ -347,38 +355,42 @@ void AJSH_BetaPlayer::Spawn_Pop()
 	FVector ThisForwardVector = this->GetActorForwardVector();
 	FVector ThisLocation = this->GetActorLocation() + ThisForwardVector * 10;
 	ThisLocation.Z += 100.0f; 
-
+	
 	FRotator Thisrotator = this->GetActorRotation();
+	UE_LOG(LogTemp, Warning, TEXT("p111111111111111111111"));
 	
 	Server_Spawn_Pop(ThisLocation, Thisrotator);
 }
 
-void AJSH_BetaPlayer::Server_Spawn_Pop_Implementation(FVector lo, FRotator ro)
+void AJSH_BetaPlayer::Server_Spawn_Pop_Implementation(FVector slo, FRotator sro)
 {
-	NetMulit_Pop(lo, ro);
+	NetMulit_Pop(slo, sro);
 }
 
-void AJSH_BetaPlayer::NetMulit_Pop_Implementation(FVector lo, FRotator ro)
+void AJSH_BetaPlayer::NetMulit_Pop_Implementation(FVector slo, FRotator sro)
 {
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
+	// if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("hhhc"));
+	// if (IsLocallyControlled()) UE_LOG(LogTemp, Warning, TEXT("lllc"));
+	UE_LOG(LogTemp, Warning, TEXT("p2222222222222222222"));
 	if (PopClass)
 	{
-		PopAct = GetWorld()->SpawnActor<AActor>(PopClass, lo, ro, SpawnParams);
-        
-		OriginPop = Cast<AJSH_TheaterSpawnActor>(PopAct);
-
+		UE_LOG(LogTemp, Warning, TEXT("p333333333333333333333333333333333"));
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		
+		PopAct = GetWorld()->SpawnActor<AActor>(PopClass, slo, sro, SpawnParams);
+		UE_LOG(LogTemp, Warning, TEXT("p44444444444444444444444444444"));
+		SpawnPop = Cast<AJSH_TheaterSpawnActor>(PopAct);
 		// 귀엽게 위로 살짝 튀도록
-		if (OriginPop)
+		if (SpawnPop)
 		{
-			UPrimitiveComponent* PopRootComponent = Cast<UPrimitiveComponent>(OriginPop->GetRootComponent());
+			UPrimitiveComponent* PopRootComponent = Cast<UPrimitiveComponent>(SpawnPop->GetRootComponent());
 			if (PopRootComponent)
 			{
 				FVector Impulse(0.0f, 0.0f, 500.0f); // 위쪽으로 향하는 임펄스 벡터
 				PopRootComponent->AddImpulse(Impulse, NAME_None, true); // Root Component에 임펄스를 추가합니다.
 			}
 		}
+
 	}
-	
 }

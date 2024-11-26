@@ -6,6 +6,7 @@
 #include <stack>
 
 #include "CoreMinimal.h"
+#include "JSH_Preset.h"
 #include "GameFramework/Character.h"
 #include "Gizmo/JSH_Rotate_GizmoX.h"
 #include "Gizmo/JSH_Rotate_GizmoY.h"
@@ -165,6 +166,9 @@ class AJSH_Player : public ACharacter
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_UI_OFF;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Preset_On;
 	
 public:
 	AJSH_Player();
@@ -652,6 +656,21 @@ public:
 
 	UFUNCTION()
 	void UI_Off();
+
+
+	//preset
+	UPROPERTY(Replicated)
+	TArray<AActor*> RockList;
+
+	UFUNCTION()
+	void Preset_On_Off();
+	UFUNCTION(Server, Reliable)
+	void Server_Preset_On_Off(AActor* rock);
+	UFUNCTION(Server, Reliable)
+	void NetMulti_Preset_On_Off(AActor* rock);
+
+	UPROPERTY(Replicated)
+	AJSH_Preset* Preset_Rock;
 	
 };
 

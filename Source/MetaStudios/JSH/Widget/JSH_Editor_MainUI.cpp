@@ -13,4 +13,69 @@ void UJSH_Editor_MainUI::NativeConstruct()
 	TranslateMode2->SetVisibility(ESlateVisibility::Hidden);
 	RotateMode2->SetVisibility(ESlateVisibility::Hidden);
 	ScaleMode2->SetVisibility(ESlateVisibility::Hidden);
+
+	Window1->SetVisibility(ESlateVisibility::Hidden);
+	Window2->SetVisibility(ESlateVisibility::Hidden);
+	Window3->SetVisibility(ESlateVisibility::Hidden);
+	Window4->SetVisibility(ESlateVisibility::Hidden);
+	Window5->SetVisibility(ESlateVisibility::Hidden);
+
+
+	if(Button_w1) Button_w1->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_w1_Clicked);
+	if(Button_w2) Button_w2->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_w2_Clicked);
+	if(Button_w3) Button_w3->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_w3_Clicked);
+	if(Button_w4) Button_w4->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_w4_Clicked);
+	if(Button_w5) Button_w5->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_w5_Clicked);
+}
+
+void UJSH_Editor_MainUI::OnButton_w1_Clicked()
+{
+	//Window0->SetVisibility(ESlateVisibility::Hidden);
+	Window1->SetVisibility(ESlateVisibility::Visible);
+	Window2->SetVisibility(ESlateVisibility::Hidden);
+	Window3->SetVisibility(ESlateVisibility::Hidden);
+	Window4->SetVisibility(ESlateVisibility::Hidden);
+	Window5->SetVisibility(ESlateVisibility::Hidden);
+	
+	UE_LOG(LogTemp, Warning, TEXT("button"));
+}
+
+void UJSH_Editor_MainUI::OnButton_w2_Clicked()
+{
+	//Window0->SetVisibility(ESlateVisibility::Hidden);
+	Window1->SetVisibility(ESlateVisibility::Hidden);
+	Window2->SetVisibility(ESlateVisibility::Visible);
+	Window3->SetVisibility(ESlateVisibility::Hidden);
+	Window4->SetVisibility(ESlateVisibility::Hidden);
+	Window5->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UJSH_Editor_MainUI::OnButton_w3_Clicked()
+{
+	//Window0->SetVisibility(ESlateVisibility::Hidden);
+	Window1->SetVisibility(ESlateVisibility::Hidden);
+	Window2->SetVisibility(ESlateVisibility::Hidden);
+	Window3->SetVisibility(ESlateVisibility::Visible);
+	Window4->SetVisibility(ESlateVisibility::Hidden);
+	Window5->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UJSH_Editor_MainUI::OnButton_w4_Clicked()
+{
+	//Window0->SetVisibility(ESlateVisibility::Hidden);
+	Window1->SetVisibility(ESlateVisibility::Hidden);
+	Window2->SetVisibility(ESlateVisibility::Hidden);
+	Window3->SetVisibility(ESlateVisibility::Hidden);
+	Window4->SetVisibility(ESlateVisibility::Visible);
+	Window5->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UJSH_Editor_MainUI::OnButton_w5_Clicked()
+{
+	//Window0->SetVisibility(ESlateVisibility::Hidden);
+	Window1->SetVisibility(ESlateVisibility::Hidden);
+	Window2->SetVisibility(ESlateVisibility::Hidden);
+	Window3->SetVisibility(ESlateVisibility::Hidden);
+	Window4->SetVisibility(ESlateVisibility::Hidden);
+	Window5->SetVisibility(ESlateVisibility::Visible);
 }
