@@ -112,24 +112,24 @@ public:
 	UFUNCTION()
 	void AttachPop(AActor* PopActor);
 	UFUNCTION(Server, Reliable)
-	void Server_AttachPop(AActor* PopActor);
+	void Server_AttachPop(UCapsuleComponent* cap);
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulti_AttachPop(AActor* PopActor);
+	void NetMulti_AttachPop(UCapsuleComponent* cap);
 
 	UFUNCTION()
 	void DetachPop(AActor* PopActor);
 	UFUNCTION(Server, Reliable)
-	void Server_DetachPop(AActor* PopActor);
+	void Server_DetachPop(UCapsuleComponent* cap);
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulti_DetachPop(AActor* PopActor);
+	void NetMulti_DetachPop(UCapsuleComponent* cap);
 
 
 	UFUNCTION()
 	void MyTakePop();
 	UFUNCTION(Server, Reliable)
-	void Server_MyTakePop();
+	void Server_MyTakePop(AActor* pop);
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulti_MyTakePop();
+	void NetMulti_MyTakePop(AActor* pop);
 
 
 

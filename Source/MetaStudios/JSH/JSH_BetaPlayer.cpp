@@ -158,9 +158,20 @@ void AJSH_BetaPlayer::Look(const FInputActionValue& Value)
 
 void AJSH_BetaPlayer::Grab()
 {
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("g1"));
-
-	Server_Grab();
+	if ( BHasPop )
+	{
+		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("g4"));
+		MyReleasePop();
+		
+		Server_Grab();
+	}
+	else
+	{
+		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("g5"));
+		MyTakePop();
+	}
+	
+	
 }
 
 void AJSH_BetaPlayer::Server_Grab_Implementation()
@@ -172,188 +183,140 @@ void AJSH_BetaPlayer::Server_Grab_Implementation()
 
 void AJSH_BetaPlayer::NetMulti_Grab_Implementation()
 {
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("g3"));
-	if ( BHasPop )
-	{
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("g4"));
-		MyReleasePop();
-		PopModeON = false;
-	}
-	else
-	{
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("g5"));
-		MyTakePop();
-	}
+	PopModeON = false;
 }
 
 
 
-
+////////////////////////
 void AJSH_BetaPlayer::MyTakePop()
 {
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t1"));
-	Server_MyTakePop();
-}
-
-void AJSH_BetaPlayer::Server_MyTakePop_Implementation()
-{
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t2"));
-	
-
-	NetMulti_MyTakePop();
-}
-
-void AJSH_BetaPlayer::NetMulti_MyTakePop_Implementation()
-{
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3"));
 	for ( AActor* Pop : PopList )
 	{
 		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-2"));
 		float tempDist = GetDistanceTo(Pop);
 		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-3"));
-		if ( tempDist > GrabDistance ) continue;
-
+		//if ( tempDist > GrabDistance ) continue;
+		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-4"));
 		//서버 쪽에서 여기서 자꾸 막힘... 왜 그런지 몰르겠음 ....
-		//if (Pop->GetOwner() != nullptr) continue;
-
-
-		GrabPopActor = Pop;
+		if (Pop->GetOwner() != nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("000000"));
+			continue;
+		}
+		UE_LOG(LogTemp, Warning, TEXT("11111"));
 		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t4"));
+		UE_LOG(LogTemp, Warning, TEXT("22222"));
 		if (IsLocallyControlled()) UE_LOG(LogTemp, Warning, TEXT("rt4"));
-		Pop->SetOwner(this);
-		BHasPop = true;
-
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t5"));
-		if (IsLocallyControlled()) UE_LOG(LogTemp, Warning, TEXT("rt5"));
-		AttachPop(GrabPopActor);
-		PopModeON = true;
-		PopGrab_O = true;
-		// WantWalk = true;
-		//
-		// if (!GrabPopActor->ActorHasTag(FName("Count")))
-		// {
-		// 	GrabPopActor->Tags.Add(FName("Count"));
-		// }
-
+		UE_LOG(LogTemp, Warning, TEXT("22222222"));
+		Server_MyTakePop(Pop);
+		
 		break;
 	}
+	
+}
+
+void AJSH_BetaPlayer::Server_MyTakePop_Implementation(AActor* pop)
+{
+	UE_LOG(LogTemp, Warning, TEXT("t2"));
+	
+
+	NetMulti_MyTakePop(pop);
+}
+
+void AJSH_BetaPlayer::NetMulti_MyTakePop_Implementation(AActor* pop)
+{
+	GrabPopActor = pop;
+	
+	pop->SetOwner(this);
+	BHasPop = true;
+
+	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t5"));
+	if (IsLocallyControlled()) UE_LOG(LogTemp, Warning, TEXT("rt5"));
+	AttachPop(GrabPopActor);
+	PopModeON = true;
+	PopGrab_O = true;
 }
 
 
+
+////////////////////////
 void AJSH_BetaPlayer::MyReleasePop()
 {
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("r1"));
-
 	Server_MyReleasePop();
 }
 void AJSH_BetaPlayer::Server_MyReleasePop_Implementation()
 {
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("r2"));
 	NetMulti_MyReleasePop();
 }
 
 
 void AJSH_BetaPlayer::NetMulti_MyReleasePop_Implementation()
 {
-
 	if ( false == BHasPop) return;
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("r3"));
+	
 	if ( BHasPop )
 	{
 		BHasPop = false;
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("r4"));
 	}
 
 
 	if ( GrabPopActor )
 	{
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("r5"));
 		DetachPop(GrabPopActor);
 
 		GrabPopActor->SetOwner(nullptr);
 
 		GrabPopActor = nullptr;
 	}
-
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("r6"));
+	
 	PopModeON = false;
 	PopGrab_O = false;
 }
 
 
 
-
+////////////////////////
 void AJSH_BetaPlayer::AttachPop(AActor* PopActor)
 {
-	Server_AttachPop(PopActor);
-}
-void AJSH_BetaPlayer::Server_AttachPop_Implementation(AActor* PopActor)
-{
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("a2"));
-	NetMulti_AttachPop(PopActor);
-}
-
-void AJSH_BetaPlayer::NetMulti_AttachPop_Implementation(AActor* PopActor)
-{
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("a3"));
-	// GrabPopActor = PopActor;
-	// auto* mesh = GrabPopActor->GetComponentByClass<UStaticMeshComponent>();
-	// check(mesh);
-	// if ( mesh )
-	// {
-	// 	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("a3"));
-	// 	mesh->SetSimulatePhysics(false);
-	// 	mesh->AttachToComponent(HandComp , FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	// }
-
-
 	CapsuleComp = GrabPopActor->GetComponentByClass<UCapsuleComponent>();
 	check(CapsuleComp);
 	if ( CapsuleComp )
 	{
-		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("a3"));
-		CapsuleComp->SetSimulatePhysics(false);
-		CapsuleComp->AttachToComponent(HandComp , FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		Server_AttachPop(CapsuleComp);
 	}
 }
+void AJSH_BetaPlayer::Server_AttachPop_Implementation(UCapsuleComponent* cap)
+{
+	NetMulti_AttachPop(cap);
+}
+
+void AJSH_BetaPlayer::NetMulti_AttachPop_Implementation(UCapsuleComponent* cap)
+{
+	cap->SetSimulatePhysics(false);
+	cap->AttachToComponent(HandComp , FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	
+}
 
 
+////////////////////////
 void AJSH_BetaPlayer::DetachPop(AActor* PopActor)
 {
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("d1"));
-	Server_DetachPop(PopActor);
-
-}
-void AJSH_BetaPlayer::Server_DetachPop_Implementation(AActor* PopActor)
-{
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("d2"));
-
-	NetMulti_DetachPop(PopActor);
-}
-
-void AJSH_BetaPlayer::NetMulti_DetachPop_Implementation(AActor* PopActor)
-{
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("d3"));
-
-	// auto* mesh = PopActor->GetComponentByClass<UStaticMeshComponent>();
-	// check(mesh);
-	// if ( mesh )
-	// {
-	// 	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("d4"));
-	//
-	// 	// 물리를 켜주고싶다.
-	// 	mesh->SetSimulatePhysics(true);
-	// 	// 분리하고싶다..
-	// 	mesh->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
-	// }
-
-	//CapsuleComp = GrabPopActor->GetComponentByClass<UCapsuleComponent>();
+	CapsuleComp = GrabPopActor->GetComponentByClass<UCapsuleComponent>();
 	check(CapsuleComp);
 	if ( CapsuleComp )
 	{
-		// 물리를 켜주고싶다.
-		CapsuleComp->SetSimulatePhysics(true);
-		// 분리하고싶다..
-		CapsuleComp->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+		Server_DetachPop(CapsuleComp);
 	}
+
+}
+void AJSH_BetaPlayer::Server_DetachPop_Implementation(UCapsuleComponent* cap)
+{
+	NetMulti_DetachPop(CapsuleComp);
+}
+
+void AJSH_BetaPlayer::NetMulti_DetachPop_Implementation(UCapsuleComponent* cap)
+{
+	cap->SetSimulatePhysics(true);
+	cap->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
 }
