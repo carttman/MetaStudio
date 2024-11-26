@@ -50,7 +50,6 @@ void AJSH_TheaterSpawnActor::Server_SET_JOwner_Implementation(AActor* me)
 
 void AJSH_TheaterSpawnActor::Netmulti_SET_JOwner_Implementation(AActor* me)
 {
-
 	SetOwner(JOwner);
 }
 

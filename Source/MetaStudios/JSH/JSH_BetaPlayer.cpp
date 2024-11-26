@@ -238,8 +238,10 @@ void AJSH_BetaPlayer::NetMulti_MyTakePop_Implementation()
 			continue;
 		}
 		OriginPop = Cast<AJSH_TheaterSpawnActor>(Pop);
-		OriginPop->SET_JOwner(this);
+		//OriginPop->SET_JOwner(this);
+		//OriginPop->SetOwner(this);
 		GrabPopActor = Pop;
+		GrabPopActor->SetOwner(this);
 		AttachPop(GrabPopActor);
 		BHasPop = true;
 		PopModeON = true;
