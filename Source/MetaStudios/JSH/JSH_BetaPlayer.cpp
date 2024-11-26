@@ -84,9 +84,6 @@ void AJSH_BetaPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AJSH_BetaPlayer, BHasPop);
 	DOREPLIFETIME(AJSH_BetaPlayer, PopList);
 	DOREPLIFETIME(AJSH_BetaPlayer, HandComp);
-
-
-
 }
 
 void AJSH_BetaPlayer::Tick(float DeltaTime)
@@ -201,6 +198,8 @@ void AJSH_BetaPlayer::MyTakePop()
 void AJSH_BetaPlayer::Server_MyTakePop_Implementation()
 {
 	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t2"));
+	
+
 	NetMulti_MyTakePop();
 }
 
@@ -212,10 +211,9 @@ void AJSH_BetaPlayer::NetMulti_MyTakePop_Implementation()
 		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-2"));
 		float tempDist = GetDistanceTo(Pop);
 		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("t3-3"));
-		if ( tempDist > GrabDistance )
-			continue;
+		if ( tempDist > GrabDistance ) continue;
 
-		// 서버 쪽에서 여기서 자꾸 막힘... 왜 그런지 몰르겠음 ....
+		//서버 쪽에서 여기서 자꾸 막힘... 왜 그런지 몰르겠음 ....
 		//if (Pop->GetOwner() != nullptr) continue;
 
 
@@ -229,6 +227,7 @@ void AJSH_BetaPlayer::NetMulti_MyTakePop_Implementation()
 		if (IsLocallyControlled()) UE_LOG(LogTemp, Warning, TEXT("rt5"));
 		AttachPop(GrabPopActor);
 		PopModeON = true;
+		PopGrab_O = true;
 		// WantWalk = true;
 		//
 		// if (!GrabPopActor->ActorHasTag(FName("Count")))
@@ -278,6 +277,7 @@ void AJSH_BetaPlayer::NetMulti_MyReleasePop_Implementation()
 
 	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("r6"));
 	PopModeON = false;
+	PopGrab_O = false;
 }
 
 
@@ -285,7 +285,6 @@ void AJSH_BetaPlayer::NetMulti_MyReleasePop_Implementation()
 
 void AJSH_BetaPlayer::AttachPop(AActor* PopActor)
 {
-	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("a1"));
 	Server_AttachPop(PopActor);
 }
 void AJSH_BetaPlayer::Server_AttachPop_Implementation(AActor* PopActor)
@@ -297,7 +296,7 @@ void AJSH_BetaPlayer::Server_AttachPop_Implementation(AActor* PopActor)
 void AJSH_BetaPlayer::NetMulti_AttachPop_Implementation(AActor* PopActor)
 {
 	if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("a3"));
-	GrabPopActor = PopActor;
+	// GrabPopActor = PopActor;
 	// auto* mesh = GrabPopActor->GetComponentByClass<UStaticMeshComponent>();
 	// check(mesh);
 	// if ( mesh )
@@ -348,7 +347,7 @@ void AJSH_BetaPlayer::NetMulti_DetachPop_Implementation(AActor* PopActor)
 	// 	mesh->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
 	// }
 
-	CapsuleComp = GrabPopActor->GetComponentByClass<UCapsuleComponent>();
+	//CapsuleComp = GrabPopActor->GetComponentByClass<UCapsuleComponent>();
 	check(CapsuleComp);
 	if ( CapsuleComp )
 	{

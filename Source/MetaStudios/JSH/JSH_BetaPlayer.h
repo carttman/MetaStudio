@@ -159,6 +159,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	UCapsuleComponent* CapsuleComp;
+
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	bool PopGrab_O = false;
 };
 
 
