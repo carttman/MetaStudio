@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BetaPl/JSH_TheaterSpawnActor.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "JSH_BetaPlayer.generated.h"
@@ -47,7 +48,8 @@ class METASTUDIOS_API AJSH_BetaPlayer : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Grab;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_SpawnPop;
 
 public:
 	// Sets default values for this character's properties
@@ -163,6 +165,21 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool PopGrab_O = false;
+
+
+
+	UFUNCTION()
+	void Spawn_Pop();
+	UFUNCTION(Reliable, Server)
+	void Server_Spawn_Pop(FVector lo, FRotator ro);
+	UFUNCTION(Reliable, NetMulticast)
+	void NetMulit_Pop(FVector lo, FRotator ro);
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Gizmo")
+	TSubclassOf<AActor> PopClass;
+	UPROPERTY(Replicated)
+	AActor* PopAct = nullptr;
+	UPROPERTY(Replicated)
+	AJSH_TheaterSpawnActor* OriginPop;
 };
 
 

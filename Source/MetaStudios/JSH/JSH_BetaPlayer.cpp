@@ -11,6 +11,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "BetaPl/JSH_TheaterSpawnActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -59,15 +60,23 @@ AJSH_BetaPlayer::AJSH_BetaPlayer()
 
 	HandComp = CreateDefaultSubobject<USceneComponent>(TEXT("HandComp"));
 	HandComp->SetupAttachment(GetMesh() , TEXT("LeftHand_Pop"));
+
+
+	// // 팝콘 스폰을 위한
+	static ConstructorHelpers::FClassFinder<AActor> PopBPClass(TEXT("/Game/JSH/BP/BP_PopCorn.BP_PopCorn_C"));
+	if (PopBPClass.Succeeded())
+	{
+		PopClass = PopBPClass.Class;
+	}
 }
 
 void AJSH_BetaPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 태어날 때 모든 AX 목록 기억
-	FName tag = TEXT("Pop");
-	UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld() , AActor::StaticClass() , tag , PopList);
+	// // 태어날 때 모든 AX 목록 기억
+	// FName tag = TEXT("Pop");
+	// UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld() , AActor::StaticClass() , tag , PopList);
 }
 
 void AJSH_BetaPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -117,6 +126,8 @@ void AJSH_BetaPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 
 		EnhancedInputComponent->BindAction(IA_Grab, ETriggerEvent::Started, this, &AJSH_BetaPlayer::Grab);
+		
+		EnhancedInputComponent->BindAction(IA_SpawnPop, ETriggerEvent::Started, this, &AJSH_BetaPlayer::Spawn_Pop);
 	}
 	else
 	{
@@ -167,6 +178,10 @@ void AJSH_BetaPlayer::Grab()
 	}
 	else
 	{
+		// 그랩할때 갱신
+		FName tag = TEXT("Pop");
+		UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld() , AActor::StaticClass() , tag , PopList);
+		
 		if (HasAuthority()) UE_LOG(LogTemp, Warning, TEXT("g5"));
 		MyTakePop();
 	}
@@ -245,6 +260,8 @@ void AJSH_BetaPlayer::MyReleasePop()
 {
 	Server_MyReleasePop();
 }
+
+
 void AJSH_BetaPlayer::Server_MyReleasePop_Implementation()
 {
 	NetMulti_MyReleasePop();
@@ -321,4 +338,34 @@ void AJSH_BetaPlayer::NetMulti_DetachPop_Implementation(UCapsuleComponent* cap)
 	cap->SetSimulatePhysics(true);
 	cap->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	cap->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+}
+
+//////
+void AJSH_BetaPlayer::Spawn_Pop()
+{
+	FVector ThisForwardVector = this->GetActorForwardVector();
+	FVector ThisLocation = this->GetActorLocation() + ThisForwardVector * 10;
+	ThisLocation.Z += 100.0f; 
+
+	FRotator Thisrotator = this->GetActorRotation();
+	
+	Server_Spawn_Pop(ThisLocation, Thisrotator);
+}
+
+void AJSH_BetaPlayer::Server_Spawn_Pop_Implementation(FVector lo, FRotator ro)
+{
+	NetMulit_Pop(lo, ro);
+}
+
+void AJSH_BetaPlayer::NetMulit_Pop_Implementation(FVector lo, FRotator ro)
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	if (PopClass)
+	{
+		PopAct = GetWorld()->SpawnActor<AActor>(PopClass, lo, ro, SpawnParams);
+        
+		OriginPop = Cast<AJSH_TheaterSpawnActor>(PopAct);
+	}
 }
