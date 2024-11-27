@@ -329,7 +329,10 @@ void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
 	{
 		AudioComponentUp->Stop();
 	}
-
+	if (CheckLanding() && AudioComponentDown->IsPlaying())
+	{
+		AudioComponentUp->Stop();
+	}
 	Server_UpdateMoveUpDownSpaceship(false);
 }
 
@@ -639,10 +642,10 @@ bool ASpaceshipPawn::CheckLanding()
 				}, 2, false);
 			Server_EndFlyEffect();
 
-			if (AudioComponentDown->IsPlaying())
-			{
-				AudioComponentDown->Stop();
-			}
+			//if (AudioComponentDown->IsPlaying())
+			//{
+			//	AudioComponentDown->Stop();
+			//}
 
 			return true;
 		}
