@@ -113,31 +113,31 @@ AJSH_Player::AJSH_Player()
 	// }
 
 
-	FallGuys = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
-	FallGuys->SetupAttachment(RootComponent);
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> TMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/JSH/Asset/Corgi/untitled.untitled'"));
-	if (TMesh.Succeeded())
-	{
-		FallGuys->SetSkeletalMesh(TMesh.Object);
-		FallGuys->SetRelativeLocationAndRotation(FVector(20, 0, -12), FRotator(0, -90, 0));
-		FallGuys->SetRelativeScale3D(FVector(0.5, 0.5, 0.5));
-		FallGuys->SetCastShadow(true);
-		
-		//FallGuys->SetVisibility(false);
-	}
+	// FallGuys = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
+	// FallGuys->SetupAttachment(RootComponent);
+	// ConstructorHelpers::FObjectFinder<USkeletalMesh> TMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/JSH/Asset/Corgi/untitled.untitled'"));
+	// if (TMesh.Succeeded())
+	// {
+	// 	FallGuys->SetSkeletalMesh(TMesh.Object);
+	// 	FallGuys->SetRelativeLocationAndRotation(FVector(20, 0, -12), FRotator(0, -90, 0));
+	// 	FallGuys->SetRelativeScale3D(FVector(0.5, 0.5, 0.5));
+	// 	FallGuys->SetCastShadow(true);
+	// 	
+	// 	//FallGuys->SetVisibility(false);
+	// }
 	
 
-	FallGuys_Camera = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Record Camera"));
-	FallGuys_Camera->SetupAttachment(FallGuys);
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> TMesh2(TEXT("/Script/Engine.SkeletalMesh'/Game/JSH/Asset/Camera03/source/video-cam.video-cam'"));
-	if (TMesh2.Succeeded())
-	{
-		FallGuys_Camera->SetSkeletalMesh(TMesh2.Object);
-		FallGuys_Camera->SetRelativeLocationAndRotation(FVector(-12477.217394, 3931.275206, 24551.795870), FRotator(1.727941, 0.148925, 9.851076));
-		FallGuys_Camera->SetRelativeScale3D(FVector(100, 100, 100));
-
-		FallGuys->SetVisibility(false);
-	}
+	// FallGuys_Camera = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Record Camera"));
+	// FallGuys_Camera->SetupAttachment(FallGuys);
+	// ConstructorHelpers::FObjectFinder<USkeletalMesh> TMesh2(TEXT("/Script/Engine.SkeletalMesh'/Game/JSH/Asset/Camera03/source/video-cam.video-cam'"));
+	// if (TMesh2.Succeeded())
+	// {
+	// 	FallGuys_Camera->SetSkeletalMesh(TMesh2.Object);
+	// 	FallGuys_Camera->SetRelativeLocationAndRotation(FVector(-12477.217394, 3931.275206, 24551.795870), FRotator(1.727941, 0.148925, 9.851076));
+	// 	FallGuys_Camera->SetRelativeScale3D(FVector(100, 100, 100));
+	//
+	// 	FallGuys->SetVisibility(false);
+	// }
 
 	
 	GetCharacterMovement()->MaxFlySpeed = MaxFlySpeed_C;
@@ -2139,9 +2139,7 @@ void AJSH_Player::Server_Preset_On_Off_Implementation(AActor* rock)
 
 void AJSH_Player::NetMulti_Preset_On_Off_Implementation(AActor* rock)
 {
-	UE_LOG(LogTemp, Warning, TEXT("p2"));
 	Preset_Rock = Cast<AJSH_Preset>(rock);
-	UE_LOG(LogTemp, Warning, TEXT("p33"));
 	if (Preset_Rock) Preset_Rock->Hidden_On_Off();
 
 }
@@ -2151,13 +2149,13 @@ void AJSH_Player::NetMulti_Preset_On_Off_Implementation(AActor* rock)
 
 void AJSH_Player::Preset_On_Off_Station()
 {
-	for (AActor* Pop : StationList)
+	for (AActor* sta : StationList)
 	{
-		if (Pop)
+		if (sta)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("p111111"));
 
-			Server_Preset_On_Off(Pop);
+			Server_Preset_On_Off(sta);
 			break;
 		}
 	}

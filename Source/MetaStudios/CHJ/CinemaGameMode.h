@@ -17,7 +17,7 @@ class METASTUDIOS_API ACinemaGameMode : public AGameModeBase
 	virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot) override;
 	
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class AJSH_Player> ServerPlayer;
+	TSubclassOf<class AJSH_BetaPlayer> ServerPlayer;
 	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AMetaStudiosCharacter> ClientPlayer;
