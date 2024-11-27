@@ -108,7 +108,7 @@ void AMetaStudiosCharacter::Tick(float DeltaTime)
 
 void AMetaStudiosCharacter::PossessedBy(AController* NewController)
 {
-	Super::PossessedBy(NewController);
+	Super::PossessedBy(NewController);	
 }
 
 void AMetaStudiosCharacter::BeginPlay()
@@ -374,6 +374,7 @@ void AMetaStudiosCharacter::NetMulticast_ManageBooster_Implementation(float Delt
 void AMetaStudiosCharacter::ToggleBoosting()
 {
 	Server_ToggleBoosting(true);
+	//UE_LOG(LogTemp, Warning, TEXT("Player Loc : %s"), *GetActorLocation().ToString())
 }
 
 void AMetaStudiosCharacter::Server_ToggleBoosting_Implementation(bool bMove)
@@ -471,6 +472,16 @@ void AMetaStudiosCharacter::ActivateBooster(bool bActive)
 		}
 	}
 }
+
+void AMetaStudiosCharacter::SetVisibilityMesh(bool bShow)
+{
+	if (JetMesh != nullptr)
+	{
+		JetMesh->SetVisibility(bShow);
+	}
+	GetMesh()->SetVisibility(bShow);
+}
+
 /////////////////////Booster/////////////////////////////////////////////////////
 
 
@@ -509,13 +520,14 @@ void AMetaStudiosCharacter::NetMulticast_ChangeCameraMode_Implementation()
 void AMetaStudiosCharacter::SelectAutoMobile()
 {
 	if (!IsLocallyControlled())	return;
+			
 	if (ListShip.Num() <= 0 && ListCar.Num() <= 0)	return;
-
+	
 	float distMinShip = 999999.0f;
 	float distMinCar = 999999.0f;
 	int selIdxShip = -1;
 	int selIdxCar = -1;
-
+	
 	// Ship중 아무도 안타고 있고 가장 가까운 애
 	for (int i = 0; i < ListShip.Num(); ++i)
 	{
@@ -525,7 +537,7 @@ void AMetaStudiosCharacter::SelectAutoMobile()
 		distMinShip = distCur;
 		selIdxShip = i;
 	}
-
+	
 	// Car중 아무도 안타고 있고 가장 가까운 애
 	for (int i = 0; i < ListCar.Num(); ++i)
 	{
@@ -535,9 +547,9 @@ void AMetaStudiosCharacter::SelectAutoMobile()
 		distMinCar = distCur;
 		selIdxCar = i;
 	}
-
+	
 	if (selIdxShip == -1 && selIdxCar == -1)	return;
-
+	
 	if (distMinShip < distMinCar)
 	{
 		spaceshipActor = ListShip[selIdxShip];
@@ -635,8 +647,9 @@ void AMetaStudiosCharacter::NetMulticast_EnterSpaceship_Implementation(ASpaceshi
 	{
 		SpaceshipActor->player = this;
 		SpaceshipActor->bExistRider = true;
-		GetMesh()->SetVisibility(false);
-		JetMesh->SetVisibility(false);
+		SetVisibilityMesh(false);		
+		//JetMesh->SetVisibility(false);		
+		//GetMesh()->SetVisibility(false);
 
 		if (IsLocallyControlled())
 		{
@@ -717,8 +730,9 @@ void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarAc
 	{
 		CarActor->player = this;
 		CarActor->bExistRider = true;
-		GetMesh()->SetVisibility(false);
-		JetMesh->SetVisibility(false);
+		SetVisibilityMesh(false);
+		//JetMesh->SetVisibility(false);
+		//GetMesh()->SetVisibility(false);
 		CarActor->RidingPlayer->SetVisibility(true);
 
 		if (IsLocallyControlled())
@@ -824,7 +838,7 @@ void AMetaStudiosCharacter::NetMulticast_FindObject_Implementation()
 		PickUpAnim();
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, this, &AMetaStudiosCharacter::DestroyObject, 2.0f);
-		// DestroyObject();
+		//  DestroyObject();
 	}
 }
 

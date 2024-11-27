@@ -185,6 +185,9 @@ public:
 	class UNiagaraComponent* BoosterFXComponent3;
 
 	void ActivateBooster(bool bActive);
+
+
+	void SetVisibilityMesh(bool bShow);
 	
 	UPROPERTY()
 	bool MoveStop = true;
@@ -229,13 +232,13 @@ private:
 	bool bIsBoosting = false;
 
 	// 부스터 힘
-	float BoostStrength = 50000.0f;
+	float BoostStrength = 10000.0f;
 
 	// 부스터의 최대 값
-	float MaxBoosterAmount = 1000.0f;
+	float MaxBoosterAmount = 10000.0f;
 
 	// 현재 부스터 양
-	float BoosterAmount = 1000.0f;
+	float BoosterAmount = 10000.0f;
 
 	// 부스터 감소 속도
 	float BoosterDrainRate = 20.0f;

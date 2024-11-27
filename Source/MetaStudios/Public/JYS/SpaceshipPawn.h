@@ -96,10 +96,10 @@ public:
 	void StopMove();
 
 	UFUNCTION(Server, Reliable)
-	void Server_OnMyActionMoveSpaceship(bool bMove);
+	void Server_OnMyActionMoveSpaceship(bool bMoveUp);
 
-	void ApplyRoll(float RollInput);
-	void ApplyRollBack();
+	FRotator ApplyRoll(float RollInput);
+	FRotator ApplyRollBack();
 
 	UPROPERTY(Replicated)
 	bool MoveStop = true;	
@@ -109,6 +109,27 @@ public:
 
 	UFUNCTION(Server, Unreliable)
 	void Server_UpdateTransformSpaceship(FVector newLocation, FRotator newRotation);
+
+
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateMoveUpDownSpaceship(bool bMoveUp);
+
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_UpdateMoveUpDownSpaceShip(FVector newLocation);
+
+
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateMoveAndRollSpaceship(FVector2D inputValue);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_UpdateMoveAndRollSpaceShip(FVector newLocation, FRotator newRot);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateRollbackSpaceship();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_UpdateRollbackSpaceShip(FVector newLocation, FRotator newRot);
 
 
 	float DescentSpeed = 5.0f;
@@ -176,8 +197,12 @@ public:
 	bool activeStartFly = true;
 
 
+	//UPROPERTY(EditAnywhere)
+	//class UArrowComponent*	ExitPosition;
+
+
 	UPROPERTY(EditAnywhere)
-	class UArrowComponent*	ExitPosition;
+	class USceneComponent*	ExitPoint;
 
 private:
 	
