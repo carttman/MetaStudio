@@ -147,4 +147,11 @@ public:
 	//UPROPERTY(Replicated)
 	//TArray<AActor> PlayerBox;
 
+	/////»ç¿îµå
+	UPROPERTY(EditAnywhere)
+	class USoundBase* MoveSound;
+
+	UPROPERTY(VisibleAnywhere)
+	class UAudioComponent* AudioComponent;
+
 };

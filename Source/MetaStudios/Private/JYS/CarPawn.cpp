@@ -16,6 +16,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/AudioComponent.h"
 
 
 
@@ -55,6 +56,11 @@ ACarPawn::ACarPawn()
 
 	UIGuideBox->SetGenerateOverlapEvents(true);
 	UIGuideBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	AudioComponent->SetupAttachment(RootComponent);
+	AudioComponent->bAutoActivate = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -224,6 +230,10 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 	{
 		//MoveStop = true;
 		Server_OnMyActionMove(true);
+		if (AudioComponent->IsPlaying())
+		{
+			AudioComponent->Stop();
+		}
 		return;
 	}
 
@@ -236,11 +246,20 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 	{
 		ApplyRoll(v.Y);
 		// UE_LOG(LogTemp, Warning, TEXT("direction.X != 0.0f"))
+		if (!AudioComponent->IsPlaying() && MoveSound)
+		{
+			AudioComponent->SetSound(MoveSound);
+			AudioComponent->Play();
+		}
 	}
 	else
 	{
 		ApplyRollBack();
 		// UE_LOG(LogTemp, Warning, TEXT("ApplyRollBack"))
+		if (AudioComponent->IsPlaying())
+		{
+			AudioComponent->FadeOut(0.2f, 0.0f);
+		}
 	}
 
 	FTransform ttt = FTransform(GetControlRotation());
