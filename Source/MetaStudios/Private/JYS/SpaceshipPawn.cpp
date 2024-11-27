@@ -15,6 +15,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/ArrowComponent.h"
 #include <Kismet/KismetMathLibrary.h>
+#include "Components/AudioComponent.h"
 
 // Sets default values
 ASpaceshipPawn::ASpaceshipPawn()
@@ -55,6 +56,14 @@ ASpaceshipPawn::ASpaceshipPawn()
 	ExitPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ExitPoint"));
 	ExitPoint->SetupAttachment(SpaceshipSkeletalMesh);
 	ExitPoint->SetRelativeLocation(FVector(0.0f, -2000.0f, 200.0f));
+
+	AudioComponentUp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponentUp"));
+	AudioComponentUp->SetupAttachment(RootComponent);
+	AudioComponentUp->bAutoActivate = false;
+
+	AudioComponentDown = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponentDown"));
+	AudioComponentDown->SetupAttachment(RootComponent);
+	AudioComponentDown->bAutoActivate = false;
 }
 
 // Called when the game starts or when spawned
@@ -90,7 +99,7 @@ void ASpaceshipPawn::Tick(float DeltaTime)
 	if (SpaceshipSkeletalMesh != nullptr)
 	{
 		//FVector SocketLocation = GetActorLocation() + ExitPosition->GetRelativeLocation();			//SpaceshipSkeletalMesh->GetSocketLocation(FName("ExitSpaceship"));
-		DrawDebugCapsule(GetWorld(), ExitPoint->GetComponentLocation(), 50.0f, 100.0f, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), FColor::Red, false, 10.0f);
+		// DrawDebugCapsule(GetWorld(), ExitPoint->GetComponentLocation(), 50.0f, 100.0f, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), FColor::Red, false, 10.0f);
 
 	}
 
@@ -206,7 +215,7 @@ void ASpaceshipPawn::Server_ExitSpaceship_Implementation()
 	{	
 		SocketLocation = ExitPoint->GetComponentLocation();
 		SocketRotation = GetActorRotation();
-		DrawDebugCapsule(GetWorld(), SocketLocation, 100.0f, 200.0f, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), FColor::Green, false, 20.0f);
+		// DrawDebugCapsule(GetWorld(), SocketLocation, 100.0f, 200.0f, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), FColor::Green, false, 20.0f);
 
 
 		//UE_LOG(LogTemp, Warning, TEXT("ExitSpaceShip 2 : %s"), *GetActorLocation().ToString())		
@@ -237,7 +246,7 @@ void ASpaceshipPawn::NetMulticast_ExitSpaceship_Implementation(FVector ExitLocat
 	{		
 		//UE_LOG(LogTemp, Warning, TEXT("ExitSpaceShip 5 : %s"), *GetActorLocation().ToString())
 		//UE_LOG(LogTemp, Warning, TEXT("ExitSpaceShip 6 : %s"), *player->GetActorLocation().ToString())
-		DrawDebugCapsule(GetWorld(), ExitLocation, 50.0f, 100.0f, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), FColor::Blue, false, 20.0f);
+		// DrawDebugCapsule(GetWorld(), ExitLocation, 50.0f, 100.0f, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), FColor::Blue, false, 20.0f);
 		
 		// 플레이어 가시화 처리
 		player->SetVisibilityMesh(true);
@@ -397,11 +406,21 @@ void ASpaceshipPawn::Server_UpdateMoveUpDownSpaceship_Implementation(bool bMoveU
 	{
 		// 수직 상승
 		currentLocation.Z += MovementSpeed * GetWorld()->GetDeltaSeconds();
+		if (AscendSound && !AudioComponentUp->IsPlaying())
+		{
+			AudioComponentUp->SetSound(AscendSound);
+			AudioComponentUp->Play();
+		}
 	}
 	else
 	{
 		// 수직 하강
 		currentLocation.Z -= MovementSpeed * GetWorld()->GetDeltaSeconds();
+		if (DescendSound && !AudioComponentDown->IsPlaying())
+		{
+			AudioComponentDown->SetSound(DescendSound);
+			AudioComponentDown->Play();
+		}
 	}
 	SetActorLocation(currentLocation);
 	NetMulticast_UpdateMoveUpDownSpaceShip(GetActorLocation());
@@ -526,7 +545,7 @@ void ASpaceshipPawn::NetMulticast_StartFlyEffect_Implementation()
 	FVector CapsuleOrigin = start + (end - start) * 0.5f;
 	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
 
-	DrawDebugCapsule(GetWorld(), hitResult.ImpactPoint, HalfSphereRadius, SphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
+	// DrawDebugCapsule(GetWorld(), hitResult.ImpactPoint, HalfSphereRadius, SphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
 }
 
 void ASpaceshipPawn::Server_EndFlyEffect_Implementation()
@@ -585,12 +604,12 @@ bool ASpaceshipPawn::CheckLanding()
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
-	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f, 0, 20.0f);
+	// DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f, 0, 20.0f);
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("LineTrace Success"));
 		bHitResult = true;
-		DrawDebugLine(GetWorld(), start, end, FColor::Magenta, false, 1.0f, 0, 20.0f);
+		// DrawDebugLine(GetWorld(), start, end, FColor::Magenta, false, 1.0f, 0, 20.0f);
 		LastLandingPosZ = hitResult.ImpactPoint.Z;
 
 		float distanceToGround = FVector::Dist(GetActorLocation(), hitResult.ImpactPoint);
