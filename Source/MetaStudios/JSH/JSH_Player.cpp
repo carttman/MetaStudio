@@ -2123,26 +2123,12 @@ void AJSH_Player::Preset_On_Off()
 			Server_Preset_On_Off(firstRock);
 		}
 	}
-
-	//
-	// for (AActor* Pop : RockList)
-	// {
-	// 	if (Pop)
-	// 	{
-	// 		UE_LOG(LogTemp, Warning, TEXT("p111111"));
-	//
-	// 		Server_Preset_On_Off(Pop);
-	// 		break;
-	// 	}
-	// }
 }
-
 
 void AJSH_Player::Server_Preset_On_Off_Implementation(AActor* rock)
 {
 	NetMulti_Preset_On_Off(rock);
 }
-
 
 void AJSH_Player::NetMulti_Preset_On_Off_Implementation(AActor* rock)
 {
@@ -2170,7 +2156,6 @@ void AJSH_Player::Preset_On_Off_Station()
 		}
 	}
 }
-
 void AJSH_Player::Server_Preset_On_Off_Station_Implementation(AActor* Station)
 {
 	NetMulti_Preset_On_Off_Station(Station);

@@ -121,6 +121,12 @@ public:
 	UButton* Button_Preset_Meteor;
 	UFUNCTION()
 	void OnButton_Preset_Meteor_Clicked();
+
+	UPROPERTY(meta=(BindWidget))
+	UImage* Image_window2;
+
+	UPROPERTY(meta=(BindWidget))
+	UImage* Image_window3;
 };
 
 
