@@ -464,7 +464,7 @@ void ASpaceshipPawn::Server_UpdateMoveAndRollSpaceship_Implementation(FVector2D 
 	direction.Normalize();
 
 	// p = p0 + vt
-	FVector newPos = GetActorLocation() + direction * 10000.0f * GetWorld()->DeltaTimeSeconds;
+	FVector newPos = GetActorLocation() + direction * 8000.0f * GetWorld()->DeltaTimeSeconds;
 	SetActorLocation(newPos);
 	//AddMovementInput(direction);
 	direction = FVector::ZeroVector;
