@@ -21,6 +21,12 @@ void UJSH_Editor_MainUI::NativeConstruct()
 	Window3->SetVisibility(ESlateVisibility::Hidden);
 	Window4->SetVisibility(ESlateVisibility::Hidden);
 	Window5->SetVisibility(ESlateVisibility::Hidden);
+	Image_window2->SetVisibility(ESlateVisibility::Hidden);
+	Image_window3->SetVisibility(ESlateVisibility::Hidden);
+	WBP_02->SetVisibility(ESlateVisibility::Hidden);
+	WBP_04->SetVisibility(ESlateVisibility::Hidden);
+	WBP_05->SetVisibility(ESlateVisibility::Hidden);
+	WBP_06->SetVisibility(ESlateVisibility::Hidden);
 
 
 	if(Button_w1) Button_w1->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_w1_Clicked);
@@ -56,7 +62,13 @@ void UJSH_Editor_MainUI::OnButton_w1_Clicked()
 	Window3->SetVisibility(ESlateVisibility::Hidden);
 	Window4->SetVisibility(ESlateVisibility::Hidden);
 	Window5->SetVisibility(ESlateVisibility::Hidden);
-	
+	Image_window2->SetVisibility(ESlateVisibility::Hidden);
+	Image_window3->SetVisibility(ESlateVisibility::Hidden);
+
+	WBP_02->SetVisibility(ESlateVisibility::Hidden);
+	WBP_04->SetVisibility(ESlateVisibility::Hidden);
+	WBP_05->SetVisibility(ESlateVisibility::Hidden);
+	WBP_06->SetVisibility(ESlateVisibility::Hidden);
 	UE_LOG(LogTemp, Warning, TEXT("button"));
 }
 
@@ -68,9 +80,15 @@ void UJSH_Editor_MainUI::OnButton_w2_Clicked()
 	Window3->SetVisibility(ESlateVisibility::Hidden);
 	Window4->SetVisibility(ESlateVisibility::Hidden);
 	Window5->SetVisibility(ESlateVisibility::Hidden);
-
+	Image_window2->SetVisibility(ESlateVisibility::Visible);
+	Image_window3->SetVisibility(ESlateVisibility::Hidden);
 	Button_Preset_Station->SetVisibility(ESlateVisibility::Hidden);
 	Button_Preset_Meteor->SetVisibility(ESlateVisibility::Hidden);
+
+	WBP_02->SetVisibility(ESlateVisibility::Visible);
+	WBP_04->SetVisibility(ESlateVisibility::Visible);
+	WBP_05->SetVisibility(ESlateVisibility::Hidden);
+	WBP_06->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UJSH_Editor_MainUI::OnButton_w3_Clicked()
@@ -81,9 +99,15 @@ void UJSH_Editor_MainUI::OnButton_w3_Clicked()
 	Window3->SetVisibility(ESlateVisibility::Visible);
 	Window4->SetVisibility(ESlateVisibility::Hidden);
 	Window5->SetVisibility(ESlateVisibility::Hidden);
-	
+	Image_window2->SetVisibility(ESlateVisibility::Hidden);
+	Image_window3->SetVisibility(ESlateVisibility::Visible);
 	Button_Preset_Station->SetVisibility(ESlateVisibility::Hidden);
 	Button_Preset_Meteor->SetVisibility(ESlateVisibility::Hidden);
+
+	WBP_02->SetVisibility(ESlateVisibility::Hidden);
+	WBP_04->SetVisibility(ESlateVisibility::Hidden);
+	WBP_05->SetVisibility(ESlateVisibility::Visible);
+	WBP_06->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UJSH_Editor_MainUI::OnButton_w4_Clicked()
@@ -94,9 +118,15 @@ void UJSH_Editor_MainUI::OnButton_w4_Clicked()
 	Window3->SetVisibility(ESlateVisibility::Hidden);
 	Window4->SetVisibility(ESlateVisibility::Visible);
 	Window5->SetVisibility(ESlateVisibility::Hidden);
-
+	Image_window2->SetVisibility(ESlateVisibility::Hidden);
+	Image_window3->SetVisibility(ESlateVisibility::Hidden);
 	Button_Preset_Station->SetVisibility(ESlateVisibility::Hidden);
 	Button_Preset_Meteor->SetVisibility(ESlateVisibility::Hidden);
+
+	WBP_02->SetVisibility(ESlateVisibility::Hidden);
+	WBP_04->SetVisibility(ESlateVisibility::Hidden);
+	WBP_05->SetVisibility(ESlateVisibility::Hidden);
+	WBP_06->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UJSH_Editor_MainUI::OnButton_w5_Clicked()
@@ -107,9 +137,15 @@ void UJSH_Editor_MainUI::OnButton_w5_Clicked()
 	Window3->SetVisibility(ESlateVisibility::Hidden);
 	Window4->SetVisibility(ESlateVisibility::Hidden);
 	Window5->SetVisibility(ESlateVisibility::Visible);
-
+	Image_window2->SetVisibility(ESlateVisibility::Hidden);
+	Image_window3->SetVisibility(ESlateVisibility::Hidden);
 	Button_Preset_Station->SetVisibility(ESlateVisibility::Visible);
 	Button_Preset_Meteor->SetVisibility(ESlateVisibility::Visible);
+
+	WBP_02->SetVisibility(ESlateVisibility::Hidden);
+	WBP_04->SetVisibility(ESlateVisibility::Hidden);
+	WBP_05->SetVisibility(ESlateVisibility::Hidden);
+	WBP_06->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UJSH_Editor_MainUI::OnButton_Preset_Station_Clicked()
