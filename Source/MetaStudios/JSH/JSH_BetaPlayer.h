@@ -174,21 +174,20 @@ public:
 	UFUNCTION()
 	void Spawn_Pop();
 	
-	UFUNCTION(Reliable, Server)
+	UFUNCTION(Server, Reliable)
 	void Server_Spawn_Pop(FVector slo, FRotator sro);
 	
-	UFUNCTION(Reliable, NetMulticast)
+	UFUNCTION(NetMulticast, Reliable)
 	void NetMulit_Pop(FVector slo, FRotator sro);
 	
-	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Gizmo")
-	TSubclassOf<AActor> PopClass;
-	UPROPERTY(Replicated)
-	AActor* PopAct = nullptr;
-	UPROPERTY(Replicated)
+	UPROPERTY(EditDefaultsOnly, Category = "Gizmo")
+	TSubclassOf<AJSH_TheaterSpawnActor> PopClass;
+	UPROPERTY()
+	AJSH_TheaterSpawnActor* PopAct = nullptr;
+	UPROPERTY()
 	AJSH_TheaterSpawnActor* SpawnPop;
 
 	FActorSpawnParameters SpawnParams;
-
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

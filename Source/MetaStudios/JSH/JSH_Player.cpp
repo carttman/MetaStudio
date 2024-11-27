@@ -221,12 +221,15 @@ void AJSH_Player::BeginPlay()
 			{
 				//Editor_UI->AddToViewport();
 				Editor_UI = Cast<UJSH_Editor_MainUI>(PlayerMainUI);
+				Editor_UI->Begin_SavedPlayer(this);
 				// Editor_UI->SetVisibility(ESlateVisibility::Hidden);
 			}
 		}
 	}
 
 
+	FName tag2 = TEXT("Station");
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), tag2, RockList);
 
 	FName tag = TEXT("Rock");
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), tag, RockList);
@@ -2125,6 +2128,7 @@ void AJSH_Player::Preset_On_Off()
 	}
 }
 
+
 void AJSH_Player::Server_Preset_On_Off_Implementation(AActor* rock)
 {
 	NetMulti_Preset_On_Off(rock);
@@ -2139,6 +2143,36 @@ void AJSH_Player::NetMulti_Preset_On_Off_Implementation(AActor* rock)
 	if (Preset_Rock) Preset_Rock->Hidden_On_Off();
 
 }
+
+
+
+
+void AJSH_Player::Preset_On_Off_Station()
+{
+	for (AActor* Pop : StationList)
+	{
+		if (Pop)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("p111111"));
+
+			Server_Preset_On_Off(Pop);
+			break;
+		}
+	}
+}
+
+void AJSH_Player::Server_Preset_On_Off_Station_Implementation(AActor* Station)
+{
+}
+
+void AJSH_Player::NetMulti_Preset_On_Off_Station_Implementation(AActor* Station)
+{
+}
+
+
+
+
+
 
 
 

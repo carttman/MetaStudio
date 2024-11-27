@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "JSH_Editor_MainUI.generated.h"
 
+class AJSH_Player;
 /**
  * 
  */
@@ -18,6 +19,15 @@ class METASTUDIOS_API UJSH_Editor_MainUI : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
+
+
+	UFUNCTION()
+	void Begin_SavedPlayer(AJSH_Player* temp);
+
+	UPROPERTY()
+	AJSH_Player* OriginPlayer;
+
+	
 
 	UPROPERTY(meta=(BindWidget))
 	class UCanvasPanel* Root_CanvasPanel;
@@ -100,4 +110,17 @@ public:
 	UButton* Button_w5;
 	UFUNCTION()
 	void OnButton_w5_Clicked();
+
+
+	UPROPERTY(meta=(BindWidget))
+	UButton* Button_Preset_Station;
+	UFUNCTION()
+	void OnButton_Preset_Station_Clicked();
+
+	UPROPERTY(meta=(BindWidget))
+	UButton* Button_Preset_Meteor;
+	UFUNCTION()
+	void OnButton_Preset_Meteor_Clicked();
 };
+
+

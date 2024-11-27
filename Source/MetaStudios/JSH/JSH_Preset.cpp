@@ -51,11 +51,11 @@ void AJSH_Preset::NetMulti_Hidden_On_Off_Implementation()
 {
 	if (B_Hidden)
 	{
-		SetActorHiddenInGame(false);
+		SetActorHiddenInGame(true);
 	}
 	else
 	{
-		SetActorHiddenInGame(true);	
+		SetActorHiddenInGame(false);	
 	}
 
 	B_Hidden = !B_Hidden;

@@ -671,6 +671,23 @@ public:
 
 	UPROPERTY(Replicated)
 	AJSH_Preset* Preset_Rock;
+
+
+
+	
+	//preset
+	UPROPERTY(Replicated)
+	TArray<AActor*> StationList;
+
+	UFUNCTION()
+	void Preset_On_Off_Station();
+	UFUNCTION(Server, Reliable)
+	void Server_Preset_On_Off_Station(AActor* Station);
+	UFUNCTION(Server, Reliable)
+	void NetMulti_Preset_On_Off_Station(AActor* Station);
+
+	UPROPERTY(Replicated)
+	AJSH_Preset* Preset_Station;
 	
 };
 
