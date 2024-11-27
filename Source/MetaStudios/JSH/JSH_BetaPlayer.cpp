@@ -13,6 +13,8 @@
 #include "InputActionValue.h"
 #include "BetaPl/JSH_TheaterSpawnActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "MetaStudios/CHJ/MainGameInstance.h"
+#include "MetaStudios/CHJ/Component/FirebaseComponent.h"
 #include "Net/UnrealNetwork.h"
 
 AJSH_BetaPlayer::AJSH_BetaPlayer()
@@ -61,7 +63,8 @@ AJSH_BetaPlayer::AJSH_BetaPlayer()
 	HandComp = CreateDefaultSubobject<USceneComponent>(TEXT("HandComp"));
 	HandComp->SetupAttachment(GetMesh() , TEXT("LeftHand_Pop"));
 
-
+	FirebaseComponent = CreateDefaultSubobject<UFirebaseComponent>(TEXT("FirebaseComponent"));
+	
 	// // 팝콘 스폰을 위한
 	static ConstructorHelpers::FClassFinder<AActor> PopBPClass(TEXT("/Game/JSH/BP/BP_PopCorn.BP_PopCorn_C"));
 	if (PopBPClass.Succeeded())
@@ -99,8 +102,7 @@ void AJSH_BetaPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AJSH_BetaPlayer, PopClass);
 	DOREPLIFETIME(AJSH_BetaPlayer, PopAct);
 	DOREPLIFETIME(AJSH_BetaPlayer, SpawnPop);
-	DOREPLIFETIME(AJSH_BetaPlayer, CapsuleComp);
-	DOREPLIFETIME(AJSH_BetaPlayer, CapsuleComp);
+	DOREPLIFETIME(AJSH_BetaPlayer, Start_Movie_On);
 }
 
 void AJSH_BetaPlayer::Tick(float DeltaTime)
@@ -393,4 +395,12 @@ void AJSH_BetaPlayer::NetMulit_Pop_Implementation(FVector slo, FRotator sro)
 		}
 
 	}
+}
+
+
+void AJSH_BetaPlayer::Esc()
+{
+	// 종료하겠습니까 위젯 하나 뛰어줘야할듯
+	if (CHJ_Instance == nullptr) CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+	CHJ_Instance->ExitSession();
 }
