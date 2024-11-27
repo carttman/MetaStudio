@@ -228,11 +228,13 @@ void AJSH_Player::BeginPlay()
 	}
 
 
-	FName tag2 = TEXT("Station");
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), tag2, RockList);
+
 
 	FName tag = TEXT("Rock");
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), tag, RockList);
+
+	FName tag2 = TEXT("Station");
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), tag2, StationList);
 }
 
 void AJSH_Player::Tick(float DeltaTime)
@@ -2163,10 +2165,14 @@ void AJSH_Player::Preset_On_Off_Station()
 
 void AJSH_Player::Server_Preset_On_Off_Station_Implementation(AActor* Station)
 {
+	NetMulti_Preset_On_Off_Station(Station);
 }
 
 void AJSH_Player::NetMulti_Preset_On_Off_Station_Implementation(AActor* Station)
 {
+	Preset_Station = Cast<AJSH_Preset>(Station);
+
+	if (Preset_Rock) Preset_Station->Hidden_On_Off();
 }
 
 

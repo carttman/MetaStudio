@@ -114,12 +114,13 @@ void UJSH_Editor_MainUI::OnButton_w5_Clicked()
 
 void UJSH_Editor_MainUI::OnButton_Preset_Station_Clicked()
 {
-	OriginPlayer->Preset_On_Off();
+	OriginPlayer->Preset_On_Off_Station();
 	UE_LOG(LogTemp, Warning, TEXT("station"));
 }
 
 void UJSH_Editor_MainUI::OnButton_Preset_Meteor_Clicked()
 {
+	OriginPlayer->Preset_On_Off();
 	UE_LOG(LogTemp, Warning, TEXT("meteor"));
 }
 

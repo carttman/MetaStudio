@@ -60,6 +60,5 @@ void AJSH_Preset::NetMulti_Hidden_On_Off_Implementation()
 
 	B_Hidden = !B_Hidden;
 	UE_LOG(LogTemp, Warning, TEXT("p6"));
-
 }
 
