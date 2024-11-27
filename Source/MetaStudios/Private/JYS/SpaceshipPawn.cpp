@@ -321,7 +321,7 @@ FRotator ASpaceshipPawn::ApplyRoll(float RollInput)
 	float YawCur = CurrentRotation.Yaw;
 
 	// P = P0 + vt
-	CurrentRotation.Yaw = YawCur + 50.0f * RollInput * GetWorld()->DeltaTimeSeconds;
+	CurrentRotation.Yaw = YawCur + 10.0f * RollInput * GetWorld()->DeltaTimeSeconds;
 
 	GetController()->SetControlRotation(CurrentRotation);
 
@@ -445,7 +445,7 @@ void ASpaceshipPawn::Server_UpdateMoveAndRollSpaceship_Implementation(FVector2D 
 	direction.Normalize();
 
 	// p = p0 + vt
-	FVector newPos = GetActorLocation() + direction * 5000.0f * GetWorld()->DeltaTimeSeconds;
+	FVector newPos = GetActorLocation() + direction * 500.0f * GetWorld()->DeltaTimeSeconds;
 	SetActorLocation(newPos);
 	//AddMovementInput(direction);
 	direction = FVector::ZeroVector;
