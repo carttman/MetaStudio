@@ -295,7 +295,7 @@ public:
 
 	// 마우스 휠로 FlyMode Speed 조정
 	UPROPERTY()
-	float MaxFlySpeed_C = 500.f;
+	float MaxFlySpeed_C = 1000.f;
 	UPROPERTY()
 	float BrakingDecelerationFlying_C = 10000.f;
 	//float BrakingDecelerationFlying_C = 5000.f;

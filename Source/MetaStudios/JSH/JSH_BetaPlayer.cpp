@@ -11,10 +11,14 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "JSH_PlayerController.h"
 #include "BetaPl/JSH_TheaterSpawnActor.h"
+#include "Blueprint/UserWidget.h"
+#include "Components/Image.h"
 #include "Kismet/GameplayStatics.h"
 #include "MetaStudios/CHJ/MainGameInstance.h"
 #include "Net/UnrealNetwork.h"
+#include "Widget/JSH_VideoStart.h"
 
 AJSH_BetaPlayer::AJSH_BetaPlayer()
 {
@@ -78,7 +82,41 @@ void AJSH_BetaPlayer::BeginPlay()
 	// // 태어날 때 모든 AX 목록 기억
 	// FName tag = TEXT("Pop");
 	// UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld() , AActor::StaticClass() , tag , PopList);
+
+
+	JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	if (JPlayerController)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("bb1"));
+		JPlayerController->bEnableTouchEvents = false;
+	}
+
+	if (IsLocallyControlled())
+	{
+		if (UI_StartVideo)
+		{
+			StartVideoUI = CreateWidget<UUserWidget>(GetWorld(), UI_StartVideo);
+			UE_LOG(LogTemp, Warning, TEXT("bb2"));
+		
+			if(StartVideoUI)
+			{
+				StartVideoUI->SetIsEnabled(true);
+				StartVideoUI->AddToViewport();
+			
+				UE_LOG(LogTemp, Warning, TEXT("bb3"));
+			
+				UE_LOG(LogTemp, Warning, TEXT("bb4"));
+				Origin_StartVideoUI = Cast<UJSH_VideoStart>(StartVideoUI);
+				Origin_StartVideoUI->Saved_BetaPlayer(this);
+				UE_LOG(LogTemp, Warning, TEXT("bb5"));
+				MouseCursor_On();
+			}
+		}
+	}
+
 }
+
+
 
 void AJSH_BetaPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -89,7 +127,6 @@ void AJSH_BetaPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AJSH_BetaPlayer, GrabDistance);
 	DOREPLIFETIME(AJSH_BetaPlayer, PopMontage);
 	DOREPLIFETIME(AJSH_BetaPlayer, GrabPopActor);
-
 	DOREPLIFETIME(AJSH_BetaPlayer, PopOn);
 	DOREPLIFETIME(AJSH_BetaPlayer, BHasPop);
 	DOREPLIFETIME(AJSH_BetaPlayer, PopList);
@@ -421,4 +458,87 @@ void AJSH_BetaPlayer::Esc()
 	// 종료하겠습니까 위젯 하나 뛰어줘야할듯
 	if (CHJ_Instance == nullptr) CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
 	CHJ_Instance->ExitSession();
+}
+
+void AJSH_BetaPlayer::MouseCursor_On()
+{
+	
+	UE_LOG(LogTemp, Warning, TEXT("bb6"));
+	if (!JPlayerController)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("bb7"));
+		JPlayerController = Cast<AJSH_PlayerController>(GetWorld()->GetFirstPlayerController());
+		if (JPlayerController)
+		{
+			JPlayerController->bEnableTouchEvents = false;
+		
+			UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller1111"));
+			// 플레이어 컨트롤러에 Director 저장
+			JPlayerController->SaveOriginCharacter();
+			UE_LOG(LogTemp, Warning, TEXT("bb8"));
+		}
+	}
+
+	if (IsLocallyControlled())
+	{
+		if (JPlayerController)
+		{
+			GetMovementComponent()->SetComponentTickEnabled(false);
+			
+			UE_LOG(LogTemp, Warning, TEXT("bb9"));
+			JPlayerController->SetIgnoreLookInput(true);
+		
+			// 마우스 커서 보이게 설정
+			JPlayerController->bShowMouseCursor = true;
+			JPlayerController->bEnableClickEvents = true;
+			JPlayerController->bEnableMouseOverEvents = true;
+		
+			FInputModeGameAndUI InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+			InputMode.SetHideCursorDuringCapture(false);
+			JPlayerController->SetInputMode(InputMode);
+			UE_LOG(LogTemp, Warning, TEXT("bb10"));
+		}
+	}
+
+
+}
+
+void AJSH_BetaPlayer::MouseCursor_Off()
+{
+	if (IsLocallyControlled())
+	{
+		GetMovementComponent()->SetComponentTickEnabled(true);
+		if (JPlayerController)
+		{
+			JPlayerController->SetIgnoreLookInput(false);
+		
+			JPlayerController->bShowMouseCursor = false;
+			JPlayerController->bEnableClickEvents = false;
+			JPlayerController->bEnableMouseOverEvents = false;
+			JPlayerController->SetInputMode(FInputModeGameOnly());
+		}
+
+		// if (Origin_StartVideoUI)
+		// {
+		// 	Origin_StartVideoUI->RemoveFromParent();
+		// }
+	}
+
+}
+
+void AJSH_BetaPlayer::Overlap_video()
+{
+	if (IsLocallyControlled())
+	{
+		Origin_StartVideoUI->OverlapImage->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void AJSH_BetaPlayer::Overlap_End_video()
+{
+	if (IsLocallyControlled())
+	{
+		Origin_StartVideoUI->OverlapImage->SetVisibility(ESlateVisibility::Hidden);
+	}
 }

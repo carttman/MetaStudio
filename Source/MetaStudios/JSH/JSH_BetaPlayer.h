@@ -13,8 +13,9 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UJSH_VideoStart;
 struct FInputActionValue;
-
+class AJSH_PlayerController;
 
 UCLASS(config=Game)
 class METASTUDIOS_API AJSH_BetaPlayer : public ACharacter
@@ -204,6 +205,33 @@ public:
 	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite);
 	bool Start_Movie_On = false;
+
+
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UUserWidget> UI_StartVideo;
+	UPROPERTY(EditDefaultsOnly)
+	class UUserWidget* StartVideoUI;
+
+	UPROPERTY()
+	UJSH_VideoStart* Origin_StartVideoUI;
+
+
+	UPROPERTY(replicated)
+	AJSH_PlayerController* JPlayerController;
+
+	UFUNCTION()
+	void MouseCursor_On();
+
+	UFUNCTION()
+	void MouseCursor_Off();
+
+
+	UFUNCTION(BlueprintCallable)
+	void Overlap_video();
+
+	UFUNCTION(BlueprintCallable)
+	void Overlap_End_video();
 };
 
 

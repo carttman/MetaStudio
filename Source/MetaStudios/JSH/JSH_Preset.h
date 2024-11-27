@@ -36,4 +36,14 @@ public:
 	bool B_Hidden = false;;
 
 
+	UFUNCTION()
+	void Hidden_On_Off2();
+	UFUNCTION(Server, Reliable)
+	void Server_Hidden_On_Off2();
+	UFUNCTION(Server, Reliable)
+	void NetMulti_Hidden_On_Off2();
+	UPROPERTY(replicated)
+	bool B_Hidden2 = false;;
+
+
 };
