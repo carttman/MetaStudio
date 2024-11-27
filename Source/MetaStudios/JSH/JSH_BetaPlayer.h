@@ -188,6 +188,20 @@ public:
 	AJSH_TheaterSpawnActor* SpawnPop;
 
 	FActorSpawnParameters SpawnParams;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UFirebaseComponent* FirebaseComponent;
+
+	UPROPERTY()
+	class UMainGameInstance* CHJ_Instance;
+	
+	void Esc();
+
+
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite);
+	bool Start_Movie_On = false;
 };
 
 

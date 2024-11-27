@@ -4,6 +4,8 @@
 #include "../../JSH/Widget/JSH_Editor_MainUI.h"
 
 #include "Components/Image.h"
+#include "Kismet/GameplayStatics.h"
+#include "MetaStudios/JSH/JSH_Player.h"
 
 void UJSH_Editor_MainUI::NativeConstruct()
 {
@@ -26,7 +28,25 @@ void UJSH_Editor_MainUI::NativeConstruct()
 	if(Button_w3) Button_w3->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_w3_Clicked);
 	if(Button_w4) Button_w4->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_w4_Clicked);
 	if(Button_w5) Button_w5->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_w5_Clicked);
+	if(Button_w5) Button_w5->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_w5_Clicked);
+
+
+	
+	// Preset
+	if(Button_Preset_Station) Button_Preset_Station->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_Preset_Station_Clicked);
+	Button_Preset_Station->SetVisibility(ESlateVisibility::Hidden);
+	if(Button_Preset_Meteor) Button_Preset_Meteor->OnClicked.AddDynamic(this, &UJSH_Editor_MainUI::OnButton_Preset_Meteor_Clicked);
+	Button_Preset_Meteor->SetVisibility(ESlateVisibility::Hidden);
+	
 }
+
+
+void UJSH_Editor_MainUI::Begin_SavedPlayer(AJSH_Player* temp)
+{
+	OriginPlayer = temp;
+}
+
+
 
 void UJSH_Editor_MainUI::OnButton_w1_Clicked()
 {
@@ -48,6 +68,9 @@ void UJSH_Editor_MainUI::OnButton_w2_Clicked()
 	Window3->SetVisibility(ESlateVisibility::Hidden);
 	Window4->SetVisibility(ESlateVisibility::Hidden);
 	Window5->SetVisibility(ESlateVisibility::Hidden);
+
+	Button_Preset_Station->SetVisibility(ESlateVisibility::Hidden);
+	Button_Preset_Meteor->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UJSH_Editor_MainUI::OnButton_w3_Clicked()
@@ -58,6 +81,9 @@ void UJSH_Editor_MainUI::OnButton_w3_Clicked()
 	Window3->SetVisibility(ESlateVisibility::Visible);
 	Window4->SetVisibility(ESlateVisibility::Hidden);
 	Window5->SetVisibility(ESlateVisibility::Hidden);
+	
+	Button_Preset_Station->SetVisibility(ESlateVisibility::Hidden);
+	Button_Preset_Meteor->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UJSH_Editor_MainUI::OnButton_w4_Clicked()
@@ -68,6 +94,9 @@ void UJSH_Editor_MainUI::OnButton_w4_Clicked()
 	Window3->SetVisibility(ESlateVisibility::Hidden);
 	Window4->SetVisibility(ESlateVisibility::Visible);
 	Window5->SetVisibility(ESlateVisibility::Hidden);
+
+	Button_Preset_Station->SetVisibility(ESlateVisibility::Hidden);
+	Button_Preset_Meteor->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UJSH_Editor_MainUI::OnButton_w5_Clicked()
@@ -78,4 +107,22 @@ void UJSH_Editor_MainUI::OnButton_w5_Clicked()
 	Window3->SetVisibility(ESlateVisibility::Hidden);
 	Window4->SetVisibility(ESlateVisibility::Hidden);
 	Window5->SetVisibility(ESlateVisibility::Visible);
+
+	Button_Preset_Station->SetVisibility(ESlateVisibility::Visible);
+	Button_Preset_Meteor->SetVisibility(ESlateVisibility::Visible);
 }
+
+void UJSH_Editor_MainUI::OnButton_Preset_Station_Clicked()
+{
+	OriginPlayer->Preset_On_Off();
+	UE_LOG(LogTemp, Warning, TEXT("station"));
+}
+
+void UJSH_Editor_MainUI::OnButton_Preset_Meteor_Clicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("meteor"));
+}
+
+
+
+

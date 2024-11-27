@@ -13,6 +13,7 @@
 #include "InputActionValue.h"
 #include "BetaPl/JSH_TheaterSpawnActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "MetaStudios/CHJ/MainGameInstance.h"
 #include "Net/UnrealNetwork.h"
 
 AJSH_BetaPlayer::AJSH_BetaPlayer()
@@ -258,9 +259,7 @@ void AJSH_BetaPlayer::NetMulti_MyTakePop_Implementation()
 		break;
 	}
 	
-
-
-
+	
 }
 
 
@@ -414,4 +413,12 @@ void AJSH_BetaPlayer::NetMulit_Pop_Implementation(FVector slo, FRotator sro)
 	// 	}
 	//
 	// }
+}
+
+
+void AJSH_BetaPlayer::Esc()
+{
+	// 종료하겠습니까 위젯 하나 뛰어줘야할듯
+	if (CHJ_Instance == nullptr) CHJ_Instance = Cast<UMainGameInstance>(GetGameInstance());
+	CHJ_Instance->ExitSession();
 }
