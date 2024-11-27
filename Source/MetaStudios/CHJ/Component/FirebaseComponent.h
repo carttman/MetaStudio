@@ -39,14 +39,12 @@ public:
 	UFUNCTION(NetMulticast, reliable)
 	void MultiRPC_GetStreamUrl(const FString& FileName);
 	
-	UPROPERTY()
-	class AJSH_Player* Me;
+	// UPROPERTY()
+	// class AJSH_Player* Me;
 
-	UPROPERTY()
-	class ACHJ_TestCharacter* CHJCharacter;
+	// UPROPERTY()
+	// class ACHJ_TestCharacter* CHJCharacter;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void LightOn();
 private:
 	FString AnonymousID = "";
 	FString FirebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/metastudio2.appspot.com/o/";

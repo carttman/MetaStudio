@@ -8,6 +8,7 @@
 #include "StreamMediaSource.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
+#include "MetaStudios/JSH/JSH_BetaPlayer.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -64,6 +65,8 @@ void UFirebaseComponent::AnonymousLogin()
     Request->OnProcessRequestComplete().BindUObject(this, &UFirebaseComponent::OnAnonymousLoginComplete);
     Request->ProcessRequest();
 }
+
+
 
 void UFirebaseComponent::OnAnonymousLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
@@ -196,7 +199,12 @@ void UFirebaseComponent::MultiRPC_GetStreamUrl_Implementation(const FString& Fil
 {
     MyStreamMediaSource->StreamUrl = FileName;
     MyMediaPlayer->OpenSource(MyStreamMediaSource);
-    
+    AJSH_BetaPlayer* me = Cast<AJSH_BetaPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    if(me)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("LightOFF"));
+        me->LightOff();
+    }
 }
 #pragma endregion
 

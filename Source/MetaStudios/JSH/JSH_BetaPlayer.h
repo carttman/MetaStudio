@@ -199,7 +199,9 @@ public:
 	void Esc();
 
 
-
+	UFUNCTION(BlueprintImplementableEvent)
+	void LightOff();
+	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite);
 	bool Start_Movie_On = false;
 };
