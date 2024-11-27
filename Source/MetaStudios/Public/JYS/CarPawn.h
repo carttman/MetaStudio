@@ -91,13 +91,10 @@ public:
 
 	// 가까이 가면 키 관련 UI 생성
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UBoxComponent* UIBox;
+	class UBoxComponent* UIGuideBox;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> EnterWidgetClass;
-
-	//UPROPERTY(EditAnywhere)
-	//TSubclassOf<UUserWidget> ExitWidgetClass;
+	class TSubclassOf<UUserWidget> EnterWidgetClass;
 
 	UUserWidget* ActiveWidget;
 
@@ -141,6 +138,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USkeletalMeshComponent* RidingPlayer;
 
+
+
+	UFUNCTION()
+	void SetActivateGuideUI(bool bActive);
 
 
 	//UPROPERTY(Replicated)

@@ -741,8 +741,9 @@ void AMetaStudiosCharacter::NetMulticast_EnterCar_Implementation(ACarPawn* CarAc
 			// Possess가 된 후 widget 사라지기
 			if (CarActor->ActiveWidget != nullptr)
 			{
-				CarActor->ActiveWidget->RemoveFromParent();
-			}
+				//SpaceshipActor->ActiveWidget->RemoveFromParent();
+				CarActor->ActiveWidget->SetVisibility(ESlateVisibility::Hidden);
+			}			
 		}
 
 		//CarActor->SetActorRotation(CarActor->GetActorRotation());

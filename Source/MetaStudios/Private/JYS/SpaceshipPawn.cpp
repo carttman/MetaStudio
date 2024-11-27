@@ -348,7 +348,7 @@ FRotator ASpaceshipPawn::ApplyRollBack()
 // 가까이 가면 키 관련 UI 생성
 void ASpaceshipPawn::OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (IsLocallyControlled())	return;
+	if (HasAuthority())	return;
 
 	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
 	{
@@ -373,7 +373,7 @@ void ASpaceshipPawn::OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AA
 
 void ASpaceshipPawn::OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (IsLocallyControlled())	return;
+	if (HasAuthority())	return;
 
 	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
 	{

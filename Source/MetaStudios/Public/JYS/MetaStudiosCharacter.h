@@ -306,7 +306,7 @@ private:
 
 
 public:
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	bool IsLocallyPlayer()	{	return IsLocallyControlled(); }
 
 };

@@ -50,11 +50,11 @@ ACarPawn::ACarPawn()
 	LineTraceArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("LineTraceArrow"));
 	LineTraceArrow->SetupAttachment(RootComponent);
 
-	UIBox = CreateDefaultSubobject<UBoxComponent>(TEXT("UIBox"));
-	UIBox->SetupAttachment(CarMesh);
+	UIGuideBox = CreateDefaultSubobject<UBoxComponent>(TEXT("UIGuideBox"));
+	UIGuideBox->SetupAttachment(CarMesh);
 
-	UIBox->SetGenerateOverlapEvents(true);
-	UIBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	UIGuideBox->SetGenerateOverlapEvents(true);
+	UIGuideBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 }
 
 // Called when the game starts or when spawned
@@ -64,13 +64,10 @@ void ACarPawn::BeginPlay()
 
 	ActivateThruster(false);
 
-	if (IsLocallyControlled())
+	if (UIGuideBox)
 	{
-		if (UIBox)
-		{
-			UIBox->OnComponentBeginOverlap.AddDynamic(this, &ACarPawn::OnUIBoxBeginOverlap);
-			UIBox->OnComponentEndOverlap.AddDynamic(this, &ACarPawn::OnUIBoxEndOverlap);
-		}
+		UIGuideBox->OnComponentBeginOverlap.AddDynamic(this, &ACarPawn::OnUIBoxBeginOverlap);
+		UIGuideBox->OnComponentEndOverlap.AddDynamic(this, &ACarPawn::OnUIBoxEndOverlap);
 	}
 
 	//UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("TTT"), PlayerBox);
@@ -133,7 +130,7 @@ void ACarPawn::Tick(float DeltaTime)
 		{
 			// DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
 
-			FVector locCharacter = GetActorLocation();			
+			FVector locCharacter = GetActorLocation();
 			FVector newLocation = hitResult.ImpactPoint;
 			newLocation.Z += 50.0f;
 			locCharacter.Z = newLocation.Z + 50.0f;
@@ -154,12 +151,12 @@ void ACarPawn::Tick(float DeltaTime)
 			//FTform.TransformVector(direction);
 			//
 			//FTransform ttt = FTransform(GetControlRotation());
-			//direction = 
+			//direction =
 			//direction.Z = 0;
 			//direction.Normalize();
 
 
-			float PosZ = GetActorLocation().Z;	
+			float PosZ = GetActorLocation().Z;
 			UE_LOG(LogTemp, Warning, TEXT("Ground hit : %f : %f"), hitResult.ImpactPoint.Z, PosZ);
 		}
 		*/
@@ -277,8 +274,25 @@ void ACarPawn::OnMyActionLook(const FInputActionValue& value)
 // 가까이 가면 키 관련 UI 생성
 void ACarPawn::OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	//if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
+	//{
+	//	if (EnterWidgetClass && !ActiveWidget)
+	//	{
+	//		ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), EnterWidgetClass);
+	//		if (ActiveWidget)
+	//		{
+	//			ActiveWidget->AddToViewport();
+	//		}
+	//	}
+	//}
+	if (HasAuthority())	return;
+	if ( bExistRider == true )	return;
+
 	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
 	{
+		AMetaStudiosCharacter* targetChar = Cast<AMetaStudiosCharacter>(OtherActor);
+		if (targetChar->IsLocallyPlayer() == false)	return;
+
 		if (EnterWidgetClass && !ActiveWidget)
 		{
 			ActiveWidget = CreateWidget<UUserWidget>(GetWorld(), EnterWidgetClass);
@@ -287,17 +301,24 @@ void ACarPawn::OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 				ActiveWidget->AddToViewport();
 			}
 		}
+
+		if (ActiveWidget)
+		{
+			ActiveWidget->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 }
 
 void ACarPawn::OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (HasAuthority())	return;
+	if (bExistRider == true)	return;
+
 	if (OtherActor && OtherActor->IsA(AMetaStudiosCharacter::StaticClass()))
 	{
 		if (ActiveWidget)
 		{
-			ActiveWidget->RemoveFromParent();
-			ActiveWidget = nullptr;
+			ActiveWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
@@ -381,6 +402,22 @@ void ACarPawn::ActivateThruster(bool bActive)
 			ThrusterComponent2->Deactivate();
 		}
 	}
+}
+
+void ACarPawn::SetActivateGuideUI(bool bActive)
+{
+	if (UIGuideBox == nullptr)	return;
+	
+	if (bActive == true)
+	{
+		UIGuideBox->OnComponentBeginOverlap.AddDynamic(this, &ACarPawn::OnUIBoxBeginOverlap);
+		UIGuideBox->OnComponentEndOverlap.AddDynamic(this, &ACarPawn::OnUIBoxEndOverlap);
+	}
+	else
+	{
+		UIGuideBox->OnComponentBeginOverlap.RemoveDynamic(this, &ACarPawn::OnUIBoxBeginOverlap);
+		UIGuideBox->OnComponentEndOverlap.RemoveDynamic(this, &ACarPawn::OnUIBoxEndOverlap);
+	}		
 }
 
 void ACarPawn::Server_UpdateTransform_Implementation(FVector newLocation, FRotator newRotation)
