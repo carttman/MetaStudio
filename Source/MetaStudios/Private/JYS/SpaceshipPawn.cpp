@@ -301,6 +301,16 @@ void ASpaceshipPawn::OnMoveUp(const FInputActionValue& value)
 	if (bCantMove)	return;
 	//UE_LOG(LogTemp, Warning, TEXT("OnMoveUP"))
 
+	if (AscendSound && !AudioComponentUp->IsPlaying())
+	{
+		AudioComponentUp->SetSound(AscendSound);
+		AudioComponentUp->Play();
+	}
+	if (AudioComponentDown->IsPlaying())
+	{
+		AudioComponentDown->Stop();
+	}
+
 	Server_UpdateMoveUpDownSpaceship(true);
 }
 
@@ -309,6 +319,16 @@ void ASpaceshipPawn::OnMoveDown(const FInputActionValue& value)
 	if (bCantMove)	return;
 	// 이미 착지중이거나 지면에 닿았으면 움직이지 않고 return;
 	if (bLanded || CheckLanding()) return;
+
+	if (DescendSound && !AudioComponentDown->IsPlaying())
+	{
+		AudioComponentDown->SetSound(DescendSound);
+		AudioComponentDown->Play();
+	}
+	if (AudioComponentUp->IsPlaying())
+	{
+		AudioComponentUp->Stop();
+	}
 
 	Server_UpdateMoveUpDownSpaceship(false);
 }
@@ -406,21 +426,11 @@ void ASpaceshipPawn::Server_UpdateMoveUpDownSpaceship_Implementation(bool bMoveU
 	{
 		// 수직 상승
 		currentLocation.Z += MovementSpeed * GetWorld()->GetDeltaSeconds();
-		if (AscendSound && !AudioComponentUp->IsPlaying())
-		{
-			AudioComponentUp->SetSound(AscendSound);
-			AudioComponentUp->Play();
-		}
 	}
 	else
 	{
 		// 수직 하강
 		currentLocation.Z -= MovementSpeed * GetWorld()->GetDeltaSeconds();
-		if (DescendSound && !AudioComponentDown->IsPlaying())
-		{
-			AudioComponentDown->SetSound(DescendSound);
-			AudioComponentDown->Play();
-		}
 	}
 	SetActorLocation(currentLocation);
 	NetMulticast_UpdateMoveUpDownSpaceShip(GetActorLocation());
@@ -629,6 +639,10 @@ bool ASpaceshipPawn::CheckLanding()
 				}, 2, false);
 			Server_EndFlyEffect();
 
+			if (AudioComponentDown->IsPlaying())
+			{
+				AudioComponentDown->Stop();
+			}
 
 			return true;
 		}
