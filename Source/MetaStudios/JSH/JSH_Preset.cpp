@@ -25,6 +25,7 @@ void AJSH_Preset::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AJSH_Preset,B_Hidden);
+	DOREPLIFETIME(AJSH_Preset,B_Hidden2);
 }
 
 // Called every frame
@@ -39,6 +40,7 @@ void AJSH_Preset::Hidden_On_Off()
 	UE_LOG(LogTemp, Warning, TEXT("p4"));
 	Server_Hidden_On_Off();
 }
+
 
 void AJSH_Preset::Server_Hidden_On_Off_Implementation()
 {
@@ -62,3 +64,29 @@ void AJSH_Preset::NetMulti_Hidden_On_Off_Implementation()
 	UE_LOG(LogTemp, Warning, TEXT("p6"));
 }
 
+
+
+void AJSH_Preset::Hidden_On_Off2()
+{
+	Server_Hidden_On_Off2();
+}
+
+void AJSH_Preset::Server_Hidden_On_Off2_Implementation()
+{
+	NetMulti_Hidden_On_Off2();
+}
+
+void AJSH_Preset::NetMulti_Hidden_On_Off2_Implementation()
+{
+	if (B_Hidden2)
+	{
+		SetActorHiddenInGame(true);
+	}
+	else
+	{
+		SetActorHiddenInGame(false);	
+	}
+
+	B_Hidden2 = !B_Hidden2;
+	UE_LOG(LogTemp, Warning, TEXT("p6"));
+}

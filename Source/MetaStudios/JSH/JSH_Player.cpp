@@ -140,6 +140,7 @@ AJSH_Player::AJSH_Player()
 	// }
 
 	
+	//GetCharacterMovement()->MaxFlySpeed = MaxFlySpeed_C;
 	GetCharacterMovement()->MaxFlySpeed = MaxFlySpeed_C;
 	GetCharacterMovement()->BrakingDecelerationFlying = BrakingDecelerationFlying_C;
 
@@ -226,9 +227,7 @@ void AJSH_Player::BeginPlay()
 			}
 		}
 	}
-
-
-
+	
 
 	FName tag = TEXT("Rock");
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), tag, RockList);
@@ -303,10 +302,6 @@ void AJSH_Player::Saved_PlayerController()
 	if (JPlayerController)
 	{
 		JPlayerController->bEnableTouchEvents = false;
-		
-		UE_LOG(LogTemp, Error, TEXT("Begin_Jcontorller1111"));
-		// 플레이어 컨트롤러에 Director 저장
-		JPlayerController->SaveOriginCharacter();
 	}
 }
 
@@ -2118,16 +2113,28 @@ void AJSH_Player::UI_Off()
 
 void AJSH_Player::Preset_On_Off()
 {
-	for (AActor* Pop : RockList)
+
+	if (RockList.Num() > 0)
 	{
-		if (Pop)
+		AActor* firstRock = RockList[0];
+		if (firstRock)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("p111111"));
-
-			Server_Preset_On_Off(Pop);
-			break;
+			Server_Preset_On_Off(firstRock);
 		}
 	}
+
+	//
+	// for (AActor* Pop : RockList)
+	// {
+	// 	if (Pop)
+	// 	{
+	// 		UE_LOG(LogTemp, Warning, TEXT("p111111"));
+	//
+	// 		Server_Preset_On_Off(Pop);
+	// 		break;
+	// 	}
+	// }
 }
 
 
@@ -2140,7 +2147,7 @@ void AJSH_Player::Server_Preset_On_Off_Implementation(AActor* rock)
 void AJSH_Player::NetMulti_Preset_On_Off_Implementation(AActor* rock)
 {
 	Preset_Rock = Cast<AJSH_Preset>(rock);
-	if (Preset_Rock) Preset_Rock->Hidden_On_Off();
+	if (Preset_Rock) Preset_Rock->Hidden_On_Off2();
 
 }
 
@@ -2149,6 +2156,9 @@ void AJSH_Player::NetMulti_Preset_On_Off_Implementation(AActor* rock)
 
 void AJSH_Player::Preset_On_Off_Station()
 {
+	FName tag2 = TEXT("Station");
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), tag2, StationList);
+	
 	for (AActor* sta : StationList)
 	{
 		if (sta)
@@ -2170,7 +2180,7 @@ void AJSH_Player::NetMulti_Preset_On_Off_Station_Implementation(AActor* Station)
 {
 	Preset_Station = Cast<AJSH_Preset>(Station);
 
-	if (Preset_Rock) Preset_Station->Hidden_On_Off();
+	if (Preset_Station) Preset_Station->Hidden_On_Off();
 }
 
 
