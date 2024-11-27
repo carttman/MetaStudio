@@ -127,7 +127,7 @@ void ACarPawn::Tick(float DeltaTime)
 		FVector CapsuleOrigin = startLocation + (endLocation - startLocation) * 0.5f;
 		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
 
-		DrawDebugCapsule(GetWorld(), hitResult.ImpactPoint, HalfSphereRadius, SphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
+		// DrawDebugCapsule(GetWorld(), hitResult.ImpactPoint, HalfSphereRadius, SphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
 
 
 		//DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Magenta, false, 1.0f, 0, 20.0f);
@@ -233,6 +233,8 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 		if (AudioComponent->IsPlaying())
 		{
 			AudioComponent->Stop();
+			AudioComponent->FadeOut(1.0f, 0.0f);
+
 		}
 		return;
 	}
@@ -258,7 +260,7 @@ void ACarPawn::OnMyActionMove(const FInputActionValue& value)
 		// UE_LOG(LogTemp, Warning, TEXT("ApplyRollBack"))
 		if (AudioComponent->IsPlaying())
 		{
-			AudioComponent->FadeOut(0.2f, 0.0f);
+			AudioComponent->FadeOut(0.5f, 0.0f);
 		}
 	}
 
@@ -484,12 +486,13 @@ void ACarPawn::Server_ExitCar_Implementation()
 
 	GetController()->Possess(player);
 
-
 	FRotator rot = this->GetActorRotation();
 	rot.Roll = 0.0f;
 	this->SetActorRotation(rot);
 
 	NetMulticast_ExitCar();
+
+	RidingPlayer->SetVisibility(false);
 
 	bExistRider = false;
 }
@@ -523,7 +526,6 @@ void ACarPawn::NetMulticast_ExitCar_Implementation()
 		//characterController->`(player);
 		player->GetMesh()->SetVisibility(true);
 		player->JetMesh->SetVisibility(true);
-
 		RidingPlayer->SetVisibility(false);
 		bExistRider = false;
 		if (IsLocallyControlled())

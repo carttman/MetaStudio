@@ -11,19 +11,19 @@ UCLASS()
 class METASTUDIOS_API ASpaceshipPawn : public APawn
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* SpaceshipMove;	
-	
+	UInputAction* SpaceshipMove;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* SpaceshipLook;	
-	
+	UInputAction* SpaceshipLook;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* SpaceshipMoveUp;	
-	
+	UInputAction* SpaceshipMoveUp;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* SpaceshipMoveDown;
 
@@ -36,7 +36,7 @@ protected:
 	virtual void BeginPlay() override;
 
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -102,8 +102,8 @@ public:
 	FRotator ApplyRollBack();
 
 	UPROPERTY(Replicated)
-	bool MoveStop = true;	
-	
+	bool MoveStop = true;
+
 	/*UPROPERTY(Replicated)
 	bool effect = false;*/
 
@@ -114,7 +114,7 @@ public:
 	UFUNCTION(Server, Unreliable)
 	void Server_UpdateMoveUpDownSpaceship(bool bMoveUp);
 
-	
+
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_UpdateMoveUpDownSpaceShip(FVector newLocation);
 
@@ -144,17 +144,17 @@ public:
 	UUserWidget* ActiveWidget;
 
 	UFUNCTION()
-    void OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
-                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
-                             bool bFromSweep, const FHitResult& SweepResult);
+	void OnUIBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
 
-    UFUNCTION()
-    void OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION()
+	void OnUIBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	// 가까이 가면 키 관련 UI 생성
 
 	/////////////////Animation//////////////////////////////
-	
+
 
 	UPROPERTY(EditAnywhere)
 	class UAnimSequence* doorAnim;
@@ -202,10 +202,22 @@ public:
 
 
 	UPROPERTY(EditAnywhere)
-	class USceneComponent*	ExitPoint;
+	class USceneComponent* ExitPoint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* AscendSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* DescendSound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound")
+	UAudioComponent* AudioComponentUp;	
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound")
+	UAudioComponent* AudioComponentDown;
 
 private:
-	
+
 	FVector MovementDirection;
 
 	FVector direction;
